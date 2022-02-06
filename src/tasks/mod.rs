@@ -1,9 +1,16 @@
+use std::sync::Arc;
+
+use serenity::client::Context;
+
+use serenity::http::CacheHttp;
+use serenity::model::id::UserId;
+
 // use self::message::Message;
 
 // mod message;
 
 pub enum Tasks {
-    Message(Message),
+    MessageUser(MessageUser),
     ChangeTeam,
     CreateRole,
     CreateCategory,
@@ -15,42 +22,52 @@ pub enum Tasks {
     CreateThread,
 }
 
-struct TaskRunner {}
+pub struct TaskRunner {
+    pub ctx: Arc<Context>,
+}
 
 struct Task {
     task: Tasks,
 }
 
-struct Message {
-    player_id: String,
+pub struct MessageUser {
+    player_id: u64,
     message: String,
 }
 
 impl Task {
-    fn message(&self) {
-        let message = if let Tasks::Message(message) = &self.task {
+    async fn message_user(&self, ctx: Arc<Context>) {
+        let message = if let Tasks::MessageUser(message) = &self.task {
             message
         } else {
             panic!("Not a message task");
         };
 
-        
+        if let Ok(user) = UserId(message.player_id).to_user(ctx.http()).await {
+            match user
+                .direct_message(ctx.http(), |m| m.content(message.message.as_str()))
+                .await
+            {
+                Ok(_) => println!("Message sent"),
+                Err(why) => println!("Error sending message: {:?}", why),
+            };
+        };
     }
 }
 
 impl TaskRunner {
-    pub fn run_tasks(&self) {
+    pub async fn run_tasks(&self) {
         // Iterate through open tasks in the DB
 
         let task = Task {
-            task: Tasks::Message(Message {
-                player_id: String::from(""),
-                message: String::from(""),
+            task: Tasks::MessageUser(MessageUser {
+                player_id: 133358326439346176,
+                message: String::from("Good day"),
             }),
         };
 
         match task.task {
-            Tasks::Message(_) => task.message(),
+            Tasks::MessageUser(_) => task.message_user(Arc::clone(&self.ctx)).await,
             _ => unimplemented!(),
         }
     }
