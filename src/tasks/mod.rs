@@ -16,7 +16,7 @@ use sea_orm::{entity::*, query::*};
 use crate::schema::tasks_task;
 
 #[derive(Serialize, Deserialize)]
-pub enum Tasks {
+pub enum TaskType {
     MessageUser(MessageUser),
     ChangeTeam,
     CreateRole,
@@ -34,8 +34,9 @@ pub struct TaskRunner {
     pub db: DatabaseConnection,
 }
 
+#[derive(Serialize, Deserialize)]
 struct Task {
-    task: Tasks,
+    task: TaskType,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -46,7 +47,7 @@ pub struct MessageUser {
 
 impl Task {
     async fn message_user(&self, ctx: Arc<Context>) {
-        let message = if let Tasks::MessageUser(message) = &self.task {
+        let message = if let TaskType::MessageUser(message) = &self.task {
             message
         } else {
             panic!("Not a message task");
@@ -76,19 +77,23 @@ impl TaskRunner {
             Err(why) => panic!("Error getting tasks: {:?}", why),
         };
 
+        for db_task in incomplete_tasks {
+            let task_payload: Task = serde_json::from_str(&db_task.payload).unwrap();
+
+            match task_payload.task {
+                TaskType::MessageUser(_) => task_payload.message_user(Arc::clone(&self.ctx)).await,
+                _ => unimplemented!(),
+            }
+        }
+    }
+
+    pub async fn sample_tasks(&self) {
         let task = Task {
-            task: Tasks::MessageUser(MessageUser {
+            task: TaskType::MessageUser(MessageUser {
                 player_id: 133358326439346176,
                 message: String::from("Good day"),
             }),
         };
-
-        for task in incomplete_tasks {
-            match task.task {
-                Tasks::MessageUser(_) => task.message_user(Arc::clone(&self.ctx)).await,
-                _ => unimplemented!(),
-            }
-        }
     }
 }
 

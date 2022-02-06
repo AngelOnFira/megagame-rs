@@ -48,6 +48,8 @@ impl EventHandler for Handler {
                 Err(err) => panic!("Error connecting to database: {:?}", err),
             };
 
+            
+
         if !self.is_loop_running.load(Ordering::Relaxed) {
             let ctx1 = Arc::clone(&ctx);
             tokio::spawn(async move {
