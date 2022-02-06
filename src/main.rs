@@ -7,19 +7,16 @@ use std::{
     time::Duration,
 };
 
-use chrono::Utc;
+use sea_orm::{Database, DatabaseConnection};
 use serenity::{
     async_trait,
-    model::{
-        channel::Message,
-        gateway::{Activity, Ready},
-        id::{ChannelId, GuildId},
-    },
+    model::{channel::Message, gateway::Ready, id::GuildId},
     prelude::*,
 };
 
 use crate::tasks::TaskRunner;
 
+mod schema;
 mod tasks;
 
 struct Handler {
@@ -45,10 +42,16 @@ impl EventHandler for Handler {
 
         let ctx = Arc::new(ctx);
 
+        let db: DatabaseConnection =
+            match Database::connect("postgres://user:pass@localhost:5433/postgres").await {
+                Ok(db) => db,
+                Err(err) => panic!("Error connecting to database: {:?}", err),
+            };
+
         if !self.is_loop_running.load(Ordering::Relaxed) {
             let ctx1 = Arc::clone(&ctx);
             tokio::spawn(async move {
-                let runner = TaskRunner { ctx: ctx1 };
+                let runner = TaskRunner { ctx: ctx1, db: db };
 
                 loop {
                     runner.run_tasks().await;
