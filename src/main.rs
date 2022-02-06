@@ -18,74 +18,41 @@ use serenity::{
     prelude::*,
 };
 
+use crate::tasks::TaskRunner;
+
+mod tasks;
+
 struct Handler {
     is_loop_running: AtomicBool,
 }
 
 #[async_trait]
 impl EventHandler for Handler {
-    // Set a handler for the `message` event - so that whenever a new message
-    // is received - the closure (or function) passed will be called.
-    //
-    // Event handlers are dispatched through a threadpool, and so multiple
-    // events can be dispatched simultaneously.
     async fn message(&self, ctx: Context, msg: Message) {
         if msg.content == "!ping" {
-            // Sending a message can fail, due to a network error, an
-            // authentication error, or lack of permissions to post in the
-            // channel, so log to stdout when some error happens, with a
-            // description of it.
             if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
                 println!("Error sending message: {:?}", why);
             }
         }
     }
 
-    // Set a handler to be called on the `ready` event. This is called when a
-    // shard is booted, and a READY payload is sent by Discord. This payload
-    // contains data like the current user's guild Ids, current user data,
-    // private channels, and more.
-    //
-    // In this case, just print what the current user's username is.
     async fn ready(&self, _: Context, ready: Ready) {
         println!("{} is connected!", ready.user.name);
     }
 
-    // We use the cache_ready event just in case some cache operation is required in whatever use
-    // case you have for this.
     async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
         println!("Cache built successfully!");
 
-        // it's safe to clone Context, but Arc is cheaper for this use case.
-        // Untested claim, just theoretically. :P
         let ctx = Arc::new(ctx);
 
-        // We need to check that the loop is not already running when this event triggers,
-        // as this event triggers every time the bot enters or leaves a guild, along every time the
-        // ready shard event triggers.
-        //
-        // An AtomicBool is used because it doesn't require a mutable reference to be changed, as
-        // we don't have one due to self being an immutable reference.
         if !self.is_loop_running.load(Ordering::Relaxed) {
-            // We have to clone the Arc, as it gets moved into the new thread.
             let ctx1 = Arc::clone(&ctx);
-            // tokio::spawn creates a new green thread that can run in parallel with the rest of
-            // the application.
             tokio::spawn(async move {
-                loop {
-                    // We clone Context again here, because Arc is owned, so it moves to the
-                    // new function.
-                    log_system_load(Arc::clone(&ctx1)).await;
-                    tokio::time::sleep(Duration::from_secs(5)).await;
-                }
-            });
+                let runner = TaskRunner { ctx: ctx1 };
 
-            // And of course, we can run more than one thread at different timings.
-            let ctx2 = Arc::clone(&ctx);
-            tokio::spawn(async move {
                 loop {
-                    set_status_to_current_time(Arc::clone(&ctx2)).await;
-                    tokio::time::sleep(Duration::from_secs(60)).await;
+                    runner.run_tasks().await;
+                    tokio::time::sleep(Duration::from_secs(1)).await;
                 }
             });
 
@@ -100,9 +67,6 @@ async fn main() {
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
-    // Create a new instance of the Client, logging in as a bot. This will
-    // automatically prepend your bot token with "Bot ", which is a requirement
-    // by Discord for bot users.
     let mut client = Client::builder(&token)
         .application_id(451862707746897961)
         .event_handler(Handler {
@@ -113,50 +77,7 @@ async fn main() {
 
     // Set up a
 
-    // Finally, start a single shard, and start listening to events.
-    //
-    // Shards will automatically attempt to reconnect, and will perform
-    // exponential backoff until it reconnects.
     if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);
     }
-}
-
-async fn log_system_load(ctx: Arc<Context>) {
-    let cpu_load = sys_info::loadavg().unwrap();
-    let mem_use = sys_info::mem_info().unwrap();
-
-    // We can use ChannelId directly to send a message to a specific channel; in this case, the
-    // message would be sent to the #testing channel on the discord server.
-    let message = ChannelId(345993194322001924)
-        .send_message(&ctx, |m| {
-            m.embed(|e| {
-                e.title("System Resource Load")
-                    .field(
-                        "CPU Load Average",
-                        format!("{:.2}%", cpu_load.one * 10.0),
-                        false,
-                    )
-                    .field(
-                        "Memory Usage",
-                        format!(
-                            "{:.2} MB Free out of {:.2} MB",
-                            mem_use.free as f32 / 1000.0,
-                            mem_use.total as f32 / 1000.0
-                        ),
-                        false,
-                    )
-            })
-        })
-        .await;
-    if let Err(why) = message {
-        eprintln!("Error sending message: {:?}", why);
-    };
-}
-
-async fn set_status_to_current_time(ctx: Arc<Context>) {
-    let current_time = Utc::now();
-    let formatted_time = current_time.to_rfc2822();
-
-    ctx.set_activity(Activity::playing(&formatted_time)).await;
 }
