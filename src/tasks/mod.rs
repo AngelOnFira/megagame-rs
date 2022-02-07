@@ -1,67 +1,17 @@
 use std::sync::Arc;
 
 use sea_orm::DatabaseConnection;
-use serde::{Deserialize, Serialize};
 use serenity::client::Context;
-
-use serenity::{http::CacheHttp, model::id::UserId};
 
 use sea_orm::{entity::*, query::*};
 
-// use self::message::Message;
+use crate::{schema::tasks_task, tasks::task::{MessageUser, Task, TaskType}};
 
-// mod message;
-
-use crate::schema::tasks_task;
-
-#[derive(Serialize, Deserialize)]
-pub enum TaskType {
-    MessageUser(MessageUser),
-    ChangeTeam,
-    CreateRole,
-    CreateCategory,
-    CreateTeamChannel,
-    CreateTeamVoiceChannel,
-    CreateCategoryChannel,
-    CreateButtons,
-    CreateMessage,
-    CreateThread,
-}
+mod task;
 
 pub struct TaskRunner {
     pub ctx: Arc<Context>,
     pub db: DatabaseConnection,
-}
-
-#[derive(Serialize, Deserialize)]
-struct Task {
-    task: TaskType,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct MessageUser {
-    player_id: u64,
-    message: String,
-}
-
-impl Task {
-    async fn message_user(&self, ctx: Arc<Context>) {
-        let message = if let TaskType::MessageUser(message) = &self.task {
-            message
-        } else {
-            panic!("Not a message task");
-        };
-
-        if let Ok(user) = UserId(message.player_id).to_user(ctx.http()).await {
-            match user
-                .direct_message(ctx.http(), |m| m.content(message.message.as_str()))
-                .await
-            {
-                Ok(_) => println!("Message sent"),
-                Err(why) => println!("Error sending message: {:?}", why),
-            };
-        };
-    }
 }
 
 impl TaskRunner {
@@ -111,7 +61,3 @@ impl TaskRunner {
         println!("Task inserted");
     }
 }
-
-// pub trait Task {
-//     fn run();
-// }
