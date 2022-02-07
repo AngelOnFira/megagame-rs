@@ -43,17 +43,18 @@ impl EventHandler for Handler {
         let ctx = Arc::new(ctx);
 
         let db: DatabaseConnection =
-            match Database::connect("postgres://user:pass@localhost:5433/postgres").await {
+            match Database::connect("sqlite://./django/db.sqlite3").await {
                 Ok(db) => db,
                 Err(err) => panic!("Error connecting to database: {:?}", err),
             };
-
-            
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
             let ctx1 = Arc::clone(&ctx);
             tokio::spawn(async move {
                 let runner = TaskRunner { ctx: ctx1, db: db };
+
+                // Seed an example test
+                runner.sample_tasks().await;
 
                 loop {
                     runner.run_tasks().await;
@@ -79,8 +80,6 @@ async fn main() {
         })
         .await
         .expect("Err creating client");
-
-    // Set up a
 
     if let Err(why) = client.start().await {
         println!("Client error: {:?}", why);
