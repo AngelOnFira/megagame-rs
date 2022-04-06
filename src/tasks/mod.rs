@@ -4,10 +4,14 @@ use sea_orm::DatabaseConnection;
 use serenity::client::Context;
 
 use sea_orm::{entity::*, query::*};
+use tracing::log;
 
-use crate::{schema::tasks_task, tasks::task::{MessageUser, Task, TaskType}};
+use crate::{
+    schema::tasks_task,
+    tasks::task::{MessageUser, Task, TaskType},
+};
 
-mod task;
+pub mod task;
 
 pub struct TaskRunner {
     pub ctx: Arc<Context>,
@@ -28,6 +32,8 @@ impl TaskRunner {
 
         for db_task in incomplete_tasks {
             let task_payload: Task = serde_json::from_str(&db_task.payload).unwrap();
+
+            log::info!("Working on task: {:?}", task_payload);
 
             // Complete the tasks
             match task_payload.task {
@@ -58,6 +64,33 @@ impl TaskRunner {
         .insert(&self.db)
         .await
         .unwrap();
-        println!("Task inserted");
+        log::info!("Task inserted");
     }
 }
+
+// // Add some tests
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+
+//     // fn get_task_runner
+
+//     // #[test]
+//     fn test_send_message() {
+//         let task = Task {
+//             task: TaskType::MessageUser(MessageUser {
+//                 player_id: 133358326439346176,
+//                 message: String::from("Good day"),
+//             }),
+//         };
+
+//         tasks_task::ActiveModel {
+//             payload: Set(serde_json::to_string(&task).unwrap()),
+//             completed: Set("true".to_string()),
+//             ..Default::default()
+//         }
+//         .insert(&self.db)
+//         .await
+//         .unwrap();
+//     }
+// }
