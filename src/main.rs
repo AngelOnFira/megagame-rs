@@ -15,7 +15,6 @@ use serenity::{
     model::{channel::Message, gateway::Ready, id::GuildId},
     prelude::*,
 };
-use std::process::Command;
 use tracing::{Level, log};
 use tracing_subscriber::EnvFilter;
 

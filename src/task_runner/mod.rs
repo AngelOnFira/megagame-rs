@@ -8,7 +8,7 @@ use tracing::log;
 
 use crate::{
     schema::tasks_task,
-    task_runner::tasks::{message_user::MessageUser, Task, TaskType},
+    task_runner::tasks::{message_user::MessageUser, TaskType},
 };
 
 pub mod tasks;
@@ -36,10 +36,8 @@ impl TaskRunner {
             log::info!("Working on task: {:?}", task_payload);
 
             // Complete the tasks
-            match task_payload {
-                TaskType::MessageUser(data) => data.handle(Arc::clone(&self.ctx)).await,
-                _ => unimplemented!(),
-            };
+            let task = task_payload.route().handle(Arc::clone(&self.ctx));
+            task.await;
 
             // Set the task as completed
             let mut db_task_active_model: tasks_task::ActiveModel = db_task.into();
@@ -48,7 +46,7 @@ impl TaskRunner {
         }
     }
 
-    pub async fn sample_tasks(&self) {
+    pub async fn _sample_tasks(&self) {
         let task = TaskType::MessageUser(MessageUser {
             player_id: 133358326439346176,
             message: String::from("Good day"),
