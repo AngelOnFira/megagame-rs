@@ -16,19 +16,16 @@ use serenity::{
     prelude::*,
 };
 use std::process::Command;
-use tracing::Level;
+use tracing::{Level, log};
 use tracing_subscriber::EnvFilter;
 
 use crate::{
     schema::tasks_task,
-    tasks::{
-        task::{MessageUser, Task, TaskType},
-        TaskRunner,
-    },
+    task_runner::{tasks::{TaskType, message_user::MessageUser}, TaskRunner},
 };
 
 mod schema;
-mod tasks;
+mod task_runner;
 
 struct Handler {
     is_loop_running: AtomicBool,
@@ -159,12 +156,10 @@ async fn run_tests(ctx: Arc<Context>) {
 
     dbg!(ctx.cache.current_user_id().0);
 
-    let task = Task {
-        task: TaskType::MessageUser(MessageUser {
-            player_id: 133358326439346176,
-            message: String::from("Good dayyy"),
-        }),
-    };
+    let task = TaskType::MessageUser(MessageUser {
+        player_id: 133358326439346176,
+        message: String::from("Good dayyy"),
+    });
 
     tasks_task::ActiveModel {
         payload: Set(serde_json::to_string(&task).unwrap()),
@@ -175,5 +170,5 @@ async fn run_tests(ctx: Arc<Context>) {
     .await
     .unwrap();
 
-    println!("Task inserted");
+    log::info!("Task inserted");
 }

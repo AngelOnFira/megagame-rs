@@ -8,10 +8,10 @@ use tracing::log;
 
 use crate::{
     schema::tasks_task,
-    tasks::task::{MessageUser, Task, TaskType},
+    task_runner::tasks::{message_user::MessageUser, Task, TaskType},
 };
 
-pub mod task;
+pub mod tasks;
 
 pub struct TaskRunner {
     pub ctx: Arc<Context>,
@@ -31,15 +31,15 @@ impl TaskRunner {
         };
 
         for db_task in incomplete_tasks {
-            let task_payload: Task = serde_json::from_str(&db_task.payload).unwrap();
+            let task_payload: TaskType = serde_json::from_str(&db_task.payload).unwrap();
 
             log::info!("Working on task: {:?}", task_payload);
 
             // Complete the tasks
-            match task_payload.task {
-                TaskType::MessageUser(_) => task_payload.message_user(Arc::clone(&self.ctx)).await,
+            match task_payload {
+                TaskType::MessageUser(data) => data.handle(Arc::clone(&self.ctx)).await,
                 _ => unimplemented!(),
-            }
+            };
 
             // Set the task as completed
             let mut db_task_active_model: tasks_task::ActiveModel = db_task.into();
@@ -49,12 +49,10 @@ impl TaskRunner {
     }
 
     pub async fn sample_tasks(&self) {
-        let task = Task {
-            task: TaskType::MessageUser(MessageUser {
-                player_id: 133358326439346176,
-                message: String::from("Good day"),
-            }),
-        };
+        let task = TaskType::MessageUser(MessageUser {
+            player_id: 133358326439346176,
+            message: String::from("Good day"),
+        });
 
         tasks_task::ActiveModel {
             payload: Set(serde_json::to_string(&task).unwrap()),
