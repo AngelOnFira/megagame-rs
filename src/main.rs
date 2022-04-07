@@ -15,12 +15,15 @@ use serenity::{
     model::{channel::Message, gateway::Ready, id::GuildId},
     prelude::*,
 };
-use tracing::{Level, log};
+use tracing::{log, Level};
 use tracing_subscriber::EnvFilter;
 
 use crate::{
     schema::tasks_task,
-    task_runner::{tasks::{TaskType, message_user::MessageUser}, TaskRunner},
+    task_runner::{
+        tasks::{message_user::MessageUser, TaskType},
+        TaskRunner,
+    },
 };
 
 mod schema;

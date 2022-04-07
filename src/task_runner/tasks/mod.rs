@@ -2,11 +2,27 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use serenity::{client::Context, model::id::UserId};
+use serenity::client::Context;
 
-use self::{create_dropdown::CreateDropdown, message_user::MessageUser};
+use self::{
+    change_team::ChangeTeam, create_buttons::CreateButtons, create_category::CreateCategory,
+    create_category_channel::CreateCategoryChannel, create_dropdown::CreateDropdown,
+    create_message::CreateMessage, create_role::CreateTeamChannel,
+    create_team_voice_channel::CreateTeamVoiceChannel, create_thread::CreateThread,
+    message_user::MessageUser,
+};
 
+pub mod change_team;
+pub mod create_buttons;
+pub mod create_category;
+pub mod create_category_channel;
 pub mod create_dropdown;
+pub mod create_message;
+pub mod create_role;
+pub mod create_team_channel;
+pub mod create_team_voice_channel;
+pub mod create_thread;
+pub mod manage_user;
 pub mod message_user;
 
 /// Store the different tasks the bot can do in the database. Each variant has
@@ -14,16 +30,16 @@ pub mod message_user;
 /// Each of these structs might have their own `impl`s to operate on the data.
 #[derive(Serialize, Deserialize, Debug)]
 pub enum TaskType {
-    ChangeTeam { team_id: u64, user_id: UserId },
-    CreateButtons,
-    CreateCategory,
-    CreateCategoryChannel,
+    ChangeTeam(ChangeTeam),
+    CreateButtons(CreateButtons),
+    CreateCategory(CreateCategory),
+    CreateCategoryChannel(CreateCategoryChannel),
     CreateDropdown(CreateDropdown),
-    CreateMessage,
-    CreateRole,
-    CreateTeamChannel,
-    CreateTeamVoiceChannel,
-    CreateThread,
+    CreateMessage(CreateMessage),
+    CreateRole(CreateRole),
+    CreateTeamChannel(CreateTeamChannel),
+    CreateTeamVoiceChannel(CreateTeamVoiceChannel),
+    CreateThread(CreateThread),
     MessageUser(MessageUser),
 }
 

@@ -12,7 +12,7 @@ use serenity::{
     },
 };
 
-use super::{Task};
+use super::Task;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateDropdown {
