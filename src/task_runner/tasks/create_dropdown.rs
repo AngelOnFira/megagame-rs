@@ -14,7 +14,8 @@ use serenity::{
 
 use super::Task;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
 pub struct CreateDropdown {
     guild_id: u64,
     channel_id: u64,

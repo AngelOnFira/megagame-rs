@@ -14,7 +14,8 @@ use serenity::{
 
 use super::Task;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
 pub struct CreateTeamVoiceChannel {}
 
 #[async_trait]

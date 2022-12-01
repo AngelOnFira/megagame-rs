@@ -28,7 +28,7 @@ pub mod message_user;
 /// Store the different tasks the bot can do in the database. Each variant has
 /// its own struct that can store the rest of the data required for the task.
 /// Each of these structs might have their own `impl`s to operate on the data.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TaskType {
     ChangeTeam(ChangeTeam),
     CreateButtons(CreateButtons),
@@ -63,7 +63,8 @@ pub trait Task: Send {
 //     pub task: TaskType,
 // }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
 pub struct CreateRole {}
 
 // impl Task {

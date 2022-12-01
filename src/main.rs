@@ -12,7 +12,7 @@ use clap::Parser;
 use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
 use serenity::{
     async_trait,
-    model::{channel::Message, gateway::Ready, id::GuildId},
+    model::{channel::Message, gateway::Ready, id::GuildId, self, application::interaction::Interaction},
     prelude::*,
 };
 use tracing::{log, Level};
@@ -82,6 +82,14 @@ impl EventHandler for Handler {
             // Now that the loop is running, we set the bool to true
             self.is_loop_running.swap(true, Ordering::Relaxed);
         }
+    }
+
+    async fn interaction_create(
+        &self,
+        ctx: Context,
+        interaction: Interaction,
+    ) {
+        dbg!(interaction);
     }
 }
 

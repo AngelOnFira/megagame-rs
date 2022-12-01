@@ -8,7 +8,8 @@ use tracing::log;
 use super::Task;
 
 /// Send a message to a user with the provided player_id.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+
 pub struct MessageUser {
     pub player_id: u64,
     pub message: String,

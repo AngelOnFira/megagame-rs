@@ -11,39 +11,32 @@ use crate::{
     task_runner::tasks::{message_user::MessageUser, TaskType},
 };
 
+use self::task_queue::TaskQueue;
+
 pub mod tasks;
+pub mod task_queue;
 
 pub struct TaskRunner {
     pub ctx: Arc<Context>,
-    pub db: DatabaseConnection,
+    pub db: Box<dyn TaskQueue>,
 }
 
 impl TaskRunner {
     pub async fn run_tasks(&self) {
-        // Iterate through open tasks in the DB
-        let incomplete_tasks: Vec<tasks_task::Model> = match tasks_task::Entity::find()
-            .filter(tasks_task::Column::Completed.eq("false"))
-            .all(&self.db)
-            .await
-        {
-            Ok(tasks) => tasks,
-            Err(why) => panic!("Error getting tasks: {:?}", why),
-        };
+                // for db_task in incomplete_tasks {
+        //     let task_payload: TaskType = serde_json::from_str(&db_task.payload).unwrap();
 
-        for db_task in incomplete_tasks {
-            let task_payload: TaskType = serde_json::from_str(&db_task.payload).unwrap();
+        //     log::info!("Working on task: {:?}", task_payload);
 
-            log::info!("Working on task: {:?}", task_payload);
+        //     // Complete the tasks
+        //     let task = task_payload.route().handle(Arc::clone(&self.ctx));
+        //     task.await;
 
-            // Complete the tasks
-            let task = task_payload.route().handle(Arc::clone(&self.ctx));
-            task.await;
-
-            // Set the task as completed
-            let mut db_task_active_model: tasks_task::ActiveModel = db_task.into();
-            db_task_active_model.completed = Set("true".to_string());
-            db_task_active_model.update(&self.db).await.unwrap();
-        }
+        //     // Set the task as completed
+        //     let mut db_task_active_model: tasks_task::ActiveModel = db_task.into();
+        //     db_task_active_model.completed = Set("true".to_string());
+        //     db_task_active_model.update(&self.db).await.unwrap();
+        // }
     }
 
     pub async fn _sample_tasks(&self) {
