@@ -136,7 +136,9 @@ async fn main() {
 
     let args = Args::parse();
 
-    let mut client = Client::builder(&token)
+    let gateway_intents = GatewayIntents::all();
+
+    let mut client = Client::builder(&token, gateway_intents)
         .application_id(451862707746897961)
         .event_handler(Handler {
             is_loop_running: AtomicBool::new(false),
