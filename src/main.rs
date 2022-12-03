@@ -38,7 +38,6 @@ struct Handler {
 #[async_trait]
 impl EventHandler for Handler {
     async fn message(&self, ctx: Context, msg: Message) {
-        dbg!(msg.clone());
         if msg.content == "!ping" {
             if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
                 println!("Error sending message: {:?}", why);
@@ -69,13 +68,13 @@ impl EventHandler for Handler {
 
             let ctx2 = Arc::clone(&ctx);
             tokio::spawn(async move {
-                let runner = TaskRunner {
+                let mut runner = TaskRunner {
                     ctx: ctx2,
                     db: Box::new(MemoryTaskQueue::new()),
                 };
 
                 // Seed an example test
-                // runner.sample_tasks().await;
+                runner.sample_tasks().await;
 
                 loop {
                     runner.run_tasks().await;

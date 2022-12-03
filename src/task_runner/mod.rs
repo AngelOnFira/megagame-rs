@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use serenity::client::Context;
+use tracing::log;
 
 use crate::task_runner::tasks::{message_user::MessageUser, TaskType};
 
@@ -15,24 +16,20 @@ pub struct TaskRunner {
 }
 
 impl TaskRunner {
-    pub async fn run_tasks(&self) {
-        // for db_task in incomplete_tasks {
-        //     let task_payload: TaskType = serde_json::from_str(&db_task.payload).unwrap();
+    pub async fn run_tasks(&mut self) {
+        for task_payload in self.db.get_available_tasks().await {
+            log::info!("Working on task: {:?}", task_payload);
 
-        //     log::info!("Working on task: {:?}", task_payload);
+            // Complete the tasks
+            let task = task_payload.task.route().handle(Arc::clone(&self.ctx));
+            task.await;
 
-        //     // Complete the tasks
-        //     let task = task_payload.route().handle(Arc::clone(&self.ctx));
-        //     task.await;
-
-        //     // Set the task as completed
-        //     let mut db_task_active_model: tasks_task::ActiveModel = db_task.into();
-        //     db_task_active_model.completed = Set("true".to_string());
-        //     db_task_active_model.update(&self.db).await.unwrap();
-        // }
+            // Set the task as completed
+            self.db.complete_task(task_payload).await;
+        }
     }
 
-    pub async fn _sample_tasks(&mut self) {
+    pub async fn sample_tasks(&mut self) {
         let task = TaskType::MessageUser(MessageUser {
             player_id: 133358326439346176,
             message: String::from("Good day"),

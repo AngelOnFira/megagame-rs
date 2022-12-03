@@ -25,6 +25,13 @@ pub mod create_thread;
 pub mod manage_user;
 pub mod message_user;
 
+/// A wrapper for TaskType to store the id if the task in the database
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct DbTask {
+    pub id: i32,
+    pub task: TaskType,
+}
+
 /// Store the different tasks the bot can do in the database. Each variant has
 /// its own struct that can store the rest of the data required for the task.
 /// Each of these structs might have their own `impl`s to operate on the data.
