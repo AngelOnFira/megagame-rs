@@ -13,17 +13,17 @@ use crate::{
 
 use self::task_queue::TaskQueue;
 
-pub mod tasks;
 pub mod task_queue;
+pub mod tasks;
 
 pub struct TaskRunner {
     pub ctx: Arc<Context>,
-    pub db: Box<dyn TaskQueue>,
+    pub db: Box<dyn TaskQueue + Send + Sync>,
 }
 
 impl TaskRunner {
     pub async fn run_tasks(&self) {
-                // for db_task in incomplete_tasks {
+        // for db_task in incomplete_tasks {
         //     let task_payload: TaskType = serde_json::from_str(&db_task.payload).unwrap();
 
         //     log::info!("Working on task: {:?}", task_payload);
@@ -39,21 +39,13 @@ impl TaskRunner {
         // }
     }
 
-    pub async fn _sample_tasks(&self) {
+    pub async fn _sample_tasks(&mut self) {
         let task = TaskType::MessageUser(MessageUser {
             player_id: 133358326439346176,
             message: String::from("Good day"),
         });
 
-        tasks_task::ActiveModel {
-            payload: Set(serde_json::to_string(&task).unwrap()),
-            completed: Set("true".to_string()),
-            ..Default::default()
-        }
-        .insert(&self.db)
-        .await
-        .unwrap();
-        log::info!("Task inserted");
+        self.db.add_task(task).await;
     }
 }
 

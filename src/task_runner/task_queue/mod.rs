@@ -2,8 +2,8 @@ use async_trait::async_trait;
 
 use super::tasks::TaskType;
 
-mod database;
-mod memory;
+pub mod database;
+pub mod memory;
 
 #[async_trait]
 pub trait TaskQueue {

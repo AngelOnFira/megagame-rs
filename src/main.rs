@@ -12,7 +12,9 @@ use clap::Parser;
 use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
 use serenity::{
     async_trait,
-    model::{channel::Message, gateway::Ready, id::GuildId, self, application::interaction::Interaction},
+    model::{
+        self, application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId,
+    },
     prelude::*,
 };
 use tracing::{log, Level};
@@ -21,6 +23,7 @@ use tracing_subscriber::EnvFilter;
 use crate::{
     schema::tasks_task,
     task_runner::{
+        task_queue::memory::MemoryTaskQueue,
         tasks::{message_user::MessageUser, TaskType},
         TaskRunner,
     },
@@ -54,10 +57,10 @@ impl EventHandler for Handler {
 
         let ctx = Arc::new(ctx);
 
-        let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
-            Ok(db) => db,
-            Err(err) => panic!("Error connecting to database: {:?}", err),
-        };
+        // let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
+        //     Ok(db) => db,
+        //     Err(err) => panic!("Error connecting to database: {:?}", err),
+        // };
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
             // If tests are enabled, start them in another thread
@@ -68,7 +71,10 @@ impl EventHandler for Handler {
 
             let ctx2 = Arc::clone(&ctx);
             tokio::spawn(async move {
-                let runner = TaskRunner { ctx: ctx2, db: db };
+                let runner = TaskRunner {
+                    ctx: ctx2,
+                    db: Box::new(MemoryTaskQueue::new()),
+                };
 
                 // Seed an example test
                 // runner.sample_tasks().await;
@@ -84,11 +90,7 @@ impl EventHandler for Handler {
         }
     }
 
-    async fn interaction_create(
-        &self,
-        ctx: Context,
-        interaction: Interaction,
-    ) {
+    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         dbg!(interaction);
     }
 }
