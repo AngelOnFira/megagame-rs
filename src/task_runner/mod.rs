@@ -1,15 +1,8 @@
 use std::sync::Arc;
 
-use sea_orm::DatabaseConnection;
 use serenity::client::Context;
 
-use sea_orm::{entity::*, query::*};
-use tracing::log;
-
-use crate::{
-    schema::tasks_task,
-    task_runner::tasks::{message_user::MessageUser, TaskType},
-};
+use crate::task_runner::tasks::{message_user::MessageUser, TaskType};
 
 use self::task_queue::TaskQueue;
 

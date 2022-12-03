@@ -12,9 +12,7 @@ use clap::Parser;
 use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
 use serenity::{
     async_trait,
-    model::{
-        self, application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId,
-    },
+    model::{application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId},
     prelude::*,
 };
 use tracing::{log, Level};
@@ -90,7 +88,7 @@ impl EventHandler for Handler {
         }
     }
 
-    async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
+    async fn interaction_create(&self, _ctx: Context, interaction: Interaction) {
         dbg!(interaction);
     }
 }

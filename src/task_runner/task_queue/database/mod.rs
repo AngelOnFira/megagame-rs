@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sea_orm::{DatabaseConnection, EntityTrait, QueryFilter, Set, ActiveModelTrait};
+use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use tracing::log;
 
 use crate::{schema::tasks_task, task_runner::tasks::TaskType};
@@ -29,7 +29,7 @@ impl TaskQueue for DatabaseTaskQueue {
             .map(|task| serde_json::from_str(&task.payload).unwrap())
             .collect()
     }
-    
+
     async fn add_task(&mut self, task: TaskType) {
         tasks_task::ActiveModel {
             payload: Set(serde_json::to_string(&task).unwrap()),
