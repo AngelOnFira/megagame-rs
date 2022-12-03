@@ -8,7 +8,7 @@ use serenity::{
     http::CacheHttp,
     model::{
         id::ChannelId,
-        interactions::message_component::{ActionRow, SelectMenuOption},
+        prelude::component::{ActionRow, SelectMenuOption},
     },
 };
 
