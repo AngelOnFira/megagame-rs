@@ -3,6 +3,16 @@ use sea_orm_migration::prelude::*;
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
+#[derive(Iden)]
+enum Currency {
+    Table,
+    Id,
+    Name,
+    Description,
+    CurrencyType,
+    Emoji,
+}
+
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -21,55 +31,38 @@ impl MigrationTrait for Migration {
                     .table(Currency::Table)
                     .if_not_exists()
                     .col(
-                        Column::create()
-                            .name(Currency::Id)
+                        ColumnDef::new(Currency::Id)
                             .integer()
                             .not_null()
                             .auto_increment()
                             .primary_key(),
                     )
                     .col(
-                        Column::create()
-                            .name(Currency::Name)
-                            .text()
+                        ColumnDef::new(Currency::Name)
+                            .string()
                             .not_null()
-                            .unique(),
+                            .unique_key(),
                     )
                     .col(
-                        Column::create()
-                            .name(Currency::Description)
-                            .text()
-                            .default(""),
+                        ColumnDef::new(Currency::Description)
+                            .string()
+                            .default("".to_owned()),
                     )
                     .col(
-                        Column::create()
-                            .name(Currency::CurrencyType)
-                            .text()
-                            .not_null()
-                            .default(CurrencyType::Hidden),
+                        ColumnDef::new(Currency::CurrencyType)
+                            .string()
+                            .null()
+                            .default("".to_owned()),
                     )
-                    .col(Column::create().name(Currency::Emoji).text().default("")),
+                    .col(ColumnDef::new(Currency::Emoji).string().null())
+                    .to_owned(),
             )
             .await
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
-        // Replace the sample below with your own migration scripts
-        todo!();
-
         manager
-            .drop_table(Table::drop().table(Post::Table).to_owned())
+            .drop_table(Table::drop().table(Currency::Table).to_owned())
             .await
     }
-}
-
-/// Learn more at https://docs.rs/sea-query#iden
-#[derive(Iden)]
-enum Currency {
-    Table,
-    Id,
-    Name,
-    Description,
-    CurrencyType,
-    Emoji,
 }
