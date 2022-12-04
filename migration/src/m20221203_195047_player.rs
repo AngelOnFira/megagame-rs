@@ -1,5 +1,7 @@
 use sea_orm_migration::prelude::*;
 
+use crate::m20221203_195037_team::Team;
+
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -8,7 +10,7 @@ enum Player {
     Table,
     Id,
     Name,
-    Team,
+    TeamId,
     Guild,
 }
 
@@ -28,15 +30,16 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Player::Name).string().not_null())
+                    .col(ColumnDef::new(Player::TeamId).integer().not_null())
+                    .col(ColumnDef::new(Player::Guild).integer().null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_player_team_id")
-                            .from(Player::Table, Player::Team)
+                            .from(Player::Table, Player::TeamId)
                             .to(Team::Table, Team::Id)
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
                     )
-                    .col(ColumnDef::new(Player::Guild).integer().null())
                     .to_owned(),
             )
             .await
@@ -44,7 +47,7 @@ impl MigrationTrait for Migration {
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
-            .drop_table(Table::drop().table(Post::Table).to_owned())
+            .drop_table(Table::drop().table(Player::Table).to_owned())
             .await
     }
 }

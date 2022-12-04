@@ -13,11 +13,6 @@ enum Currency {
     Emoji,
 }
 
-
-
-
-
-
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
@@ -69,10 +64,10 @@ impl MigrationTrait for Migration {
         //     currency = models.ForeignKey(
         //         Currency, on_delete=models.PROTECT, null=True, blank=True
         //     )
-        
+
         //     created_date = models.DateTimeField(default=timezone.now)
         //     modified_date = models.DateTimeField(default=timezone.now)
-        
+
         //     from_wallet = models.ForeignKey(
         //         "Wallet",
         //         on_delete=models.PROTECT,
@@ -89,7 +84,7 @@ impl MigrationTrait for Migration {
         //         null=True,
         //         blank=True,
         //     )
-        
+
         //     initiating_player = models.ForeignKey(
         //         Player,
         //         on_delete=models.PROTECT,
@@ -98,7 +93,6 @@ impl MigrationTrait for Migration {
         //         null=True,
         //         blank=True,
         //     )
-        
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
