@@ -3,11 +3,12 @@
 use sea_orm::entity::prelude::*;
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq)]
-#[sea_orm(table_name = "wallet")]
+#[sea_orm(table_name = "task")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    pub name: String,
+    pub completed: bool,
+    pub payload: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

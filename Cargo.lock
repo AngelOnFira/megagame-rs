@@ -1740,6 +1740,7 @@ dependencies = [
  "bonsaidb",
  "chrono",
  "clap 4.0.29",
+ "entity",
  "regex",
  "reqwest",
  "sea-orm",

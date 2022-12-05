@@ -1,14 +1,8 @@
-use async_trait::async_trait;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
-use tracing::log;
-
-use crate::{
-    schema::tasks_task,
-    task_runner::tasks::{DbTask, TaskType},
-};
-use sea_orm::ColumnTrait;
-
 use super::TaskQueue;
+use crate::task_runner::tasks::{DbTask, TaskType};
+use async_trait::async_trait;
+use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
+use tracing::log;
 
 pub struct DatabaseTaskQueue {
     pub db: DatabaseConnection,
@@ -18,8 +12,8 @@ pub struct DatabaseTaskQueue {
 impl TaskQueue for DatabaseTaskQueue {
     async fn get_available_tasks(&mut self) -> Vec<DbTask> {
         // Iterate through open tasks in the DB
-        let incomplete_tasks: Vec<tasks_task::Model> = match tasks_task::Entity::find()
-            .filter(tasks_task::Column::Completed.eq("false"))
+        let incomplete_tasks: Vec<task::Model> = match task::Entity::find()
+            .filter(task::Column::Completed.eq("false"))
             .all(&self.db)
             .await
         {
@@ -37,7 +31,7 @@ impl TaskQueue for DatabaseTaskQueue {
     }
 
     async fn add_task(&mut self, task: TaskType) {
-        tasks_task::ActiveModel {
+        task::ActiveModel {
             payload: Set(serde_json::to_string(&task).unwrap()),
             completed: Set("false".to_string()),
             ..Default::default()
@@ -49,14 +43,14 @@ impl TaskQueue for DatabaseTaskQueue {
     }
 
     async fn complete_task(&mut self, task: DbTask) {
-        let db_task = tasks_task::Entity::find()
-            .filter(tasks_task::Column::Id.eq(task.id))
+        let db_task = task::Entity::find()
+            .filter(task::Column::Id.eq(task.id))
             .one(&self.db)
             .await
             .unwrap()
             .unwrap();
 
-        let mut db_task_active_model: tasks_task::ActiveModel = db_task.into();
+        let mut db_task_active_model: task::ActiveModel = db_task.into();
         db_task_active_model.completed = Set("true".to_string());
         db_task_active_model.update(&self.db).await.unwrap();
     }
