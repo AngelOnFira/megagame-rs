@@ -1,5 +1,5 @@
 use crate::{
-    commands::{self},
+    commands::{self, fake_trade::FakeTrade, initialize_game::InitializeGame},
     task_runner::{
         task_queue::memory::MemoryTaskQueue,
         tasks::{message_user::MessageUser, TaskType},
@@ -7,6 +7,7 @@ use crate::{
     },
 };
 
+use crate::commands::GameCommand;
 use entity::entities::task;
 use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
 use serenity::{
@@ -39,7 +40,8 @@ impl EventHandler for Handler {
             println!("Received command interaction: {:#?}", command);
 
             let content = match command.data.name.as_str() {
-                "trade" => commands::fake_trade::run(&command.data.options),
+                "trade" => FakeTrade::run(&command.data.options),
+                "init" => InitializeGame::run(&command.data.options),
                 _ => "not implemented :(".to_string(),
             };
 
@@ -63,9 +65,9 @@ impl EventHandler for Handler {
             dbg!(guild.0);
             GuildId(guild.0)
                 .set_application_commands(&ctx.http, |commands| {
-                    commands.create_application_command(|command| {
-                        commands::fake_trade::register(command)
-                    })
+                    commands
+                        .create_application_command(|command| FakeTrade::register(command))
+                        .create_application_command(|command| InitializeGame::register(command))
                 })
                 .await
                 .unwrap();

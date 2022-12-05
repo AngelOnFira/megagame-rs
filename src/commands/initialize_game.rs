@@ -4,14 +4,16 @@ use serenity::{
 
 use super::GameCommand;
 
-pub struct FakeTrade;
+pub struct InitializeGame;
 
-impl GameCommand for FakeTrade {
+impl GameCommand for InitializeGame {
     fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-        command.name("trade").description("Start a test trade")
+        command
+            .name("initialize")
+            .description("Initialize the game")
     }
 
     fn run(_options: &[CommandDataOption]) -> String {
-        "Hey, I'm alive!".to_string()
+        "Hey".to_string()
     }
 }
