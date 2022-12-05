@@ -1,5 +1,6 @@
 use clap::Parser;
 use entity::entities::task;
+use handler::Handler;
 use sea_orm::{ActiveModelTrait, DatabaseConnection, Set, Database};
 use serenity::{
     async_trait,
@@ -27,62 +28,7 @@ pub mod task_runner;
 pub mod commands;
 pub mod handler;
 
-struct Handler {
-    is_loop_running: AtomicBool,
-    run_tests: bool,
-}
 
-#[async_trait]
-impl EventHandler for Handler {
-    async fn message(&self, ctx: Context, msg: Message) {
-        if msg.content == "!ping" {
-            if let Err(why) = msg.channel_id.say(&ctx.http, "Pong!").await {
-                println!("Error sending message: {:?}", why);
-            }
-        }
-    }
-
-    async fn ready(&self, _: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
-    }
-
-    async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
-        println!("Cache built successfully!");
-
-        let ctx = Arc::new(ctx);
-
-        if !self.is_loop_running.load(Ordering::Relaxed) {
-            // If tests are enabled, start them in another thread
-            let ctx1 = Arc::clone(&ctx);
-            if self.run_tests {
-                tokio::spawn(async move { run_tests(ctx1).await });
-            }
-
-            let ctx2 = Arc::clone(&ctx);
-            tokio::spawn(async move {
-                let mut runner = TaskRunner {
-                    ctx: ctx2,
-                    db: Box::new(MemoryTaskQueue::new()),
-                };
-
-                // Seed an example test
-                runner.sample_tasks().await;
-
-                loop {
-                    runner.run_tasks().await;
-                    tokio::time::sleep(Duration::from_secs(1)).await;
-                }
-            });
-
-            // Now that the loop is running, we set the bool to true
-            self.is_loop_running.swap(true, Ordering::Relaxed);
-        }
-    }
-
-    async fn interaction_create(&self, _ctx: Context, interaction: Interaction) {
-        dbg!(interaction);
-    }
-}
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -151,27 +97,4 @@ async fn main() {
     }
 }
 
-async fn run_tests(ctx: Arc<Context>) {
-    let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
-        Ok(db) => db,
-        Err(err) => panic!("Error connecting to database: {:?}", err),
-    };
 
-    dbg!(ctx.cache.current_user_id().0);
-
-    let task = TaskType::MessageUser(MessageUser {
-        player_id: 133358326439346176,
-        message: String::from("Good dayyy"),
-    });
-
-    task::ActiveModel {
-        payload: Set(serde_json::to_string(&task).unwrap()),
-        completed: Set(false),
-        ..Default::default()
-    }
-    .insert(&db)
-    .await
-    .unwrap();
-
-    log::info!("Task inserted");
-}
