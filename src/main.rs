@@ -1,3 +1,17 @@
+use bonsaidb::{
+    core::schema::{Collection, SerializedCollection},
+    local::{
+        config::{Builder, StorageConfiguration},
+        Database,
+    },
+};
+use clap::Parser;
+use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
+use serenity::{
+    async_trait,
+    model::{application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId},
+    prelude::*,
+};
 use std::{
     env,
     sync::{
@@ -5,15 +19,6 @@ use std::{
         Arc,
     },
     time::Duration,
-};
-
-use clap::Parser;
-
-use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
-use serenity::{
-    async_trait,
-    model::{application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId},
-    prelude::*,
 };
 use tracing::{log, Level};
 use tracing_subscriber::EnvFilter;
@@ -54,10 +59,7 @@ impl EventHandler for Handler {
 
         let ctx = Arc::new(ctx);
 
-        // let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
-        //     Ok(db) => db,
-        //     Err(err) => panic!("Error connecting to database: {:?}", err),
-        // };
+        let db = Database::open::<Message>(StorageConfiguration::new("basic.bonsaidb")).unwrap();
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
             // If tests are enabled, start them in another thread
