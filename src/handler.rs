@@ -1,7 +1,6 @@
 use crate::{
     commands::{self, fake_trade::FakeTrade, initialize_game::InitializeGame},
     task_runner::{
-        task_queue::memory::MemoryTaskQueue,
         tasks::{message_user::MessageUser, TaskType},
         TaskRunner,
     },
@@ -76,6 +75,11 @@ impl EventHandler for Handler {
 
     async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
         println!("Cache built successfully!");
+
+        let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
+            Ok(db) => db,
+            Err(err) => panic!("Error connecting to database: {:?}", err),
+        };
 
         let ctx = Arc::new(ctx);
 
