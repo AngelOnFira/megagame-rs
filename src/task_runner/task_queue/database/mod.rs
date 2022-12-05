@@ -1,6 +1,7 @@
 use super::TaskQueue;
 use crate::task_runner::tasks::{DbTask, TaskType};
 use async_trait::async_trait;
+use entity::entities::task;
 use sea_orm::{ActiveModelTrait, ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter, Set};
 use tracing::log;
 
@@ -33,7 +34,7 @@ impl TaskQueue for DatabaseTaskQueue {
     async fn add_task(&mut self, task: TaskType) {
         task::ActiveModel {
             payload: Set(serde_json::to_string(&task).unwrap()),
-            completed: Set("false".to_string()),
+            completed: Set(false),
             ..Default::default()
         }
         .insert(&self.db)
@@ -51,7 +52,7 @@ impl TaskQueue for DatabaseTaskQueue {
             .unwrap();
 
         let mut db_task_active_model: task::ActiveModel = db_task.into();
-        db_task_active_model.completed = Set("true".to_string());
+        db_task_active_model.completed = Set(true);
         db_task_active_model.update(&self.db).await.unwrap();
     }
 }

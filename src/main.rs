@@ -1,12 +1,6 @@
-use bonsaidb::{
-    core::schema::{Collection, SerializedCollection},
-    local::{
-        config::{Builder, StorageConfiguration},
-        Database,
-    },
-};
 use clap::Parser;
-use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
+use entity::entities::task;
+use sea_orm::{ActiveModelTrait, DatabaseConnection, Set, Database};
 use serenity::{
     async_trait,
     model::{application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId},
@@ -23,17 +17,15 @@ use std::{
 use tracing::{log, Level};
 use tracing_subscriber::EnvFilter;
 
-use crate::{
-    schema::tasks_task,
-    task_runner::{
-        task_queue::memory::MemoryTaskQueue,
-        tasks::{message_user::MessageUser, TaskType},
-        TaskRunner,
-    },
+use crate::task_runner::{
+    task_queue::memory::MemoryTaskQueue,
+    tasks::{message_user::MessageUser, TaskType},
+    TaskRunner,
 };
 
-mod schema;
-mod task_runner;
+pub mod task_runner;
+pub mod commands;
+pub mod handler;
 
 struct Handler {
     is_loop_running: AtomicBool,
@@ -58,8 +50,6 @@ impl EventHandler for Handler {
         println!("Cache built successfully!");
 
         let ctx = Arc::new(ctx);
-
-        let db = Database::open::<Message>(StorageConfiguration::new("basic.bonsaidb")).unwrap();
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
             // If tests are enabled, start them in another thread
@@ -174,9 +164,9 @@ async fn run_tests(ctx: Arc<Context>) {
         message: String::from("Good dayyy"),
     });
 
-    tasks_task::ActiveModel {
+    task::ActiveModel {
         payload: Set(serde_json::to_string(&task).unwrap()),
-        completed: Set("false".to_string()),
+        completed: Set(false),
         ..Default::default()
     }
     .insert(&db)
