@@ -1,37 +1,31 @@
 use crate::{
-    commands::{self, fake_trade},
+    commands::{self},
     task_runner::{
         task_queue::memory::MemoryTaskQueue,
         tasks::{message_user::MessageUser, TaskType},
         TaskRunner,
     },
 };
-use clap::Parser;
+
 use entity::entities::task;
 use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
 use serenity::{
     async_trait,
     model::{
-        application::{
-            command::Command,
-            interaction::{Interaction, InteractionResponseType},
-        },
-        channel::Message,
+        application::interaction::{Interaction, InteractionResponseType},
         gateway::Ready,
         id::GuildId,
     },
     prelude::*,
 };
 use std::{
-    env,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc,
     },
     time::Duration,
 };
-use tracing::{log, Level};
-use tracing_subscriber::EnvFilter;
+use tracing::log;
 
 pub struct Handler {
     pub is_loop_running: AtomicBool,

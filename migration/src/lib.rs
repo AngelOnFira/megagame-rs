@@ -4,8 +4,8 @@ pub mod m20221203_145623_currency;
 pub mod m20221203_194651_wallet;
 pub mod m20221203_194657_transaction;
 pub mod m20221203_194700_trade;
-pub mod m20221203_195047_player;
 pub mod m20221203_195037_team;
+pub mod m20221203_195047_player;
 mod m20221204_194750_task;
 
 pub struct Migrator;

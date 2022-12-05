@@ -10,7 +10,6 @@ enum Trade {
     InitiatingParty,
     ReceivingParty,
     Transactions,
-
 }
 
 #[async_trait::async_trait]

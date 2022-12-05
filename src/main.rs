@@ -1,34 +1,15 @@
 use clap::Parser;
-use entity::entities::task;
+
 use handler::Handler;
-use sea_orm::{ActiveModelTrait, DatabaseConnection, Set, Database};
-use serenity::{
-    async_trait,
-    model::{application::interaction::Interaction, channel::Message, gateway::Ready, id::GuildId},
-    prelude::*,
-};
-use std::{
-    env,
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-    time::Duration,
-};
-use tracing::{log, Level};
+
+use serenity::prelude::*;
+use std::{env, sync::atomic::AtomicBool};
+use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
-use crate::task_runner::{
-    task_queue::memory::MemoryTaskQueue,
-    tasks::{message_user::MessageUser, TaskType},
-    TaskRunner,
-};
-
-pub mod task_runner;
 pub mod commands;
 pub mod handler;
-
-
+pub mod task_runner;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -96,5 +77,3 @@ async fn main() {
         println!("Client error: {:?}", why);
     }
 }
-
-

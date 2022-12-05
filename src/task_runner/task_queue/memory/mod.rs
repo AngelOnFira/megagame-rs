@@ -31,7 +31,7 @@ impl TaskQueue for MemoryTaskQueue {
         self.tasks.push(task);
     }
 
-    async fn complete_task(&mut self, task: DbTask) {
+    async fn complete_task(&mut self, _task: DbTask) {
         // Do nothing
     }
 }
