@@ -2,8 +2,10 @@ use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
 };
 
-
-use crate::task_runner::tasks::{TaskType, message_user::MessageUser};
+use crate::{
+    db_wrapper::DBWrapper,
+    task_runner::tasks::{message_user::MessageUser, TaskType},
+};
 
 use super::GameCommand;
 
@@ -16,7 +18,7 @@ impl GameCommand for InitializeGame {
             .description("Initialize the game")
     }
 
-    fn run(_options: &[CommandDataOption]) -> String {
+    fn run(_options: &[CommandDataOption], db: DBWrapper) -> String {
         let task = TaskType::MessageUser(MessageUser {
             player_id: 133358326439346176,
             message: String::from("Good day"),

@@ -1,9 +1,10 @@
 use crate::{
     commands::{self, fake_trade::FakeTrade, initialize_game::InitializeGame},
+    db_wrapper::DBWrapper,
     task_runner::{
         tasks::{message_user::MessageUser, TaskType},
         TaskRunner,
-    }, db_wrapper::DBWrapper,
+    },
 };
 
 use crate::commands::GameCommand;
@@ -37,11 +38,13 @@ pub struct Handler {
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
-            let content = match command.data.name.as_str() {
-                "trade" => FakeTrade::run(&command.data.options),
-                "init" => InitializeGame::run(&command.data.options),
-                _ => "not implemented :(".to_string(),
+            let command_handler = match command.data.name.as_str() {
+                "trade" => FakeTrade::run,
+                "init" => InitializeGame::run,
+                _ => unreachable!(),
             };
+
+            let content = command_handler(&command.data.options, self.db.clone());
 
             if let Err(why) = command
                 .create_interaction_response(&ctx.http, |response| {

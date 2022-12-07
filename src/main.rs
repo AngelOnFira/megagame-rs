@@ -1,5 +1,6 @@
 use clap::Parser;
 
+use db_wrapper::DBWrapper;
 use handler::Handler;
 
 use sea_orm::{prelude::*, Database};
@@ -9,9 +10,9 @@ use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
 pub mod commands;
+pub mod db_wrapper;
 pub mod handler;
 pub mod task_runner;
-pub mod db_wrapper;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -71,7 +72,7 @@ async fn main() {
         Err(err) => panic!("Error connecting to database: {:?}", err),
     };
 
-    let db_wrapper = db_wrapper::DBWrapper::new(db.clone());
+    let db_wrapper = DBWrapper::new(db.clone());
 
     let mut client = Client::builder(&token, gateway_intents)
         .application_id(451862707746897961)

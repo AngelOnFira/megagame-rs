@@ -1,6 +1,9 @@
 use sea_orm::DatabaseConnection;
-use serenity::{builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption};
+use serenity::{
+    builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
+};
 
+use crate::db_wrapper::DBWrapper;
 
 pub mod fake_trade;
 pub mod initialize_game;
@@ -10,8 +13,8 @@ pub mod initialize_game;
 // `CreateApplicationCommand` instance to be registered as a game command, and the
 // run method takes a list of `CommandDataOptions` as input and returns a string
 // result. These methods enable developers to easily create and execute custom
-// game commands within the Discord bot. 
+// game commands within the Discord bot.
 pub trait GameCommand {
     fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand;
-    fn run(options: &[CommandDataOption], db: DatabaseConnection) -> String;
+    fn run(options: &[CommandDataOption], db: DBWrapper) -> String;
 }

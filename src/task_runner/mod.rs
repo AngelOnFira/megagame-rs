@@ -5,7 +5,7 @@ use sea_orm::{prelude::*, Set};
 use serenity::client::Context;
 use tracing::log;
 
-use crate::task_runner::tasks::TaskType;
+use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType};
 
 use self::tasks::message_user::MessageUser;
 
@@ -13,7 +13,7 @@ pub mod tasks;
 
 pub struct TaskRunner {
     pub ctx: Arc<Context>,
-    pub db: DatabaseConnection,
+    pub db: DBWrapper,
 }
 
 impl TaskRunner {
@@ -21,7 +21,7 @@ impl TaskRunner {
         // Get all the incomplete tasks from the database
         let incomplete_tasks: Vec<task::Model> = match task::Entity::find()
             .filter(task::Column::Completed.eq("false"))
-            .all(&self.db)
+            .all(&*self.db)
             .await
         {
             Ok(tasks) => tasks,
@@ -41,7 +41,7 @@ impl TaskRunner {
             // Set the task as completed
             let mut db_task_active_model: task::ActiveModel = db_task.into();
             db_task_active_model.completed = Set(true);
-            db_task_active_model.update(&self.db).await.unwrap();
+            db_task_active_model.update(&*self.db).await.unwrap();
         }
     }
 
