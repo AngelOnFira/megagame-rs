@@ -20,13 +20,16 @@ impl TaskRunner {
     pub async fn run_tasks(&self) {
         // Get all the incomplete tasks from the database
         let incomplete_tasks: Vec<task::Model> = match task::Entity::find()
-            .filter(task::Column::Completed.eq("false"))
+            .filter(task::Column::Completed.eq(false))
             .all(&*self.db)
             .await
         {
             Ok(tasks) => tasks,
             Err(why) => panic!("Error getting tasks: {:?}", why),
         };
+
+        // Print the tasks
+        log::info!("Found {} tasks", incomplete_tasks.len());
 
         // Iterate through open tasks in the DB
         for db_task in incomplete_tasks {

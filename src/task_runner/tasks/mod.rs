@@ -54,6 +54,7 @@ impl TaskType {
     pub fn route(&self) -> &dyn Task {
         match self {
             TaskType::CreateDropdown(create_dropdown) => create_dropdown,
+            TaskType::CreateCategory(create_category) => create_category,
             TaskType::MessageUser(message_user) => message_user,
             _ => unimplemented!(),
         }
