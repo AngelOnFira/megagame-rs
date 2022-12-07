@@ -1,3 +1,4 @@
+use sea_orm::DatabaseConnection;
 use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
 };
@@ -11,7 +12,8 @@ impl GameCommand for FakeTrade {
         command.name("trade").description("Start a test trade")
     }
 
-    fn run(_options: &[CommandDataOption]) -> String {
+    fn run(_options: &[CommandDataOption], db: DatabaseConnection) -> String {
         "Hey, I'm alive!".to_string()
+        // Add a channel create task
     }
 }

@@ -3,7 +3,7 @@ use crate::{
     task_runner::{
         tasks::{message_user::MessageUser, TaskType},
         TaskRunner,
-    },
+    }, db_wrapper::DBWrapper,
 };
 
 use crate::commands::GameCommand;
@@ -30,14 +30,13 @@ use tracing::log;
 pub struct Handler {
     pub is_loop_running: AtomicBool,
     pub run_tests: bool,
+    pub db: DBWrapper,
 }
 
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
         if let Interaction::ApplicationCommand(command) = interaction {
-            println!("Received command interaction: {:#?}", command);
-
             let content = match command.data.name.as_str() {
                 "trade" => FakeTrade::run(&command.data.options),
                 "init" => InitializeGame::run(&command.data.options),
@@ -76,11 +75,6 @@ impl EventHandler for Handler {
     async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
         println!("Cache built successfully!");
 
-        let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
-            Ok(db) => db,
-            Err(err) => panic!("Error connecting to database: {:?}", err),
-        };
-
         let ctx = Arc::new(ctx);
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
@@ -91,14 +85,15 @@ impl EventHandler for Handler {
             }
 
             let ctx2 = Arc::clone(&ctx);
+            let db_clone = self.db.clone();
             tokio::spawn(async move {
                 let mut runner = TaskRunner {
                     ctx: ctx2,
-                    db: Box::new(MemoryTaskQueue::new()),
+                    db: db_clone,
                 };
 
-                // Seed an example test
-                runner.sample_tasks().await;
+                // // Seed an example test
+                // runner.sample_tasks().await;
 
                 loop {
                     runner.run_tasks().await;

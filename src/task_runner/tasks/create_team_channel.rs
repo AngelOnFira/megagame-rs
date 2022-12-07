@@ -6,10 +6,19 @@ use serenity::client::Context;
 
 use super::Task;
 
+enum CreateChannelType {
+    Team,
+    Public,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
-pub struct CreateButtons {}
+pub struct CreateChannel {
+    guild_id: u64,
+    category_id: u64,
+    channel_name: String,
+}
 
 #[async_trait]
-impl Task for CreateButtons {
+impl Task for CreateChannel {
     async fn handle(&self, _ctx: Arc<Context>) {}
 }

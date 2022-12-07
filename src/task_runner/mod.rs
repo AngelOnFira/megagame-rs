@@ -40,7 +40,7 @@ impl TaskRunner {
 
             // Set the task as completed
             let mut db_task_active_model: task::ActiveModel = db_task.into();
-            db_task_active_model.completed = Set("true".to_string());
+            db_task_active_model.completed = Set(true);
             db_task_active_model.update(&self.db).await.unwrap();
         }
     }

@@ -14,7 +14,7 @@ members = [
 [dependencies]
 
 # Discord
-serenity = { git = "https://github.com/serenity-rs/serenity", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "cache", "unstable_discord_api"] }
+serenity = { git = "https://github.com/serenity-rs/serenity", default-features = false, features = ["client", "gateway", "rustls_backend", "model", "cache", "unstable_discord_api", "builder"] }
 sea-orm = { version = "0.10.4", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "with-chrono", "sqlx-postgres" ], default-features = false }
 
 # Async
