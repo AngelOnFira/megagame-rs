@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sea_orm::DatabaseConnection;
+
 use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
 };
@@ -8,7 +8,6 @@ use crate::{
     db_wrapper::DBWrapper,
     task_runner::tasks::{
         create_category::{CreateCategory, CreateCategoryKind},
-        create_channel::CreateChannel,
         TaskType,
     },
 };
@@ -29,7 +28,8 @@ impl GameCommand for FakeTrade {
             guild_id: 345993194322001923,
             category_name: "Test Category".to_string(),
             kind: CreateCategoryKind::Public,
-        })).await;
+        }))
+        .await;
         "Hey, I'm alive!".to_string()
     }
 }

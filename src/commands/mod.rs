@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use sea_orm::DatabaseConnection;
+
 use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
 };

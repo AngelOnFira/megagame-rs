@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelType};
+use serenity::{client::Context, model::channel::ChannelType};
 
 use super::Task;
 
@@ -23,7 +23,7 @@ pub struct CreateCategory {
 impl Task for CreateCategory {
     async fn handle(&self, ctx: Arc<Context>) {
         // Create the category
-        let category = ctx
+        let _category = ctx
             .cache
             .guild(self.guild_id)
             .unwrap()

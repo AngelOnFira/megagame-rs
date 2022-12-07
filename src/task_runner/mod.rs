@@ -7,8 +7,6 @@ use tracing::log;
 
 use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType};
 
-use self::tasks::message_user::MessageUser;
-
 pub mod tasks;
 
 pub struct TaskRunner {

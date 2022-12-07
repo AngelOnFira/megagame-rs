@@ -1,5 +1,5 @@
 use crate::{
-    commands::{self, fake_trade::FakeTrade, initialize_game::InitializeGame},
+    commands::{fake_trade::FakeTrade, initialize_game::InitializeGame},
     db_wrapper::DBWrapper,
     task_runner::{
         tasks::{message_user::MessageUser, TaskType},
@@ -90,7 +90,7 @@ impl EventHandler for Handler {
             let ctx2 = Arc::clone(&ctx);
             let db_clone = self.db.clone();
             tokio::spawn(async move {
-                let mut runner = TaskRunner {
+                let runner = TaskRunner {
                     ctx: ctx2,
                     db: db_clone,
                 };
