@@ -8,9 +8,9 @@ use super::Task;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 
-pub struct CreateTeamChannel {}
+pub struct CreateRole {}
 
 #[async_trait]
-impl Task for CreateTeamChannel {
+impl Task for CreateRole {
     async fn handle(&self, _ctx: Arc<Context>) {}
 }

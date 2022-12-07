@@ -1,6 +1,7 @@
 use std::ops::Deref;
 
-use sea_orm::DatabaseConnection;
+use entity::entities::task;
+use sea_orm::{prelude::*, Set};
 
 use crate::task_runner::tasks::TaskType;
 #[derive(Debug, Clone)]
@@ -13,8 +14,16 @@ impl DBWrapper {
         Self { db }
     }
 
-    pub fn add_task(&self, task: TaskType) {
+    pub async fn add_task(&self, task: TaskType) {
         // Add a task to the database
+        task::ActiveModel {
+            payload: Set(serde_json::to_string(&task).unwrap()),
+            completed: Set(false),
+            ..Default::default()
+        }
+        .insert(&self.db)
+        .await
+        .unwrap();
     }
 }
 

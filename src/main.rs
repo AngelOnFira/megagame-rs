@@ -67,7 +67,7 @@ async fn main() {
 
     let gateway_intents = GatewayIntents::all();
 
-    let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
+    let db: DatabaseConnection = match Database::connect("sqlite://./db.sqlite3").await {
         Ok(db) => db,
         Err(err) => panic!("Error connecting to database: {:?}", err),
     };

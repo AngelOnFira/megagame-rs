@@ -44,7 +44,7 @@ impl EventHandler for Handler {
                 _ => unreachable!(),
             };
 
-            let content = command_handler(&command.data.options, self.db.clone());
+            let content = command_handler(&command.data.options, self.db.clone()).await;
 
             if let Err(why) = command
                 .create_interaction_response(&ctx.http, |response| {

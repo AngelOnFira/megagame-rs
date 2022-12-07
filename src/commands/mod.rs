@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use sea_orm::DatabaseConnection;
 use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
@@ -14,7 +15,8 @@ pub mod initialize_game;
 // run method takes a list of `CommandDataOptions` as input and returns a string
 // result. These methods enable developers to easily create and execute custom
 // game commands within the Discord bot.
+#[async_trait]
 pub trait GameCommand {
     fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand;
-    fn run(options: &[CommandDataOption], db: DBWrapper) -> String;
+    async fn run(options: &[CommandDataOption], db: DBWrapper) -> String;
 }

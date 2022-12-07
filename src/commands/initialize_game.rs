@@ -1,3 +1,4 @@
+use async_trait::async_trait;
 use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
 };
@@ -11,6 +12,7 @@ use super::GameCommand;
 
 pub struct InitializeGame;
 
+#[async_trait]
 impl GameCommand for InitializeGame {
     fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
         command
@@ -18,7 +20,7 @@ impl GameCommand for InitializeGame {
             .description("Initialize the game")
     }
 
-    fn run(_options: &[CommandDataOption], db: DBWrapper) -> String {
+    async fn run(_options: &[CommandDataOption], db: DBWrapper) -> String {
         let task = TaskType::MessageUser(MessageUser {
             player_id: 133358326439346176,
             message: String::from("Good day"),

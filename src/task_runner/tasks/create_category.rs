@@ -7,16 +7,16 @@ use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelT
 use super::Task;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-enum CreateCategoryKind {
+pub enum CreateCategoryKind {
     Team,
     Public,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CreateCategory {
-    guild_id: u64,
-    category_name: String,
-    kind: CreateCategoryKind,
+    pub guild_id: u64,
+    pub category_name: String,
+    pub kind: CreateCategoryKind,
 }
 
 #[async_trait]

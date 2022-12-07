@@ -6,8 +6,8 @@ use serenity::client::Context;
 
 use self::{
     change_team::ChangeTeam, create_buttons::CreateButtons, create_category::CreateCategory,
-    create_category_channel::CreateCategoryChannel, create_dropdown::CreateDropdown,
-    create_message::CreateMessage, create_role::CreateTeamChannel,
+    create_category_channel::CreateCategoryChannel, create_channel::CreateChannel,
+    create_dropdown::CreateDropdown, create_message::CreateMessage,
     create_team_voice_channel::CreateTeamVoiceChannel, create_thread::CreateThread,
     message_user::MessageUser,
 };
@@ -16,10 +16,10 @@ pub mod change_team;
 pub mod create_buttons;
 pub mod create_category;
 pub mod create_category_channel;
+pub mod create_channel;
 pub mod create_dropdown;
 pub mod create_message;
 pub mod create_role;
-pub mod create_team_channel;
 pub mod create_team_voice_channel;
 pub mod create_thread;
 pub mod manage_user;
@@ -44,7 +44,7 @@ pub enum TaskType {
     CreateDropdown(CreateDropdown),
     CreateMessage(CreateMessage),
     CreateRole(CreateRole),
-    CreateTeamChannel(CreateTeamChannel),
+    CreateChannel(CreateChannel),
     CreateTeamVoiceChannel(CreateTeamVoiceChannel),
     CreateThread(CreateThread),
     MessageUser(MessageUser),

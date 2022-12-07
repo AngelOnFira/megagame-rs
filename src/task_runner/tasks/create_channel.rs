@@ -11,7 +11,7 @@ enum CreateChannelType {
     Public,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CreateChannel {
     guild_id: u64,
     category_id: u64,
