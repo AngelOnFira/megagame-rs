@@ -1,12 +1,13 @@
 pub use sea_orm_migration::prelude::*;
 
-pub mod m20221203_145623_currency;
-pub mod m20221203_194651_wallet;
-pub mod m20221203_194657_transaction;
-pub mod m20221203_194700_trade;
-pub mod m20221203_195037_team;
-pub mod m20221203_195047_player;
+mod m20221203_145623_currency;
+mod m20221203_194651_wallet;
+mod m20221203_194657_transaction;
+mod m20221203_194700_trade;
+mod m20221203_195037_team;
+mod m20221203_195047_player;
 mod m20221204_194750_task;
+mod m20221208_160019_discord_models;
 
 pub struct Migrator;
 
@@ -18,9 +19,10 @@ impl MigratorTrait for Migrator {
             Box::new(m20221203_194651_wallet::Migration),
             Box::new(m20221203_194657_transaction::Migration),
             Box::new(m20221203_194700_trade::Migration),
-            Box::new(m20221203_195047_player::Migration),
             Box::new(m20221203_195037_team::Migration),
+            Box::new(m20221203_195047_player::Migration),
             Box::new(m20221204_194750_task::Migration),
+            Box::new(m20221208_160019_discord_models::Migration),
         ]
     }
 }

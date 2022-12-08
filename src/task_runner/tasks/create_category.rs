@@ -2,12 +2,16 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use entity::entities::team;
-use sea_orm::EntityTrait;
+use sea_orm::{EntityTrait, Set, ActiveModelTrait};
 use serde::{Deserialize, Serialize};
 use serenity::{
     builder::CreateChannel,
     client::Context,
-    model::{channel::ChannelType, prelude::PermissionOverwrite},
+    model::{
+        channel::{ChannelType, PermissionOverwriteType},
+        permissions::Permissions,
+        prelude::PermissionOverwrite,
+    },
 };
 
 use super::Task;
@@ -29,45 +33,62 @@ pub struct CreateCategory {
 #[async_trait]
 impl Task for CreateCategory {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
-        let channel_builder = match self.kind {
+        let guild = ctx.cache.guild(self.guild_id).unwrap();
+
+        let everyone_role = guild.role_by_name("everyone").unwrap();
+
+        let channel_builder: Box<
+            dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
+        > = match self.kind {
             CreateCategoryKind::Team { team_id } => {
                 // Get the team from the database
-                let team: Option<team::Model> = team::Entity::find_by_id(team_id as i32)
+                let team: team::Model = team::Entity::find_by_id(team_id as i32)
                     .one(&*db)
                     .await
+                    .unwrap()
                     .unwrap();
 
-                |c: &mut CreateChannel| {
-                    c.name(&self.category_name);
+                Box::new(|c: &mut CreateChannel| {
+                    c.name(team.name);
                     c.kind(ChannelType::Category);
                     c.permissions(vec![PermissionOverwrite {
                         allow: Permissions::VIEW_CHANNEL,
                         deny: Permissions::SEND_TTS_MESSAGES,
-                        kind: PermissionOverwriteType::Member(UserId(1234)),
+                        kind: PermissionOverwriteType::Role(everyone_role.id),
                     }]);
                     c
-                }
+                })
             }
-            CreateCategoryKind::Public => |c| {
+            CreateCategoryKind::Public => Box::new(|c: &mut CreateChannel| {
                 c.name(&self.category_name);
                 c.kind(ChannelType::Category);
                 c.permissions(vec![PermissionOverwrite {
                     allow: Permissions::VIEW_CHANNEL,
                     deny: Permissions::SEND_TTS_MESSAGES,
-                    kind: PermissionOverwriteType::Member(UserId(1234)),
+                    kind: PermissionOverwriteType::Role(everyone_role.id),
                 }]);
                 c
-            },
+            }),
         };
 
         // Create the category
-        let _category = ctx
-            .cache
-            .guild(self.guild_id)
-            .unwrap()
+        let category = guild
             .create_channel(&ctx.http, channel_builder)
             .await
             .unwrap();
+
+        // If it's a team channel, safe it to the database
+        if let CreateCategoryKind::Team { team_id } = self.kind {
+            let mut team: team::ActiveModel = team::Entity::find_by_id(team_id as i32)
+                .one(&*db)
+                .await
+                .unwrap()
+                .unwrap().into();
+
+            team.name = Set(self.category_name.to_owned());
+
+            let team = team.update(&*db).await.unwrap();
+        }
     }
 }
 

@@ -1,7 +1,5 @@
 use sea_orm_migration::prelude::*;
 
-use crate::m20221203_195037_team::Team;
-
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
@@ -12,6 +10,12 @@ enum Player {
     Name,
     TeamId,
     Guild,
+}
+
+#[derive(Iden)]
+pub enum Team {
+    Table,
+    Id,
 }
 
 #[async_trait::async_trait]
