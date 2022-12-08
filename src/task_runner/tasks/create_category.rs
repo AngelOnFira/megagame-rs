@@ -86,7 +86,7 @@ impl Task for CreateCategory {
                 .unwrap().into();
 
             team.name = Set(self.category_name.to_owned());
-            team.category
+            team.category_id = Set(Some(category.id.0 as i32));
 
             let team = team.update(&*db).await.unwrap();
         }

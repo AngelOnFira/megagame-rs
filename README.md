@@ -8,4 +8,9 @@
 
 ## Generating entities
 
-`sea-orm-cli generate entity -o entity/src/entities`
+```bash
+sea-orm-cli generate entity \
+    -o entity/src/entities \
+    --expanded-format \
+    --with-serde both
+```
