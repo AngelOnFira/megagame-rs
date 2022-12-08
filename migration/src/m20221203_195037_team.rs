@@ -15,11 +15,21 @@ pub enum Team {
     Emoji,
     Wallet,
     Role,
-    Category,
-    GeneralChannel,
-    TradeChannel,
-    MenuChannel,
+    CategoryId,
+    GeneralChannelId,
+    TradeChannelId,
+    MenuChannelId,
     BankEmbedId,
+}
+
+#[derive(Iden)]
+enum Channel {
+    Table,
+    Id,
+    DiscordId,
+    GuildId,
+    Name,
+    AllowNSFW,
 }
 
 #[async_trait::async_trait]
@@ -45,11 +55,43 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Team::Emoji).string().not_null())
                     .col(ColumnDef::new(Team::Wallet).integer().not_null())
                     .col(ColumnDef::new(Team::Role).integer().not_null())
-                    .col(ColumnDef::new(Team::Category).integer().not_null())
-                    .col(ColumnDef::new(Team::GeneralChannel).integer().not_null())
-                    .col(ColumnDef::new(Team::TradeChannel).integer().not_null())
-                    .col(ColumnDef::new(Team::MenuChannel).integer().not_null())
+                    .col(ColumnDef::new(Team::CategoryId).integer().not_null())
+                    .col(ColumnDef::new(Team::GeneralChannelId).integer().not_null())
+                    .col(ColumnDef::new(Team::TradeChannelId).integer().not_null())
+                    .col(ColumnDef::new(Team::MenuChannelId).integer().not_null())
                     .col(ColumnDef::new(Team::BankEmbedId).string().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("team_category_channel_fk")
+                            .from(Team::Table, Team::CategoryId)
+                            .to(Channel::Table, Channel::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("team_general_channel_fk")
+                            .from(Team::Table, Team::GeneralChannelId)
+                            .to(Channel::Table, Channel::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("team_trade_channel_fk")
+                            .from(Team::Table, Team::TradeChannelId)
+                            .to(Channel::Table, Channel::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("team_menu_channel_fk")
+                            .from(Team::Table, Team::MenuChannelId)
+                            .to(Channel::Table, Channel::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
                     .to_owned(),
             )
             .await

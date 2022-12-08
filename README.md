@@ -14,3 +14,15 @@ sea-orm-cli generate entity \
     --expanded-format \
     --with-serde both
 ```
+
+## Rebuiding the database
+
+```bash
+rm db.sqlite3
+sqlite3 db.sqlite3 "VACUUM;"
+sea-orm-cli migrate
+sea-orm-cli generate entity \
+    -o entity/src/entities \
+    --expanded-format \
+    --with-serde both
+```

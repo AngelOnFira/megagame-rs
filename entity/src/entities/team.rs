@@ -23,9 +23,10 @@ pub struct Model {
     pub emoji: String,
     pub wallet: i32,
     pub role: i32,
-    pub general_channel: i32,
-    pub trade_channel: i32,
-    pub menu_channel: i32,
+    pub category_id: i32,
+    pub general_channel_id: i32,
+    pub trade_channel_id: i32,
+    pub menu_channel_id: i32,
     pub bank_embed_id: String,
 }
 
@@ -40,9 +41,10 @@ pub enum Column {
     Emoji,
     Wallet,
     Role,
-    GeneralChannel,
-    TradeChannel,
-    MenuChannel,
+    CategoryId,
+    GeneralChannelId,
+    TradeChannelId,
+    MenuChannelId,
     BankEmbedId,
 }
 
@@ -60,6 +62,10 @@ impl PrimaryKeyTrait for PrimaryKey {
 
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {
+    Channel4,
+    Channel3,
+    Channel2,
+    Channel1,
     Player,
 }
 
@@ -76,9 +82,10 @@ impl ColumnTrait for Column {
             Self::Emoji => ColumnType::String(None).def(),
             Self::Wallet => ColumnType::Integer.def(),
             Self::Role => ColumnType::Integer.def(),
-            Self::GeneralChannel => ColumnType::Integer.def(),
-            Self::TradeChannel => ColumnType::Integer.def(),
-            Self::MenuChannel => ColumnType::Integer.def(),
+            Self::CategoryId => ColumnType::Integer.def(),
+            Self::GeneralChannelId => ColumnType::Integer.def(),
+            Self::TradeChannelId => ColumnType::Integer.def(),
+            Self::MenuChannelId => ColumnType::Integer.def(),
             Self::BankEmbedId => ColumnType::String(None).def(),
         }
     }
@@ -87,6 +94,22 @@ impl ColumnTrait for Column {
 impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {
         match self {
+            Self::Channel4 => Entity::belongs_to(super::channel::Entity)
+                .from(Column::MenuChannelId)
+                .to(super::channel::Column::Id)
+                .into(),
+            Self::Channel3 => Entity::belongs_to(super::channel::Entity)
+                .from(Column::TradeChannelId)
+                .to(super::channel::Column::Id)
+                .into(),
+            Self::Channel2 => Entity::belongs_to(super::channel::Entity)
+                .from(Column::GeneralChannelId)
+                .to(super::channel::Column::Id)
+                .into(),
+            Self::Channel1 => Entity::belongs_to(super::channel::Entity)
+                .from(Column::CategoryId)
+                .to(super::channel::Column::Id)
+                .into(),
             Self::Player => Entity::has_many(super::player::Entity).into(),
         }
     }

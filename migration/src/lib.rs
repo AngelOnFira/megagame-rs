@@ -7,8 +7,7 @@ mod m20221203_194700_trade;
 mod m20221203_195037_team;
 mod m20221203_195047_player;
 mod m20221204_194750_task;
-mod m20221208_160019_discord_models;
-mod m20221208_162731_team_add_category_fk;
+mod m20221202_160019_discord_models;
 
 pub struct Migrator;
 
@@ -16,6 +15,7 @@ pub struct Migrator;
 impl MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
         vec![
+            Box::new(m20221202_160019_discord_models::Migration),
             Box::new(m20221203_145623_currency::Migration),
             Box::new(m20221203_194651_wallet::Migration),
             Box::new(m20221203_194657_transaction::Migration),
@@ -23,8 +23,6 @@ impl MigratorTrait for Migrator {
             Box::new(m20221203_195037_team::Migration),
             Box::new(m20221203_195047_player::Migration),
             Box::new(m20221204_194750_task::Migration),
-            Box::new(m20221208_160019_discord_models::Migration),
-            Box::new(m20221208_162731_team_add_category_fk::Migration),
         ]
     }
 }
