@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serenity::client::Context;
 
+use crate::db_wrapper::DBWrapper;
 use super::Task;
 
 enum CreateChannelType {
@@ -20,5 +21,18 @@ pub struct CreateChannel {
 
 #[async_trait]
 impl Task for CreateChannel {
-    async fn handle(&self, _ctx: Arc<Context>) {}
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+        // Create the channel
+        let _channel = ctx
+            .cache
+            .guild(self.guild_id)
+            .unwrap()
+            .create_channel(&ctx.http, |c| {
+                c.name(&self.channel_name);
+                c.category(self.category_id);
+                c
+            })
+            .await
+            .unwrap();
+    }
 }

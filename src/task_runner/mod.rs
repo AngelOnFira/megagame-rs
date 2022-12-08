@@ -36,8 +36,10 @@ impl TaskRunner {
             log::info!("Working on task: {:?}", task_payload);
 
             // Complete the tasks
-            let task = task_payload.route().handle(Arc::clone(&self.ctx));
-            task.await;
+            let task = task_payload
+                .route()
+                .handle(Arc::clone(&self.ctx), self.db.clone())
+                .await;
 
             // Set the task as completed
             let mut db_task_active_model: task::ActiveModel = db_task.into();

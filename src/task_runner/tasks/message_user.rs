@@ -5,6 +5,8 @@ use serde::{Deserialize, Serialize};
 use serenity::{client::Context, http::CacheHttp, model::id::UserId};
 use tracing::log;
 
+use crate::db_wrapper::DBWrapper;
+
 use super::Task;
 
 /// Send a message to a user with the provided player_id.
@@ -17,7 +19,7 @@ pub struct MessageUser {
 
 #[async_trait]
 impl Task for MessageUser {
-    async fn handle(&self, ctx: Arc<Context>) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
         if let Ok(user) = UserId(self.player_id).to_user(ctx.http()).await {
             match user
                 .direct_message(ctx.http(), |m| m.content(self.message.as_str()))

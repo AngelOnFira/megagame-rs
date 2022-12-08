@@ -12,6 +12,7 @@ use serenity::{
     },
 };
 
+use crate::db_wrapper::DBWrapper;
 use super::Task;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -26,7 +27,7 @@ pub struct CreateDropdown {
 
 #[async_trait]
 impl Task for CreateDropdown {
-    async fn handle(&self, ctx: Arc<Context>) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
         let _message = ChannelId(self.channel_id)
             .send_message(ctx.http(), |m| {
                 m.content("Hello, world!");

@@ -4,6 +4,8 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serenity::client::Context;
 
+use crate::db_wrapper::DBWrapper;
+
 use self::{
     change_team::ChangeTeam, create_buttons::CreateButtons, create_category::CreateCategory,
     create_category_channel::CreateCategoryChannel, create_channel::CreateChannel,
@@ -62,8 +64,8 @@ impl TaskType {
 }
 
 #[async_trait]
-pub trait Task: Send {
-    async fn handle(&self, ctx: Arc<Context>);
+pub trait Task: Send + Sync {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper);
 }
 
 // #[derive(Serialize, Deserialize, Debug)]

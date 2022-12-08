@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serenity::{client::Context, model::channel::ChannelType};
 
+use crate::db_wrapper::DBWrapper;
 use super::Task;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -21,7 +22,8 @@ pub struct CreateCategory {
 
 #[async_trait]
 impl Task for CreateCategory {
-    async fn handle(&self, ctx: Arc<Context>) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+        // Get the team from the database
         // Create the category
         let _category = ctx
             .cache
@@ -37,7 +39,6 @@ impl Task for CreateCategory {
     }
 }
 
-// Add some tests
 #[cfg(test)]
 mod tests {
     use rand::{distributions::Alphanumeric, thread_rng, Rng};
