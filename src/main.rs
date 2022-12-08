@@ -1,3 +1,5 @@
+#![feature(async_closure)]
+
 use clap::Parser;
 
 use db_wrapper::DBWrapper;

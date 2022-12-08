@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use entity::entities::team;
-use sea_orm::{EntityTrait, Set, ActiveModelTrait};
+use entity::entities::{category, team};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
     builder::CreateChannel,
@@ -14,7 +14,7 @@ use serenity::{
     },
 };
 
-use super::Task;
+use super::{Task, TaskTest};
 use crate::db_wrapper::DBWrapper;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -72,7 +72,7 @@ impl Task for CreateCategory {
         };
 
         // Create the category
-        let category = guild
+        let discord_category = guild
             .create_channel(&ctx.http, channel_builder)
             .await
             .unwrap();
@@ -83,17 +83,45 @@ impl Task for CreateCategory {
                 .one(&*db)
                 .await
                 .unwrap()
-                .unwrap().into();
+                .unwrap()
+                .into();
 
             team.name = Set(self.category_name.to_owned());
-            team.category_id = Set(Some(category.id.0 as i32));
+
+            // Create the category, or get it if it exists
+            // TODO: Change this to upsert in the future
+            let category_option = category::Entity::find()
+                .filter(category::Column::DiscordId.eq(discord_category.id.0 as i32))
+                .one(&*db)
+                .await
+                .unwrap();
+
+            let category = match category_option {
+                Some(category) => category,
+                None => category::ActiveModel {
+                    name: Set(self.category_name.to_owned()),
+                    discord_id: Set(discord_category.id.0 as i32),
+                    guild_id: Set(self.guild_id as i32),
+                    ..Default::default()
+                }
+                .insert(&*db)
+                .await
+                .unwrap(),
+            };
+
+            team.category_id = Set(category.id);
 
             let team = team.update(&*db).await.unwrap();
         }
     }
 }
 
-#[cfg(test)]
+impl TaskTest for CreateCategory {
+    fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+        assert!(tests::test_create_channel())
+    }
+}
+
 mod tests {
     use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
@@ -101,8 +129,7 @@ mod tests {
 
     use super::*;
 
-    #[tokio::test]
-    async fn test_create_channel() {
+    pub async fn test_create_channel() -> bool {
         let db_wrapper = DBWrapper::new_default_db().await;
 
         let channel_name: String = thread_rng()
@@ -123,5 +150,9 @@ mod tests {
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         // TODO: Check if the category was created
+
+        // TODO: Make sure that the category is in the database
+
+        true
     }
 }

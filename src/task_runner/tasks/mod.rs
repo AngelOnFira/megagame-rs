@@ -45,7 +45,7 @@ pub enum TaskType {
     CreateCategoryChannel(CreateCategoryChannel),
     CreateDropdown(CreateDropdown),
     CreateMessage(CreateMessage),
-    CreateRole(CreateRole),
+    // CreateRole(CreateRole),
     CreateChannel(CreateChannel),
     CreateTeamVoiceChannel(CreateTeamVoiceChannel),
     CreateThread(CreateThread),
@@ -68,14 +68,14 @@ pub trait Task: Send + Sync {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper);
 }
 
-// #[derive(Serialize, Deserialize, Debug)]
-// pub struct Task {
-//     pub task: TaskType,
-// }
+#[async_trait]
+pub trait TaskTest: Send + Sync {
+    async fn run_tests(ctx: Arc<Context>, db: DBWrapper);
+}
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
-
-pub struct CreateRole {}
+pub fn run_tests() {
+    CreateCategory::run_tests();
+}
 
 // impl Task {
 //     pub async fn message_user(&self, ctx: Arc<Context>) {
