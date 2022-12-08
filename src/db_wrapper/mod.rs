@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use entity::entities::task;
-use sea_orm::{prelude::*, Set};
+use sea_orm::{prelude::*, Set, Database};
 
 use crate::task_runner::tasks::TaskType;
 #[derive(Debug, Clone)]
@@ -11,6 +11,15 @@ pub struct DBWrapper {
 
 impl DBWrapper {
     pub fn new(db: DatabaseConnection) -> Self {
+        Self { db }
+    }
+
+    pub async fn new_default_db() -> Self {
+        let db: DatabaseConnection = match Database::connect("sqlite://./db.sqlite3").await {
+            Ok(db) => db,
+            Err(err) => panic!("Error connecting to database: {:?}", err),
+        };
+
         Self { db }
     }
 

@@ -18,7 +18,7 @@ serenity = { git = "https://github.com/serenity-rs/serenity", default-features =
 sea-orm = { version = "0.10.4", features = [ "sqlx-sqlite", "runtime-tokio-rustls", "macros", "with-chrono", "sqlx-postgres" ], default-features = false }
 
 # Async
-tokio = { version = "1.16.1", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.23.0", features = ["macros", "rt-multi-thread"] }
 async-trait = "0.1.53"
 
 # Tooling
@@ -36,3 +36,4 @@ regex = "1.5.4"
 
 # Local
 entity = { path = "entity" }
+rand = "0.8.5"

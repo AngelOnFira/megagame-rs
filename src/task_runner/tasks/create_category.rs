@@ -36,3 +36,37 @@ impl Task for CreateCategory {
             .unwrap();
     }
 }
+
+// Add some tests
+#[cfg(test)]
+mod tests {
+    use rand::{distributions::Alphanumeric, thread_rng, Rng};
+
+    use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType};
+
+    use super::*;
+
+    #[tokio::test]
+    async fn test_create_channel() {
+        let db_wrapper = DBWrapper::new_default_db().await;
+
+        let channel_name: String = thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(20)
+            .map(char::from)
+            .collect();
+
+        db_wrapper
+            .add_task(TaskType::CreateCategory(CreateCategory {
+                guild_id: 345993194322001923,
+                category_name: channel_name,
+                kind: CreateCategoryKind::Public,
+            }))
+            .await;
+
+        // Sleep for 2 seconds, then check if the category was created
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        // TODO: Check if the category was created
+    }
+}
