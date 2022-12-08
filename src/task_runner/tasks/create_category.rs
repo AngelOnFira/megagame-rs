@@ -1,15 +1,21 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use entity::entities::team;
+use sea_orm::EntityTrait;
 use serde::{Deserialize, Serialize};
-use serenity::{client::Context, model::channel::ChannelType};
+use serenity::{
+    builder::CreateChannel,
+    client::Context,
+    model::{channel::ChannelType, prelude::PermissionOverwrite},
+};
 
-use crate::db_wrapper::DBWrapper;
 use super::Task;
+use crate::db_wrapper::DBWrapper;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CreateCategoryKind {
-    Team,
+    Team { team_id: u64 },
     Public,
 }
 
@@ -23,17 +29,43 @@ pub struct CreateCategory {
 #[async_trait]
 impl Task for CreateCategory {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
-        // Get the team from the database
+        let channel_builder = match self.kind {
+            CreateCategoryKind::Team { team_id } => {
+                // Get the team from the database
+                let team: Option<team::Model> = team::Entity::find_by_id(team_id as i32)
+                    .one(&*db)
+                    .await
+                    .unwrap();
+
+                |c: &mut CreateChannel| {
+                    c.name(&self.category_name);
+                    c.kind(ChannelType::Category);
+                    c.permissions(vec![PermissionOverwrite {
+                        allow: Permissions::VIEW_CHANNEL,
+                        deny: Permissions::SEND_TTS_MESSAGES,
+                        kind: PermissionOverwriteType::Member(UserId(1234)),
+                    }]);
+                    c
+                }
+            }
+            CreateCategoryKind::Public => |c| {
+                c.name(&self.category_name);
+                c.kind(ChannelType::Category);
+                c.permissions(vec![PermissionOverwrite {
+                    allow: Permissions::VIEW_CHANNEL,
+                    deny: Permissions::SEND_TTS_MESSAGES,
+                    kind: PermissionOverwriteType::Member(UserId(1234)),
+                }]);
+                c
+            },
+        };
+
         // Create the category
         let _category = ctx
             .cache
             .guild(self.guild_id)
             .unwrap()
-            .create_channel(&ctx.http, |c| {
-                c.name(&self.category_name);
-                c.kind(ChannelType::Category);
-                c
-            })
+            .create_channel(&ctx.http, channel_builder)
             .await
             .unwrap();
     }
