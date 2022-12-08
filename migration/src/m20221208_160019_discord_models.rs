@@ -76,7 +76,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Channel::AllowNSFW).boolean().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_player_team_id")
+                            .name("channel_guild_fk")
                             .from(Channel::Table, Channel::GuildId)
                             .to(Guild::Table, Guild::Id)
                             .on_delete(ForeignKeyAction::Cascade)
@@ -103,7 +103,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Role::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_player_team_id")
+                            .name("role_guild_fk")
                             .from(Role::Table, Role::GuildId)
                             .to(Guild::Table, Guild::Id)
                             .on_delete(ForeignKeyAction::Cascade)
@@ -130,7 +130,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
-                            .name("fk_player_team_id")
+                            .name("category_guild_fk")
                             .from(Category::Table, Category::GuildId)
                             .to(Guild::Table, Guild::Id)
                             .on_delete(ForeignKeyAction::Cascade)
