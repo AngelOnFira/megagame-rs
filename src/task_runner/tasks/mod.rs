@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{sync::Arc, fmt::Debug};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -7,16 +7,16 @@ use serenity::client::Context;
 use crate::db_wrapper::DBWrapper;
 
 use self::{
-    change_team::ChangeTeam, create_buttons::CreateButtons, create_category::CreateCategory,
+    change_team::ChangeTeam, create_buttons::CreateButtons,
     create_category_channel::CreateCategoryChannel, create_channel::CreateChannel,
     create_dropdown::CreateDropdown, create_message::CreateMessage,
     create_team_voice_channel::CreateTeamVoiceChannel, create_thread::CreateThread,
-    message_user::MessageUser,
+    message_user::MessageUser, category::CategoryHandler,
 };
 
 pub mod change_team;
 pub mod create_buttons;
-pub mod create_category;
+pub mod category;
 pub mod create_category_channel;
 pub mod create_channel;
 pub mod create_dropdown;
@@ -41,7 +41,7 @@ pub struct DbTask {
 pub enum TaskType {
     ChangeTeam(ChangeTeam),
     CreateButtons(CreateButtons),
-    CreateCategory(CreateCategory),
+    CreateCategory(CategoryHandler),
     CreateCategoryChannel(CreateCategoryChannel),
     CreateDropdown(CreateDropdown),
     CreateMessage(CreateMessage),
@@ -74,7 +74,17 @@ pub trait TaskTest: Send + Sync {
 }
 
 pub async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
-    CreateCategory::run_tests(ctx, db).await;
+    CategoryHandler::run_tests(ctx, db).await;
+}
+
+pub fn assert_not_error<T>(result: Result<(), T>)
+where
+    T: Debug,
+{
+    match result {
+        Ok(_) => {}
+        Err(e) => panic!("Error: {:?}", e),
+    }
 }
 
 // impl Task {
