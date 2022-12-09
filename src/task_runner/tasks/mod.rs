@@ -1,4 +1,4 @@
-use std::{sync::Arc, fmt::Debug};
+use std::{fmt::Debug, sync::Arc};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -7,16 +7,16 @@ use serenity::client::Context;
 use crate::db_wrapper::DBWrapper;
 
 use self::{
-    change_team::ChangeTeam, create_buttons::CreateButtons,
+    category::CategoryHandler, change_team::ChangeTeam, create_buttons::CreateButtons,
     create_category_channel::CreateCategoryChannel, create_channel::CreateChannel,
     create_dropdown::CreateDropdown, create_message::CreateMessage,
     create_team_voice_channel::CreateTeamVoiceChannel, create_thread::CreateThread,
-    message_user::MessageUser, category::CategoryHandler,
+    message_user::MessageUser,
 };
 
+pub mod category;
 pub mod change_team;
 pub mod create_buttons;
-pub mod category;
 pub mod create_category_channel;
 pub mod create_channel;
 pub mod create_dropdown;

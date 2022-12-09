@@ -172,9 +172,9 @@ impl CategoryHandler {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) {
-        let guild = ctx.cache.guild(self.guild_id).unwrap();
+        let _guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        let channel_id = match task {
+        let _channel_id = match task {
             DeleteCategoryTasks::TeamCategory { team_id } => {
                 // Get the team from the database
                 let team: team::Model = team::Entity::find_by_id(*team_id as i32)
