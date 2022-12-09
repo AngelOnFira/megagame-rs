@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use entity::entities::{category, team};
+use entity::entities::{category, guild, team};
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
@@ -13,6 +13,7 @@ use serenity::{
         prelude::PermissionOverwrite,
     },
 };
+use tracing::log;
 
 use super::{Task, TaskTest};
 use crate::db_wrapper::DBWrapper;
@@ -35,7 +36,7 @@ impl Task for CreateCategory {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
         let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        let everyone_role = guild.role_by_name("everyone").unwrap();
+        let everyone_role = guild.role_by_name("@everyone").unwrap();
 
         let channel_builder: Box<
             dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
@@ -88,6 +89,24 @@ impl Task for CreateCategory {
 
             team.name = Set(self.category_name.to_owned());
 
+            // Get or create the guild
+            let guild_option = guild::Entity::find()
+                .filter(guild::Column::DiscordId.eq(self.guild_id as i32))
+                .one(&*db)
+                .await
+                .unwrap();
+
+            let guild = match guild_option {
+                Some(guild) => guild,
+                None => guild::ActiveModel {
+                    discord_id: Set(self.guild_id as i32),
+                    ..Default::default()
+                }
+                .insert(&*db)
+                .await
+                .unwrap(),
+            };
+
             // Create the category, or get it if it exists
             // TODO: Change this to upsert in the future
             let category_option = category::Entity::find()
@@ -98,61 +117,132 @@ impl Task for CreateCategory {
 
             let category = match category_option {
                 Some(category) => category,
-                None => category::ActiveModel {
-                    name: Set(self.category_name.to_owned()),
-                    discord_id: Set(discord_category.id.0 as i32),
-                    guild_id: Set(self.guild_id as i32),
-                    ..Default::default()
+                None => {
+                    category::ActiveModel {
+                        name: Set(self.category_name.to_owned()),
+                        discord_id: Set(discord_category.id.0 as i32),
+                        guild_id: Set(Some(guild.id as i32)),
+                        ..Default::default()
+                    }
+                    .insert(&*db)
+                    .await
+                    .unwrap()
                 }
-                .insert(&*db)
-                .await
-                .unwrap(),
             };
 
-            team.category_id = Set(category.id);
+            team.category_id = Set(Some(category.id));
 
             let team = team.update(&*db).await.unwrap();
         }
     }
 }
 
-impl TaskTest for CreateCategory {
-    fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
-        assert!(tests::test_create_channel())
+fn assert_not_error<T>(result: Result<(), T>)
+where
+    T: std::fmt::Debug,
+{
+    match result {
+        Ok(_) => {}
+        Err(e) => panic!("Error: {:?}", e),
     }
 }
 
-mod tests {
-    use rand::{distributions::Alphanumeric, thread_rng, Rng};
+#[async_trait]
+impl TaskTest for CreateCategory {
+    async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+        log::info!("Testing categories");
+        assert_not_error(tests::test_create_category(ctx, db).await);
+    }
+}
 
-    use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType};
+#[derive(Debug)]
+pub enum CategoryCreateError {
+    CategoryAlreadyExists,
+    CategoryNotCreated,
+    CategoryNotInDatabase,
+}
+
+mod tests {
+    use entity::entities::guild;
+    use rand::{distributions::Alphanumeric, thread_rng, Rng};
+    use serenity::model::prelude::{Channel, ChannelCategory};
+
+    use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType, TEST_GUILD_ID};
 
     use super::*;
 
-    pub async fn test_create_channel() -> bool {
-        let db_wrapper = DBWrapper::new_default_db().await;
-
-        let channel_name: String = thread_rng()
+    pub async fn test_create_category(
+        ctx: Arc<Context>,
+        db: DBWrapper,
+    ) -> Result<(), CategoryCreateError> {
+        let team_name: String = thread_rng()
             .sample_iter(&Alphanumeric)
             .take(20)
             .map(char::from)
             .collect();
 
-        db_wrapper
-            .add_task(TaskType::CreateCategory(CreateCategory {
-                guild_id: 345993194322001923,
-                category_name: channel_name,
-                kind: CreateCategoryKind::Public,
-            }))
-            .await;
+        // Add a sample team to the database
+        let test_team = team::ActiveModel {
+            name: Set(team_name.clone()),
+            ..Default::default()
+        }
+        .insert(&*db)
+        .await
+        .unwrap();
+
+        // Create a test guild
+        let test_guild = guild::ActiveModel {
+            discord_id: Set(TEST_GUILD_ID as i32),
+            ..Default::default()
+        };
+
+        db.add_task(TaskType::CreateCategory(CreateCategory {
+            guild_id: 345993194322001923,
+            category_name: team_name.clone(),
+            kind: CreateCategoryKind::Team {
+                team_id: test_team.id as u64,
+            },
+        }))
+        .await;
 
         // Sleep for 2 seconds, then check if the category was created
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        // TODO: Check if the category was created
+        // Check if the category was created
+        if ctx
+            .cache
+            .guild(TEST_GUILD_ID)
+            .unwrap()
+            .channels
+            .iter()
+            .filter(|(_, channel)| {
+                if let Channel::Category(category) = channel {
+                    category.name == team_name
+                } else {
+                    false
+                }
+            })
+            .count()
+            != 1
+        {
+            return Err(CategoryCreateError::CategoryNotCreated);
+        }
 
-        // TODO: Make sure that the category is in the database
+        // Check if the category was saved to the database
+        if category::Entity::find()
+            .filter(category::Column::Name.eq(team_name.clone()))
+            .one(&*db)
+            .await
+            .unwrap()
+            .is_none()
+        {
+            return Err(CategoryCreateError::CategoryNotInDatabase);
+        }
 
-        true
+        // Check if the channel name is the team name
+
+        // TODO: Cleanup
+
+        Ok(())
     }
 }

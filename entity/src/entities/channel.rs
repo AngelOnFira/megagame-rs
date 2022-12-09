@@ -16,7 +16,7 @@ impl EntityName for Entity {
 pub struct Model {
     pub id: i32,
     pub discord_id: i32,
-    pub guild_id: i32,
+    pub guild_id: Option<i32>,
     pub name: String,
     pub allow_nsfw: bool,
 }
@@ -53,7 +53,7 @@ impl ColumnTrait for Column {
         match self {
             Self::Id => ColumnType::Integer.def(),
             Self::DiscordId => ColumnType::Integer.def(),
-            Self::GuildId => ColumnType::Integer.def(),
+            Self::GuildId => ColumnType::Integer.def().null(),
             Self::Name => ColumnType::String(None).def(),
             Self::AllowNsfw => ColumnType::Boolean.def(),
         }

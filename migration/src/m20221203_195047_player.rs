@@ -41,8 +41,6 @@ impl MigrationTrait for Migration {
                             .name("fk_player_team_id")
                             .from(Player::Table, Player::TeamId)
                             .to(Team::Table, Team::Id)
-                            .on_delete(ForeignKeyAction::Cascade)
-                            .on_update(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )

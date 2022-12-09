@@ -16,6 +16,8 @@ pub mod db_wrapper;
 pub mod handler;
 pub mod task_runner;
 
+pub const TEST_GUILD_ID: u64 = 345993194322001923;
+
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 struct Args {
@@ -75,6 +77,7 @@ async fn main() {
     };
 
     let db_wrapper = DBWrapper::new(db.clone());
+
 
     let mut client = Client::builder(&token, gateway_intents)
         .application_id(451862707746897961)

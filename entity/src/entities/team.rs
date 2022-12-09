@@ -16,18 +16,18 @@ impl EntityName for Entity {
 pub struct Model {
     pub id: i32,
     pub name: String,
-    pub abreviation: String,
-    pub guild: i32,
-    pub created_at: String,
-    pub updated_at: String,
-    pub emoji: String,
-    pub wallet: i32,
-    pub role: i32,
-    pub category_id: i32,
-    pub general_channel_id: i32,
-    pub trade_channel_id: i32,
-    pub menu_channel_id: i32,
-    pub bank_embed_id: String,
+    pub abreviation: Option<String>,
+    pub guild: Option<i32>,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
+    pub emoji: Option<String>,
+    pub wallet: Option<i32>,
+    pub role: Option<i32>,
+    pub category_id: Option<i32>,
+    pub general_channel_id: Option<i32>,
+    pub trade_channel_id: Option<i32>,
+    pub menu_channel_id: Option<i32>,
+    pub bank_embed_id: Option<i32>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
@@ -62,7 +62,7 @@ impl PrimaryKeyTrait for PrimaryKey {
 
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {
-    Channel4,
+    Category,
     Channel3,
     Channel2,
     Channel1,
@@ -75,18 +75,18 @@ impl ColumnTrait for Column {
         match self {
             Self::Id => ColumnType::Integer.def(),
             Self::Name => ColumnType::String(None).def(),
-            Self::Abreviation => ColumnType::String(None).def(),
-            Self::Guild => ColumnType::Integer.def(),
-            Self::CreatedAt => ColumnType::String(None).def(),
-            Self::UpdatedAt => ColumnType::String(None).def(),
-            Self::Emoji => ColumnType::String(None).def(),
-            Self::Wallet => ColumnType::Integer.def(),
-            Self::Role => ColumnType::Integer.def(),
-            Self::CategoryId => ColumnType::Integer.def(),
-            Self::GeneralChannelId => ColumnType::Integer.def(),
-            Self::TradeChannelId => ColumnType::Integer.def(),
-            Self::MenuChannelId => ColumnType::Integer.def(),
-            Self::BankEmbedId => ColumnType::String(None).def(),
+            Self::Abreviation => ColumnType::String(None).def().null(),
+            Self::Guild => ColumnType::Integer.def().null(),
+            Self::CreatedAt => ColumnType::String(None).def().null(),
+            Self::UpdatedAt => ColumnType::String(None).def().null(),
+            Self::Emoji => ColumnType::String(None).def().null(),
+            Self::Wallet => ColumnType::Integer.def().null(),
+            Self::Role => ColumnType::Integer.def().null(),
+            Self::CategoryId => ColumnType::Integer.def().null(),
+            Self::GeneralChannelId => ColumnType::Integer.def().null(),
+            Self::TradeChannelId => ColumnType::Integer.def().null(),
+            Self::MenuChannelId => ColumnType::Integer.def().null(),
+            Self::BankEmbedId => ColumnType::Integer.def().null(),
         }
     }
 }
@@ -94,24 +94,30 @@ impl ColumnTrait for Column {
 impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {
         match self {
-            Self::Channel4 => Entity::belongs_to(super::channel::Entity)
+            Self::Category => Entity::belongs_to(super::category::Entity)
+                .from(Column::CategoryId)
+                .to(super::category::Column::Id)
+                .into(),
+            Self::Channel3 => Entity::belongs_to(super::channel::Entity)
                 .from(Column::MenuChannelId)
                 .to(super::channel::Column::Id)
                 .into(),
-            Self::Channel3 => Entity::belongs_to(super::channel::Entity)
+            Self::Channel2 => Entity::belongs_to(super::channel::Entity)
                 .from(Column::TradeChannelId)
                 .to(super::channel::Column::Id)
                 .into(),
-            Self::Channel2 => Entity::belongs_to(super::channel::Entity)
-                .from(Column::GeneralChannelId)
-                .to(super::channel::Column::Id)
-                .into(),
             Self::Channel1 => Entity::belongs_to(super::channel::Entity)
-                .from(Column::CategoryId)
+                .from(Column::GeneralChannelId)
                 .to(super::channel::Column::Id)
                 .into(),
             Self::Player => Entity::has_many(super::player::Entity).into(),
         }
+    }
+}
+
+impl Related<super::category::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Category.def()
     }
 }
 

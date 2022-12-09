@@ -16,7 +16,7 @@ impl EntityName for Entity {
 pub struct Model {
     pub id: i32,
     pub discord_id: i32,
-    pub guild_id: i32,
+    pub guild_id: Option<i32>,
     pub name: String,
 }
 
@@ -43,6 +43,7 @@ impl PrimaryKeyTrait for PrimaryKey {
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {
     Guild,
+    Team,
 }
 
 impl ColumnTrait for Column {
@@ -51,7 +52,7 @@ impl ColumnTrait for Column {
         match self {
             Self::Id => ColumnType::Integer.def(),
             Self::DiscordId => ColumnType::Integer.def(),
-            Self::GuildId => ColumnType::Integer.def(),
+            Self::GuildId => ColumnType::Integer.def().null(),
             Self::Name => ColumnType::String(None).def(),
         }
     }
@@ -64,6 +65,7 @@ impl RelationTrait for Relation {
                 .from(Column::GuildId)
                 .to(super::guild::Column::Id)
                 .into(),
+            Self::Team => Entity::has_many(super::team::Entity).into(),
         }
     }
 }
@@ -71,6 +73,12 @@ impl RelationTrait for Relation {
 impl Related<super::guild::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Guild.def()
+    }
+}
+
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Team.def()
     }
 }
 

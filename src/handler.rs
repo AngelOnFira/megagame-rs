@@ -2,7 +2,7 @@ use crate::{
     commands::{fake_trade::FakeTrade, initialize_game::InitializeGame},
     db_wrapper::DBWrapper,
     task_runner::{
-        tasks::{message_user::MessageUser, TaskType},
+        tasks::{message_user::MessageUser, run_tests, TaskType},
         TaskRunner,
     },
 };
@@ -81,12 +81,6 @@ impl EventHandler for Handler {
         let ctx = Arc::new(ctx);
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
-            // If tests are enabled, start them in another thread
-            let ctx1 = Arc::clone(&ctx);
-            if self.run_tests {
-                tokio::spawn(async move { run_tests(ctx1).await });
-            }
-
             let ctx2 = Arc::clone(&ctx);
             let db_clone = self.db.clone();
             tokio::spawn(async move {
@@ -104,33 +98,43 @@ impl EventHandler for Handler {
                 }
             });
 
+            // If the testing flag is active, start a thread and run the tests
+            let db_clone = self.db.clone();
+            if self.run_tests {
+                tokio::spawn(async move {
+                    run_tests(ctx, db_clone).await;
+                    // Log test complete
+                    log::info!("Tests complete");
+                });
+            }
+
             // Now that the loop is running, we set the bool to true
             self.is_loop_running.swap(true, Ordering::Relaxed);
         }
     }
 }
 
-async fn run_tests(ctx: Arc<Context>) {
-    let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
-        Ok(db) => db,
-        Err(err) => panic!("Error connecting to database: {:?}", err),
-    };
+// async fn run_tests(ctx: Arc<Context>) {
+//     let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
+//         Ok(db) => db,
+//         Err(err) => panic!("Error connecting to database: {:?}", err),
+//     };
 
-    dbg!(ctx.cache.current_user_id().0);
+//     dbg!(ctx.cache.current_user_id().0);
 
-    let task = TaskType::MessageUser(MessageUser {
-        player_id: 133358326439346176,
-        message: String::from("Good dayyy"),
-    });
+//     let task = TaskType::MessageUser(MessageUser {
+//         player_id: 133358326439346176,
+//         message: String::from("Good dayyy"),
+//     });
 
-    task::ActiveModel {
-        payload: Set(serde_json::to_string(&task).unwrap()),
-        completed: Set(false),
-        ..Default::default()
-    }
-    .insert(&db)
-    .await
-    .unwrap();
+//     task::ActiveModel {
+//         payload: Set(serde_json::to_string(&task).unwrap()),
+//         completed: Set(false),
+//         ..Default::default()
+//     }
+//     .insert(&db)
+//     .await
+//     .unwrap();
 
-    log::info!("Task inserted");
-}
+//     log::info!("Task inserted");
+// }

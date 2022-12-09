@@ -71,7 +71,7 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Channel::DiscordId).big_integer().not_null())
-                    .col(ColumnDef::new(Channel::GuildId).integer().not_null())
+                    .col(ColumnDef::new(Channel::GuildId).integer().null())
                     .col(ColumnDef::new(Channel::Name).string().not_null())
                     .col(ColumnDef::new(Channel::AllowNSFW).boolean().not_null())
                     .foreign_key(
@@ -79,8 +79,6 @@ impl MigrationTrait for Migration {
                             .name("channel_guild_fk")
                             .from(Channel::Table, Channel::GuildId)
                             .to(Guild::Table, Guild::Id)
-                            .on_delete(ForeignKeyAction::Cascade)
-                            .on_update(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
@@ -99,15 +97,13 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Role::DiscordId).big_integer().not_null())
-                    .col(ColumnDef::new(Role::GuildId).integer().not_null())
+                    .col(ColumnDef::new(Role::GuildId).integer().null())
                     .col(ColumnDef::new(Role::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("role_guild_fk")
                             .from(Role::Table, Role::GuildId)
                             .to(Guild::Table, Guild::Id)
-                            .on_delete(ForeignKeyAction::Cascade)
-                            .on_update(ForeignKeyAction::Cascade),
                     )
                     .to_owned(),
             )
@@ -126,15 +122,15 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Category::DiscordId).big_integer().not_null())
-                    .col(ColumnDef::new(Category::GuildId).integer().not_null())
+                    .col(ColumnDef::new(Category::GuildId).integer().null())
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("category_guild_fk")
                             .from(Category::Table, Category::GuildId)
                             .to(Guild::Table, Guild::Id)
-                            .on_delete(ForeignKeyAction::Cascade)
-                            .on_update(ForeignKeyAction::Cascade),
+                            .on_update(ForeignKeyAction::Cascade)
+                            .on_delete(ForeignKeyAction::SetNull)
                     )
                     .to_owned(),
             )

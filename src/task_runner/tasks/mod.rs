@@ -73,8 +73,8 @@ pub trait TaskTest: Send + Sync {
     async fn run_tests(ctx: Arc<Context>, db: DBWrapper);
 }
 
-pub fn run_tests() {
-    CreateCategory::run_tests();
+pub async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+    CreateCategory::run_tests(ctx, db).await;
 }
 
 // impl Task {
