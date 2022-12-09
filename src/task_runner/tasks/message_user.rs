@@ -19,7 +19,7 @@ pub struct MessageUser {
 
 #[async_trait]
 impl Task for MessageUser {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+    async fn handle(&self, ctx: Arc<Context>, _db: DBWrapper) {
         if let Ok(user) = UserId(self.player_id).to_user(ctx.http()).await {
             match user
                 .direct_message(ctx.http(), |m| m.content(self.message.as_str()))

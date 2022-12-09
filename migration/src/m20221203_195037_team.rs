@@ -73,25 +73,25 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("team_category_channel_ffk")
                             .from(Team::Table, Team::CategoryId)
-                            .to(Category::Table, Category::Id)
+                            .to(Category::Table, Category::Id),
                     )
                     .foreign_key(
                         ForeignKey::create()
                             .name("team_general_channel_fk")
                             .from(Team::Table, Team::GeneralChannelId)
-                            .to(Channel::Table, Channel::Id)
+                            .to(Channel::Table, Channel::Id),
                     )
                     .foreign_key(
                         ForeignKey::create()
                             .name("team_trade_channel_fk")
                             .from(Team::Table, Team::TradeChannelId)
-                            .to(Channel::Table, Channel::Id)
+                            .to(Channel::Table, Channel::Id),
                     )
                     .foreign_key(
                         ForeignKey::create()
                             .name("team_menu_channel_fk")
                             .from(Team::Table, Team::MenuChannelId)
-                            .to(Channel::Table, Channel::Id)
+                            .to(Channel::Table, Channel::Id),
                     )
                     .to_owned(),
             )

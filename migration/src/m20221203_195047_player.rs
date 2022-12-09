@@ -40,7 +40,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("fk_player_team_id")
                             .from(Player::Table, Player::TeamId)
-                            .to(Team::Table, Team::Id)
+                            .to(Team::Table, Team::Id),
                     )
                     .to_owned(),
             )

@@ -117,22 +117,20 @@ impl Task for CreateCategory {
 
             let category = match category_option {
                 Some(category) => category,
-                None => {
-                    category::ActiveModel {
-                        name: Set(self.category_name.to_owned()),
-                        discord_id: Set(discord_category.id.0 as i32),
-                        guild_id: Set(Some(guild.id as i32)),
-                        ..Default::default()
-                    }
-                    .insert(&*db)
-                    .await
-                    .unwrap()
+                None => category::ActiveModel {
+                    name: Set(self.category_name.to_owned()),
+                    discord_id: Set(discord_category.id.0 as i32),
+                    guild_id: Set(Some(guild.id as i32)),
+                    ..Default::default()
                 }
+                .insert(&*db)
+                .await
+                .unwrap(),
             };
 
             team.category_id = Set(Some(category.id));
 
-            let team = team.update(&*db).await.unwrap();
+            let _team = team.update(&*db).await.unwrap();
         }
     }
 }
@@ -165,7 +163,7 @@ pub enum CategoryCreateError {
 mod tests {
     use entity::entities::guild;
     use rand::{distributions::Alphanumeric, thread_rng, Rng};
-    use serenity::model::prelude::{Channel, ChannelCategory};
+    use serenity::model::prelude::Channel;
 
     use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType, TEST_GUILD_ID};
 
@@ -191,7 +189,7 @@ mod tests {
         .unwrap();
 
         // Create a test guild
-        let test_guild = guild::ActiveModel {
+        let _test_guild = guild::ActiveModel {
             discord_id: Set(TEST_GUILD_ID as i32),
             ..Default::default()
         };

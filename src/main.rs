@@ -78,7 +78,6 @@ async fn main() {
 
     let db_wrapper = DBWrapper::new(db.clone());
 
-
     let mut client = Client::builder(&token, gateway_intents)
         .application_id(451862707746897961)
         .event_handler(Handler {

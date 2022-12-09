@@ -1,15 +1,11 @@
 use crate::{
     commands::{fake_trade::FakeTrade, initialize_game::InitializeGame},
     db_wrapper::DBWrapper,
-    task_runner::{
-        tasks::{message_user::MessageUser, run_tests, TaskType},
-        TaskRunner,
-    },
+    task_runner::{tasks::run_tests, TaskRunner},
 };
 
 use crate::commands::GameCommand;
-use entity::entities::task;
-use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, Set};
+
 use serenity::{
     async_trait,
     model::{

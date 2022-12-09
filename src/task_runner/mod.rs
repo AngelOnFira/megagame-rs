@@ -36,7 +36,7 @@ impl TaskRunner {
             log::info!("Working on task: {:?}", task_payload);
 
             // Complete the tasks
-            let task = task_payload
+            let _task = task_payload
                 .route()
                 .handle(Arc::clone(&self.ctx), self.db.clone())
                 .await;

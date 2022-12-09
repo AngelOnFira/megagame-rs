@@ -1,5 +1,6 @@
 pub use sea_orm_migration::prelude::*;
 
+mod m20221202_160019_discord_models;
 mod m20221203_145623_currency;
 mod m20221203_194651_wallet;
 mod m20221203_194657_transaction;
@@ -7,7 +8,6 @@ mod m20221203_194700_trade;
 mod m20221203_195037_team;
 mod m20221203_195047_player;
 mod m20221204_194750_task;
-mod m20221202_160019_discord_models;
 
 pub struct Migrator;
 

@@ -1,7 +1,7 @@
 use std::ops::Deref;
 
 use entity::entities::task;
-use sea_orm::{prelude::*, Set, Database};
+use sea_orm::{prelude::*, Database, Set};
 
 use crate::task_runner::tasks::TaskType;
 #[derive(Debug, Clone)]

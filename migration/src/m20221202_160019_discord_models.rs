@@ -78,7 +78,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("channel_guild_fk")
                             .from(Channel::Table, Channel::GuildId)
-                            .to(Guild::Table, Guild::Id)
+                            .to(Guild::Table, Guild::Id),
                     )
                     .to_owned(),
             )
@@ -103,7 +103,7 @@ impl MigrationTrait for Migration {
                         ForeignKey::create()
                             .name("role_guild_fk")
                             .from(Role::Table, Role::GuildId)
-                            .to(Guild::Table, Guild::Id)
+                            .to(Guild::Table, Guild::Id),
                     )
                     .to_owned(),
             )
@@ -130,7 +130,7 @@ impl MigrationTrait for Migration {
                             .from(Category::Table, Category::GuildId)
                             .to(Guild::Table, Guild::Id)
                             .on_update(ForeignKeyAction::Cascade)
-                            .on_delete(ForeignKeyAction::SetNull)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     .to_owned(),
             )
