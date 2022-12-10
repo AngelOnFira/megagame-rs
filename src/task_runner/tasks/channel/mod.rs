@@ -39,7 +39,8 @@ pub enum ChannelTasks {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CreateChannelTasks {
     TeamChannel { team_id: u64, channel_db_id: u64 },
-    PublicChannel { name: String },
+    PublicChannel { category_id: u64, name: String },
+    TeamVoiceChannel { team_id: u64, name: String },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -99,7 +100,29 @@ impl ChannelHandler {
                     c
                 })
             }
-            CreateChannelTasks::PublicChannel { ref name } => todo!(),
+            CreateChannelTasks::PublicChannel {
+                ref name,
+                category_id,
+            } => Box::new(move |c: &mut CreateChannel| {
+                c.name(name);
+                c.category(*category_id);
+                c
+            }),
+            CreateChannelTasks::TeamVoiceChannel { team_id, name } => {
+                // Get the team from the database
+                let team: team::Model = team::Entity::find_by_id(*team_id as i32)
+                    .one(&*db)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+                Box::new(move |c: &mut CreateChannel| {
+                    c.name(name);
+                    c.category(team.category_id.unwrap() as u64);
+                    c.kind(ChannelType::Voice);
+                    c
+                })
+            }
         };
 
         // Create the channel
