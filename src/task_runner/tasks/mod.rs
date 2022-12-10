@@ -7,25 +7,17 @@ use serenity::client::Context;
 use crate::db_wrapper::DBWrapper;
 
 use self::{
-    category::CategoryHandler, change_team::ChangeTeam, create_buttons::CreateButtons,
-    create_category_channel::CreateCategoryChannel,
-    create_dropdown::CreateDropdown, create_message::CreateMessage,
-    create_team_voice_channel::CreateTeamVoiceChannel, create_thread::CreateThread,
-    message_user::MessageUser, channel::ChannelHandler,
+    button::ButtonHandler, category::CategoryHandler, channel::ChannelHandler,
+    dropdown::DropdownHandler, message::MessageHandler, role::RoleHandler, thread::ThreadHandler,
 };
 
+pub mod button;
 pub mod category;
-pub mod change_team;
 pub mod channel;
-pub mod create_buttons;
-pub mod create_category_channel;
-pub mod create_dropdown;
-pub mod create_message;
-pub mod create_role;
-pub mod create_team_voice_channel;
-pub mod create_thread;
-pub mod manage_user;
-pub mod message_user;
+pub mod dropdown;
+pub mod message;
+pub mod role;
+pub mod thread;
 
 /// A wrapper for TaskType to store the id if the task in the database
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -39,27 +31,25 @@ pub struct DbTask {
 /// Each of these structs might have their own `impl`s to operate on the data.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TaskType {
-    ChangeTeam(ChangeTeam),
-    CreateButtons(CreateButtons),
+    ButtonHandler(ButtonHandler),
     CategoryHandler(CategoryHandler),
     ChannelHandler(ChannelHandler),
-    CreateCategoryChannel(CreateCategoryChannel),
-    CreateDropdown(CreateDropdown),
-    CreateMessage(CreateMessage),
-    // CreateRole(CreateRole),
-    CreateTeamVoiceChannel(CreateTeamVoiceChannel),
-    CreateThread(CreateThread),
-    MessageUser(MessageUser),
+    DropdownHandler(DropdownHandler),
+    MessageHandler(MessageHandler),
+    RoleHandler(RoleHandler),
+    ThreadHandler(ThreadHandler),
 }
 
 impl TaskType {
     pub fn route(&self) -> &dyn Task {
         match self {
-            TaskType::CreateDropdown(create_dropdown) => create_dropdown,
+            TaskType::ButtonHandler(task_handler) => task_handler,
             TaskType::CategoryHandler(task_handler) => task_handler,
             TaskType::ChannelHandler(task_handler) => task_handler,
-            TaskType::MessageUser(message_user) => message_user,
-            _ => unimplemented!(),
+            TaskType::DropdownHandler(task_handler) => task_handler,
+            TaskType::MessageHandler(task_handler) => task_handler,
+            TaskType::RoleHandler(task_handler) => task_handler,
+            TaskType::ThreadHandler(task_handler) => task_handler,
         }
     }
 }
