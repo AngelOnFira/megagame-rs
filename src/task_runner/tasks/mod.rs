@@ -8,17 +8,17 @@ use crate::db_wrapper::DBWrapper;
 
 use self::{
     category::CategoryHandler, change_team::ChangeTeam, create_buttons::CreateButtons,
-    create_category_channel::CreateCategoryChannel, create_channel::CreateChannel,
+    create_category_channel::CreateCategoryChannel,
     create_dropdown::CreateDropdown, create_message::CreateMessage,
     create_team_voice_channel::CreateTeamVoiceChannel, create_thread::CreateThread,
-    message_user::MessageUser,
+    message_user::MessageUser, channel::ChannelHandler,
 };
 
 pub mod category;
 pub mod change_team;
+pub mod channel;
 pub mod create_buttons;
 pub mod create_category_channel;
-pub mod create_channel;
 pub mod create_dropdown;
 pub mod create_message;
 pub mod create_role;
@@ -41,12 +41,12 @@ pub struct DbTask {
 pub enum TaskType {
     ChangeTeam(ChangeTeam),
     CreateButtons(CreateButtons),
-    CreateCategory(CategoryHandler),
+    CategoryHandler(CategoryHandler),
+    ChannelHandler(ChannelHandler),
     CreateCategoryChannel(CreateCategoryChannel),
     CreateDropdown(CreateDropdown),
     CreateMessage(CreateMessage),
     // CreateRole(CreateRole),
-    CreateChannel(CreateChannel),
     CreateTeamVoiceChannel(CreateTeamVoiceChannel),
     CreateThread(CreateThread),
     MessageUser(MessageUser),
@@ -56,7 +56,8 @@ impl TaskType {
     pub fn route(&self) -> &dyn Task {
         match self {
             TaskType::CreateDropdown(create_dropdown) => create_dropdown,
-            TaskType::CreateCategory(create_category) => create_category,
+            TaskType::CategoryHandler(task_handler) => task_handler,
+            TaskType::ChannelHandler(task_handler) => task_handler,
             TaskType::MessageUser(message_user) => message_user,
             _ => unimplemented!(),
         }

@@ -40,7 +40,7 @@ pub mod tests {
             ..Default::default()
         };
 
-        db.add_task(TaskType::CreateCategory(CategoryHandler {
+        db.add_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: 345993194322001923,
             task: CategoryTasks::Create(CreateCategoryTasks::TeamCategory {
                 team_id: test_team.id as u64,

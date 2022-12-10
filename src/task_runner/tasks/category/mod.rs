@@ -51,14 +51,14 @@ pub enum DeleteCategoryTasks {
 impl Task for CategoryHandler {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
         match &self.task {
-            CategoryTasks::Create(task) => self.handle_channel_create(task, ctx, db).await,
-            CategoryTasks::Delete(task) => self.handle_channel_delete(task, ctx, db).await,
+            CategoryTasks::Create(task) => self.handle_category_create(task, ctx, db).await,
+            CategoryTasks::Delete(task) => self.handle_category_delete(task, ctx, db).await,
         }
     }
 }
 
 impl CategoryHandler {
-    async fn handle_channel_create(
+    async fn handle_category_create(
         &self,
         task: &CreateCategoryTasks,
         ctx: Arc<Context>,
@@ -110,7 +110,7 @@ impl CategoryHandler {
             .await
             .unwrap();
 
-        // If it's a team channel, safe it to the database
+        // If it's a team category, safe it to the database
         if let CreateCategoryTasks::TeamCategory { team_id } = task {
             let mut team: team::ActiveModel = team::Entity::find_by_id(*team_id as i32)
                 .one(&*db)
@@ -166,50 +166,13 @@ impl CategoryHandler {
         }
     }
 
-    async fn handle_channel_delete(
+    async fn handle_category_delete(
         &self,
         task: &DeleteCategoryTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
     ) {
-        let _guild = ctx.cache.guild(self.guild_id).unwrap();
-
-        let _channel_id = match task {
-            DeleteCategoryTasks::TeamCategory { team_id } => {
-                // Get the team from the database
-                let team: team::Model = team::Entity::find_by_id(*team_id as i32)
-                    .one(&*db)
-                    .await
-                    .unwrap()
-                    .unwrap();
-
-                // Get the category from the database
-                let category: category::Model =
-                    category::Entity::find_by_id(team.category_id.unwrap())
-                        .one(&*db)
-                        .await
-                        .unwrap()
-                        .unwrap();
-
-                category.discord_id
-            }
-            DeleteCategoryTasks::PublicCategory { id } => {
-                // Get the category from the database
-                let category: category::Model = category::Entity::find_by_id(*id as i32)
-                    .one(&*db)
-                    .await
-                    .unwrap()
-                    .unwrap();
-
-                category.discord_id
-            }
-        };
-
-        // // Delete the category
-        // guild
-        //     .delete_channel(&ctx.http, channel_id as u64)
-        //     .await
-        //     .unwrap();
+        todo!("Delete category")
     }
 }
 
