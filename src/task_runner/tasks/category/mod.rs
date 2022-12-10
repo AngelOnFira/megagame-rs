@@ -168,9 +168,9 @@ impl CategoryHandler {
 
     async fn handle_category_delete(
         &self,
-        task: &DeleteCategoryTasks,
-        ctx: Arc<Context>,
-        db: DBWrapper,
+        _task: &DeleteCategoryTasks,
+        _ctx: Arc<Context>,
+        _db: DBWrapper,
     ) {
         todo!("Delete category")
     }

@@ -1,25 +1,13 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use entity::entities::{category, channel, guild, team};
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+
 use serde::{Deserialize, Serialize};
-use serenity::{
-    builder::CreateChannel,
-    client::Context,
-    model::{
-        channel::{ChannelType, PermissionOverwriteType},
-        permissions::Permissions,
-        prelude::PermissionOverwrite,
-    },
-};
+use serenity::client::Context;
 use tracing::log;
 
 use super::{Task, TaskTest};
-use crate::{
-    db_wrapper::DBWrapper,
-    task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
-};
+use crate::db_wrapper::DBWrapper;
 
 // pub mod tests;
 
@@ -58,21 +46,15 @@ impl Task for RoleHandler {
 }
 
 impl RoleHandler {
-    async fn handle_role_create(
-        &self,
-        task: &CreateRoleTasks,
-        ctx: Arc<Context>,
-        db: DBWrapper,
-    ) {
-        let guild = ctx.cache.guild(self.guild_id).unwrap();
-
+    async fn handle_role_create(&self, _task: &CreateRoleTasks, ctx: Arc<Context>, _db: DBWrapper) {
+        let _guild = ctx.cache.guild(self.guild_id).unwrap();
     }
 
     async fn handle_role_delete(
         &self,
-        task: &DeleteRoleTasks,
-        ctx: Arc<Context>,
-        db: DBWrapper,
+        _task: &DeleteRoleTasks,
+        _ctx: Arc<Context>,
+        _db: DBWrapper,
     ) {
         todo!()
     }
@@ -80,7 +62,7 @@ impl RoleHandler {
 
 #[async_trait]
 impl TaskTest for RoleHandler {
-    async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+    async fn run_tests(_ctx: Arc<Context>, _db: DBWrapper) {
         log::info!("Testing categories");
         // assert_not_error(test_create_channel(ctx, db).await);
     }

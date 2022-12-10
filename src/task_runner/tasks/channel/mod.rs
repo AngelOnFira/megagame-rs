@@ -1,25 +1,14 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use entity::entities::{category, channel, guild, team};
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+use entity::entities::{channel, team};
+use sea_orm::{ActiveModelTrait, EntityTrait, Set};
 use serde::{Deserialize, Serialize};
-use serenity::{
-    builder::CreateChannel,
-    client::Context,
-    model::{
-        channel::{ChannelType, PermissionOverwriteType},
-        permissions::Permissions,
-        prelude::PermissionOverwrite,
-    },
-};
+use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelType};
 use tracing::log;
 
 use super::{Task, TaskTest};
-use crate::{
-    db_wrapper::DBWrapper,
-    task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
-};
+use crate::db_wrapper::DBWrapper;
 
 pub mod tests;
 
@@ -68,7 +57,7 @@ impl ChannelHandler {
     ) {
         let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        let everyone_role = guild.role_by_name("@everyone").unwrap();
+        let _everyone_role = guild.role_by_name("@everyone").unwrap();
 
         let channel_builder: Box<
             dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
@@ -78,7 +67,7 @@ impl ChannelHandler {
                 channel_db_id,
             } => {
                 // Get the team from the database
-                let team: team::Model = team::Entity::find_by_id(*team_id as i32)
+                let _team: team::Model = team::Entity::find_by_id(*team_id as i32)
                     .one(&*db)
                     .await
                     .unwrap()
@@ -133,7 +122,7 @@ impl ChannelHandler {
 
         // If it's a team channel, safe it to the database
         if let CreateChannelTasks::TeamChannel {
-            team_id,
+            team_id: _,
             channel_db_id,
         } = task
         {
@@ -148,15 +137,15 @@ impl ChannelHandler {
 
             category.discord_id = Set(discord_channel.id.0 as i32);
 
-            let category = category.update(&*db).await.unwrap();
+            let _category = category.update(&*db).await.unwrap();
         }
     }
 
     async fn handle_channel_delete(
         &self,
-        task: &DeleteChannelTasks,
-        ctx: Arc<Context>,
-        db: DBWrapper,
+        _task: &DeleteChannelTasks,
+        _ctx: Arc<Context>,
+        _db: DBWrapper,
     ) {
         todo!()
     }
@@ -164,7 +153,7 @@ impl ChannelHandler {
 
 #[async_trait]
 impl TaskTest for ChannelHandler {
-    async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+    async fn run_tests(_ctx: Arc<Context>, _db: DBWrapper) {
         log::info!("Testing categories");
         // assert_not_error(test_create_channel(ctx, db).await);
     }

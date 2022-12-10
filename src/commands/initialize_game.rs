@@ -3,10 +3,7 @@ use serenity::{
     builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
 };
 
-use crate::{
-    db_wrapper::DBWrapper,
-    task_runner::tasks::{message_user::MessageUser, TaskType},
-};
+use crate::db_wrapper::DBWrapper;
 
 use super::GameCommand;
 
@@ -21,10 +18,10 @@ impl GameCommand for InitializeGame {
     }
 
     async fn run(_options: &[CommandDataOption], _db: DBWrapper) -> String {
-        let _task = TaskType::MessageUser(MessageUser {
-            player_id: 133358326439346176,
-            message: String::from("Good day"),
-        });
+        // let _task = TaskType::MessageUser(MessageUser {
+        //     player_id: 133358326439346176,
+        //     message: String::from("Good day"),
+        // });
         "Hey".to_string()
     }
 }
