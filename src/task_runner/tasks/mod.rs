@@ -1,4 +1,4 @@
-use std::{fmt::Debug, sync::Arc};
+use std::{fmt::Debug, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
@@ -75,6 +75,28 @@ where
     match result {
         Ok(_) => {}
         Err(e) => panic!("Error: {:?}", e),
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+pub struct DiscordId(u64);
+
+impl Deref for DiscordId {
+    type Target = u64;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+pub struct DatabaseId(i32);
+
+impl Deref for DatabaseId {
+    type Target = i32;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
