@@ -15,7 +15,7 @@ use serenity::{
 };
 use tracing::log;
 
-use super::{Task, TaskTest};
+use super::{DiscordId, Task, TaskTest, DatabaseId};
 use crate::{
     db_wrapper::DBWrapper,
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
@@ -25,7 +25,7 @@ pub mod tests;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CategoryHandler {
-    pub guild_id: u64,
+    pub guild_id: DiscordId,
     pub task: CategoryTasks,
 }
 
@@ -37,14 +37,14 @@ pub enum CategoryTasks {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CreateCategoryTasks {
-    TeamCategory { team_id: u64 },
+    TeamCategory { team_id: DatabaseId },
     PublicCategory { name: String },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum DeleteCategoryTasks {
-    TeamCategory { team_id: u64 },
-    PublicCategory { id: u64 },
+    TeamCategory { team_id: DatabaseId },
+    PublicCategory { id: DiscordId },
 }
 
 #[async_trait]
@@ -64,7 +64,7 @@ impl CategoryHandler {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) {
-        let guild = ctx.cache.guild(self.guild_id).unwrap();
+        let guild = ctx.cache.guild(*self.guild_id).unwrap();
 
         let everyone_role = guild.role_by_name("@everyone").unwrap();
 
@@ -73,7 +73,7 @@ impl CategoryHandler {
         > = match task {
             CreateCategoryTasks::TeamCategory { team_id } => {
                 // Get the team from the database
-                let team: team::Model = team::Entity::find_by_id(*team_id as i32)
+                let team: team::Model = team::Entity::find_by_id(**team_id)
                     .one(&*db)
                     .await
                     .unwrap()
@@ -112,7 +112,7 @@ impl CategoryHandler {
 
         // If it's a team category, safe it to the database
         if let CreateCategoryTasks::TeamCategory { team_id } = task {
-            let mut team: team::ActiveModel = team::Entity::find_by_id(*team_id as i32)
+            let mut team: team::ActiveModel = team::Entity::find_by_id(**team_id)
                 .one(&*db)
                 .await
                 .unwrap()
@@ -123,7 +123,7 @@ impl CategoryHandler {
 
             // Get or create the guild
             let guild_option = guild::Entity::find()
-                .filter(guild::Column::DiscordId.eq(self.guild_id as i32))
+                .filter(guild::Column::DiscordId.eq(*self.guild_id))
                 .one(&*db)
                 .await
                 .unwrap();
@@ -131,7 +131,7 @@ impl CategoryHandler {
             let guild = match guild_option {
                 Some(guild) => guild,
                 None => guild::ActiveModel {
-                    discord_id: Set(self.guild_id as i32),
+                    discord_id: Set(self.guild_id.into()),
                     ..Default::default()
                 }
                 .insert(&*db)
@@ -168,11 +168,14 @@ impl CategoryHandler {
 
     async fn handle_category_delete(
         &self,
-        _task: &DeleteCategoryTasks,
+        task: &DeleteCategoryTasks,
         _ctx: Arc<Context>,
         _db: DBWrapper,
     ) {
-        todo!("Delete category")
+        let category_id: DiscordId = match task {
+            DeleteCategoryTasks::TeamCategory { team_id } => todo!(),
+            DeleteCategoryTasks::PublicCategory { id } => todo!(),
+        };
     }
 }
 

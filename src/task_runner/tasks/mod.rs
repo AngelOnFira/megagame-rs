@@ -79,7 +79,7 @@ where
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
-pub struct DiscordId(u64);
+pub struct DiscordId(pub u64);
 
 impl Deref for DiscordId {
     type Target = u64;
@@ -89,8 +89,14 @@ impl Deref for DiscordId {
     }
 }
 
+impl Into<i32> for DiscordId {
+    fn into(self) -> i32 {
+        self.0 as i32
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
-pub struct DatabaseId(i32);
+pub struct DatabaseId(pub i32);
 
 impl Deref for DatabaseId {
     type Target = i32;

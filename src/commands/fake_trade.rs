@@ -8,7 +8,7 @@ use crate::{
     db_wrapper::DBWrapper,
     task_runner::tasks::{
         category::{CategoryHandler, CategoryTasks, CreateCategoryTasks},
-        TaskType,
+        DiscordId, TaskType,
     },
 };
 
@@ -25,7 +25,7 @@ impl GameCommand for FakeTrade {
     async fn run(_options: &[CommandDataOption], db: DBWrapper) -> String {
         // Add a channel create task
         db.add_task(TaskType::CategoryHandler(CategoryHandler {
-            guild_id: 345993194322001923,
+            guild_id: DiscordId(345993194322001923),
             task: CategoryTasks::Create(CreateCategoryTasks::PublicCategory {
                 name: "test".to_string(),
             }),

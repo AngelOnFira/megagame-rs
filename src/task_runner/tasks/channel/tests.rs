@@ -10,7 +10,7 @@ pub mod tests {
         db_wrapper::DBWrapper,
         task_runner::tasks::{
             category::{CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks},
-            TaskType,
+            DiscordId, TaskType, DatabaseId,
         },
         TEST_GUILD_ID,
     };
@@ -41,9 +41,9 @@ pub mod tests {
         };
 
         db.add_task(TaskType::CategoryHandler(CategoryHandler {
-            guild_id: 345993194322001923,
+            guild_id: DiscordId(345993194322001923),
             task: CategoryTasks::Create(CreateCategoryTasks::TeamCategory {
-                team_id: test_team.id as u64,
+                team_id: DatabaseId(test_team.id),
             }),
         }))
         .await;
@@ -89,4 +89,3 @@ pub mod tests {
         Ok(())
     }
 }
-
