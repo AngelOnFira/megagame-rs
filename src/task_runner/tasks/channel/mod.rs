@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use entity::entities::{channel, team};
-use sea_orm::{ActiveModelTrait, Database, EntityTrait, ModelTrait, Set};
+use sea_orm::{ActiveModelTrait, EntityTrait, ModelTrait, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelType};
 use tracing::log;
@@ -173,7 +173,7 @@ impl ChannelHandler {
                 let channel_id = DiscordId::from(&channel.discord_id);
 
                 // Delete it from the database
-                let res = channel.delete(&*db).await;
+                let _res = channel.delete(&*db).await;
 
                 channel_id
             }

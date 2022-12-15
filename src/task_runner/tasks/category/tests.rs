@@ -1,10 +1,7 @@
 pub mod tests {
     use std::sync::Arc;
 
-    use entity::entities::{category, guild, team};
-    use rand::{distributions::Alphanumeric, thread_rng, Rng};
-    use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
-    use serenity::{model::prelude::Channel, prelude::Context};
+    use serenity::prelude::Context;
 
     use crate::{
         db_wrapper::DBWrapper,
@@ -16,7 +13,6 @@ pub mod tests {
             test_helpers::{self, DatabaseStatus, DiscordStatus, TestHelpers},
             DatabaseId, DiscordId, TaskType,
         },
-        TEST_GUILD_ID,
     };
 
     pub async fn test_create_category(

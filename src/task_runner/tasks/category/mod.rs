@@ -199,7 +199,7 @@ impl CategoryHandler {
                     .unwrap();
 
                 // Delete the category from the database
-                let res = category.delete(&*db).await;
+                let _res = category.delete(&*db).await;
             }
             DeleteCategoryTasks::PublicCategory { category_id } => {
                 // Delete the category from Discord

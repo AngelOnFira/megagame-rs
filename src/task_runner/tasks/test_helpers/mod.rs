@@ -59,7 +59,7 @@ impl TestHelpers {
 
     pub async fn check_discord_status(&self, discord_construct: DiscordConstruct) -> DiscordStatus {
         match discord_construct {
-            DiscordConstruct::Channel { name } => todo!(),
+            DiscordConstruct::Channel { name: _ } => todo!(),
             DiscordConstruct::Category { name } => {
                 if self
                     .ctx
@@ -91,7 +91,7 @@ impl TestHelpers {
         database_construct: DatabaseConstruct,
     ) -> DatabaseStatus {
         match database_construct {
-            DatabaseConstruct::Team { id } => todo!(),
+            DatabaseConstruct::Team { id: _ } => todo!(),
             DatabaseConstruct::Category { name } => {
                 if category::Entity::find()
                     // TODO: This should match on more than just name
