@@ -1,0 +1,8 @@
+[package]
+name = "backend"
+version = "0.1.0"
+
+
+[dependencies]
+moon = { git = "https://github.com/MoonZoon/MoonZoon", branch = "main" }
+
