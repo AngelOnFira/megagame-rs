@@ -8,7 +8,7 @@ use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelT
 use tracing::log;
 
 use super::{DatabaseId, DiscordId, Task, TaskTest};
-use crate::db_wrapper::DBWrapper;
+use crate::{db_wrapper::DBWrapper, task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel}};
 
 pub mod tests;
 
@@ -192,9 +192,9 @@ impl ChannelHandler {
 
 #[async_trait]
 impl TaskTest for ChannelHandler {
-    async fn run_tests(_ctx: Arc<Context>, _db: DBWrapper) {
+    async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
         log::info!("Testing categories");
-        // assert_not_error(test_create_channel(ctx, db).await);
+        assert_not_error(test_create_channel(ctx, db).await);
     }
 }
 

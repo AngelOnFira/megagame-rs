@@ -10,6 +10,8 @@ pub mod tests {
         db_wrapper::DBWrapper,
         task_runner::tasks::{
             category::{CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks},
+            channel::{ChannelTasks, ChannelHandler},
+            test_helpers::TestHelpers,
             DatabaseId, DiscordId, TaskType,
         },
         TEST_GUILD_ID,
@@ -19,37 +21,23 @@ pub mod tests {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> Result<(), CategoryCreateError> {
-        let team_name: String = thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(20)
-            .map(char::from)
-            .collect();
+        let test_helper = TestHelpers::new(ctx, db.clone()).await;
 
-        // Add a sample team to the database
-        let test_team = team::ActiveModel {
-            name: Set(team_name.clone()),
-            ..Default::default()
-        }
-        .insert(&*db)
-        .await
-        .unwrap();
+        // Create a test team
+        let test_team = test_helper.generate_team().await;
 
-        // Create a test guild
-        let _test_guild = guild::ActiveModel {
-            discord_id: Set(DiscordId(TEST_GUILD_ID).into()),
-            ..Default::default()
-        };
-
-        db.add_task(TaskType::CategoryHandler(CategoryHandler {
-            guild_id: DiscordId(345993194322001923),
-            task: CategoryTasks::Create(CreateCategoryTasks::TeamCategory {
-                team_id: DatabaseId(test_team.id),
-            }),
+        // Add the task to create the channel
+        db.add_await_task(TaskType::ChannelHandler(ChannelHandler {
+            guild_id: DiscordId(TEST_GUILD_ID),
+            task: ChannelTasks::Create(
+                crate::task_runner::tasks::channel::CreateChannelTasks::TeamChannel {
+                    team_id: DatabaseId(test_team.id),
+                    channel_id: DatabaseId(test_team.general_channel_id.unwrap()),
+                },
+            ),
+            category_id: todo!(),
         }))
         .await;
-
-        // Sleep for 2 seconds, then check if the category was created
-        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         // Check if the category was created
         if ctx
@@ -60,7 +48,7 @@ pub mod tests {
             .iter()
             .filter(|(_, channel)| {
                 if let Channel::Category(category) = channel {
-                    category.name == team_name
+                    category.name == test_team.name
                 } else {
                     false
                 }
@@ -73,7 +61,7 @@ pub mod tests {
 
         // Check if the category was saved to the database
         if category::Entity::find()
-            .filter(category::Column::Name.eq(team_name.clone()))
+            .filter(category::Column::Name.eq(test_team.name.clone()))
             .one(&*db)
             .await
             .unwrap()

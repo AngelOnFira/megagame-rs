@@ -12,7 +12,7 @@ pub mod tests {
             },
             test_helpers::{self, DatabaseStatus, DiscordStatus, TestHelpers},
             DatabaseId, DiscordId, TaskType,
-        },
+        }, TEST_GUILD_ID,
     };
 
     pub async fn test_create_category(
@@ -24,23 +24,14 @@ pub mod tests {
         // Create a test team
         let test_team = test_helper.generate_team().await;
 
-        // // Create a test guild
-        // let _test_guild = guild::ActiveModel {
-        //     discord_id: Set(TEST_GUILD_ID as i32),
-        //     ..Default::default()
-        // };
-
         // Create the create category task
-        db.add_task(TaskType::CategoryHandler(CategoryHandler {
-            guild_id: DiscordId(345993194322001923),
+        db.add_await_task(TaskType::CategoryHandler(CategoryHandler {
+            guild_id: DiscordId(TEST_GUILD_ID),
             task: CategoryTasks::Create(CreateCategoryTasks::TeamCategory {
                 team_id: DatabaseId(test_team.id as i32),
             }),
         }))
         .await;
-
-        // Sleep for 2 seconds, then check if the category was created
-        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         // Check if the category was created
         if let DiscordStatus::DoesNotExist = test_helper
@@ -63,16 +54,13 @@ pub mod tests {
         }
 
         // Create the delete category task
-        db.add_task(TaskType::CategoryHandler(CategoryHandler {
+        db.add_await_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: DiscordId(345993194322001923),
             task: CategoryTasks::Delete(DeleteCategoryTasks::TeamCategory {
                 team_id: DatabaseId(test_team.id as i32),
             }),
         }))
         .await;
-
-        // Sleep for 2 seconds, then check if the category was deleted
-        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         // Check if the category was deleted
         if let DiscordStatus::Exists = test_helper
