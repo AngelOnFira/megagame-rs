@@ -9,8 +9,12 @@ pub mod tests {
     use crate::{
         db_wrapper::DBWrapper,
         task_runner::tasks::{
-            category::{CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks},
-            TaskType, DiscordId, DatabaseId,
+            category::{
+                CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks,
+                DeleteCategoryTasks,
+            },
+            test_helpers::{self, DatabaseStatus, DiscordStatus, TestHelpers},
+            DatabaseId, DiscordId, TaskType,
         },
         TEST_GUILD_ID,
     };
@@ -19,31 +23,22 @@ pub mod tests {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> Result<(), CategoryCreateError> {
-        let team_name: String = thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(20)
-            .map(char::from)
-            .collect();
+        let test_helper = TestHelpers::new(ctx, db.clone()).await;
 
-        // Add a sample team to the database
-        let test_team = team::ActiveModel {
-            name: Set(team_name.clone()),
-            ..Default::default()
-        }
-        .insert(&*db)
-        .await
-        .unwrap();
+        // Create a test team
+        let test_team = test_helper.generate_team().await;
 
-        // Create a test guild
-        let _test_guild = guild::ActiveModel {
-            discord_id: Set(TEST_GUILD_ID as i32),
-            ..Default::default()
-        };
+        // // Create a test guild
+        // let _test_guild = guild::ActiveModel {
+        //     discord_id: Set(TEST_GUILD_ID as i32),
+        //     ..Default::default()
+        // };
 
+        // Create the create category task
         db.add_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: DiscordId(345993194322001923),
             task: CategoryTasks::Create(CreateCategoryTasks::TeamCategory {
-                team_id: DatabaseId(test_team.id),
+                team_id: DatabaseId(test_team.id as i32),
             }),
         }))
         .await;
@@ -52,39 +47,46 @@ pub mod tests {
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         // Check if the category was created
-        if ctx
-            .cache
-            .guild(TEST_GUILD_ID)
-            .unwrap()
-            .channels
-            .iter()
-            .filter(|(_, channel)| {
-                if let Channel::Category(category) = channel {
-                    category.name == team_name
-                } else {
-                    false
-                }
+        if let DiscordStatus::DoesNotExist = test_helper
+            .check_discord_status(test_helpers::DiscordConstruct::Category {
+                name: test_team.name.clone(),
             })
-            .count()
-            != 1
+            .await
         {
             return Err(CategoryCreateError::CategoryNotCreated);
         }
 
         // Check if the category was saved to the database
-        if category::Entity::find()
-            .filter(category::Column::Name.eq(team_name.clone()))
-            .one(&*db)
+        if let DatabaseStatus::DoesNotExist = test_helper
+            .check_database_status(test_helpers::DatabaseConstruct::Category {
+                name: test_team.name.clone(),
+            })
             .await
-            .unwrap()
-            .is_none()
         {
-            return Err(CategoryCreateError::CategoryNotInDatabase);
+            return Err(CategoryCreateError::CategoryNotSaved);
         }
 
-        // Check if the channel name is the team name
+        // Create the delete category task
+        db.add_task(TaskType::CategoryHandler(CategoryHandler {
+            guild_id: DiscordId(345993194322001923),
+            task: CategoryTasks::Delete(DeleteCategoryTasks::TeamCategory {
+                team_id: DatabaseId(test_team.id as i32),
+            }),
+        }))
+        .await;
 
-        // TODO: Cleanup
+        // Sleep for 2 seconds, then check if the category was deleted
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        // Check if the category was deleted
+        if let DiscordStatus::Exists = test_helper
+            .check_discord_status(test_helpers::DiscordConstruct::Category {
+                name: test_team.name,
+            })
+            .await
+        {
+            return Err(CategoryCreateError::CategoryNotDeleted);
+        }
 
         Ok(())
     }

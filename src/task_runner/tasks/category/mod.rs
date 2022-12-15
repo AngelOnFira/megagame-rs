@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use entity::entities::{category, guild, team};
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, ModelTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
     builder::CreateChannel,
@@ -15,7 +15,7 @@ use serenity::{
 };
 use tracing::log;
 
-use super::{DiscordId, Task, TaskTest, DatabaseId};
+use super::{DatabaseId, DiscordId, Task, TaskTest};
 use crate::{
     db_wrapper::DBWrapper,
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
@@ -44,7 +44,7 @@ pub enum CreateCategoryTasks {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum DeleteCategoryTasks {
     TeamCategory { team_id: DatabaseId },
-    PublicCategory { id: DiscordId },
+    PublicCategory { category_id: DiscordId },
 }
 
 #[async_trait]
@@ -68,7 +68,7 @@ impl CategoryHandler {
 
         let everyone_role = guild.role_by_name("@everyone").unwrap();
 
-        let channel_builder: Box<
+        let category_builder: Box<
             dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
         > = match task {
             CreateCategoryTasks::TeamCategory { team_id } => {
@@ -106,11 +106,11 @@ impl CategoryHandler {
 
         // Create the category
         let discord_category = guild
-            .create_channel(&ctx.http, channel_builder)
+            .create_channel(&ctx.http, category_builder)
             .await
             .unwrap();
 
-        // If it's a team category, safe it to the database
+        // If it's a team category, save it to the database
         if let CreateCategoryTasks::TeamCategory { team_id } = task {
             let mut team: team::ActiveModel = team::Entity::find_by_id(**team_id)
                 .one(&*db)
@@ -169,12 +169,47 @@ impl CategoryHandler {
     async fn handle_category_delete(
         &self,
         task: &DeleteCategoryTasks,
-        _ctx: Arc<Context>,
-        _db: DBWrapper,
+        ctx: Arc<Context>,
+        db: DBWrapper,
     ) {
-        let category_id: DiscordId = match task {
-            DeleteCategoryTasks::TeamCategory { team_id } => todo!(),
-            DeleteCategoryTasks::PublicCategory { id } => todo!(),
+        match task {
+            DeleteCategoryTasks::TeamCategory { team_id } => {
+                // Get the team from the database
+                let team: team::Model = team::Entity::find_by_id(**team_id)
+                    .one(&*db)
+                    .await
+                    .unwrap()
+                    .unwrap();
+
+                let category: category::Model =
+                    category::Entity::find_by_id(team.category_id.unwrap())
+                        .one(&*db)
+                        .await
+                        .unwrap()
+                        .unwrap();
+
+                let category_id: DiscordId = category.discord_id.into();
+
+                // Delete the category from Discord
+                ctx.cache
+                    .channel(*category_id)
+                    .unwrap()
+                    .delete(&ctx.http)
+                    .await
+                    .unwrap();
+
+                // Delete the category from the database
+                let res = category.delete(&*db).await;
+            }
+            DeleteCategoryTasks::PublicCategory { category_id } => {
+                // Delete the category from Discord
+                ctx.cache
+                    .category(*category_id)
+                    .unwrap()
+                    .delete(&ctx.http)
+                    .await
+                    .unwrap();
+            }
         };
     }
 }
@@ -192,4 +227,6 @@ pub enum CategoryCreateError {
     CategoryAlreadyExists,
     CategoryNotCreated,
     CategoryNotInDatabase,
+    CategoryNotDeleted,
+    CategoryNotSaved,
 }

@@ -2,7 +2,7 @@ use std::{fmt::Debug, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use serenity::client::Context;
+use serenity::{client::Context, model::prelude::ChannelId};
 
 use crate::db_wrapper::DBWrapper;
 
@@ -18,6 +18,7 @@ pub mod dropdown;
 pub mod message;
 pub mod role;
 pub mod thread;
+pub mod test_helpers;
 
 /// A wrapper for TaskType to store the id if the task in the database
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -92,6 +93,18 @@ impl Deref for DiscordId {
 impl Into<i32> for DiscordId {
     fn into(self) -> i32 {
         self.0 as i32
+    }
+}
+
+impl From<i32> for DiscordId {
+    fn from(id: i32) -> Self {
+        Self(id as u64)
+    }
+}
+
+impl Into<ChannelId> for DiscordId {
+    fn into(self) -> ChannelId {
+        ChannelId(self.0)
     }
 }
 
