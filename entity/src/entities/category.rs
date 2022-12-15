@@ -15,7 +15,7 @@ impl EntityName for Entity {
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
     pub id: i32,
-    pub discord_id: i32,
+    pub discord_id: String,
     pub guild_id: Option<i32>,
     pub name: String,
 }
@@ -51,7 +51,7 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::Id => ColumnType::Integer.def(),
-            Self::DiscordId => ColumnType::Integer.def(),
+            Self::DiscordId => ColumnType::String(None).def(),
             Self::GuildId => ColumnType::Integer.def().null(),
             Self::Name => ColumnType::String(None).def(),
         }

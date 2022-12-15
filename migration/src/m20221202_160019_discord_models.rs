@@ -53,7 +53,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Guild::DiscordId).big_integer().not_null())
+                    .col(ColumnDef::new(Guild::DiscordId).text().not_null())
                     .to_owned(),
             )
             .await?;
@@ -70,7 +70,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Channel::DiscordId).big_integer().not_null())
+                    .col(ColumnDef::new(Channel::DiscordId).text().not_null())
                     .col(ColumnDef::new(Channel::GuildId).integer().null())
                     .col(ColumnDef::new(Channel::Name).string().not_null())
                     .col(ColumnDef::new(Channel::AllowNSFW).boolean().not_null())
@@ -96,7 +96,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Role::DiscordId).big_integer().not_null())
+                    .col(ColumnDef::new(Role::DiscordId).text().not_null())
                     .col(ColumnDef::new(Role::GuildId).integer().null())
                     .col(ColumnDef::new(Role::Name).string().not_null())
                     .foreign_key(
@@ -121,7 +121,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Category::DiscordId).big_integer().not_null())
+                    .col(ColumnDef::new(Category::DiscordId).text().not_null())
                     .col(ColumnDef::new(Category::GuildId).integer().null())
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .foreign_key(

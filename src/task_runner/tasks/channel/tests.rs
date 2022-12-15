@@ -10,7 +10,7 @@ pub mod tests {
         db_wrapper::DBWrapper,
         task_runner::tasks::{
             category::{CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks},
-            DiscordId, TaskType, DatabaseId,
+            DatabaseId, DiscordId, TaskType,
         },
         TEST_GUILD_ID,
     };
@@ -36,7 +36,7 @@ pub mod tests {
 
         // Create a test guild
         let _test_guild = guild::ActiveModel {
-            discord_id: Set(TEST_GUILD_ID as i32),
+            discord_id: Set(DiscordId(TEST_GUILD_ID).into()),
             ..Default::default()
         };
 

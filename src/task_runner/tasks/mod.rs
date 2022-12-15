@@ -17,8 +17,8 @@ pub mod channel;
 pub mod dropdown;
 pub mod message;
 pub mod role;
-pub mod thread;
 pub mod test_helpers;
+pub mod thread;
 
 /// A wrapper for TaskType to store the id if the task in the database
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -90,15 +90,15 @@ impl Deref for DiscordId {
     }
 }
 
-impl Into<i32> for DiscordId {
-    fn into(self) -> i32 {
-        self.0 as i32
+impl Into<String> for DiscordId {
+    fn into(self) -> String {
+        self.0.to_string()
     }
 }
 
-impl From<i32> for DiscordId {
-    fn from(id: i32) -> Self {
-        Self(id as u64)
+impl From<&String> for DiscordId {
+    fn from(s: &String) -> Self {
+        DiscordId(s.parse().unwrap())
     }
 }
 

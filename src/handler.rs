@@ -59,7 +59,6 @@ impl EventHandler for Handler {
         println!("{} is connected!", ready.user.name);
 
         for guild in ctx.cache.guilds().iter() {
-            dbg!(guild.0);
             GuildId(guild.0)
                 .set_application_commands(&ctx.http, |commands| {
                     commands

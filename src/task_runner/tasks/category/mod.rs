@@ -151,7 +151,7 @@ impl CategoryHandler {
                 Some(category) => category,
                 None => category::ActiveModel {
                     name: Set(discord_category.name),
-                    discord_id: Set(discord_category.id.0 as i32),
+                    discord_id: Set(DiscordId(discord_category.id.0).into()),
                     guild_id: Set(Some(guild.id as i32)),
                     ..Default::default()
                 }
@@ -188,11 +188,11 @@ impl CategoryHandler {
                         .unwrap()
                         .unwrap();
 
-                let category_id: DiscordId = category.discord_id.into();
+                let category_id: DiscordId = DiscordId::from(&category.discord_id);
 
                 // Delete the category from Discord
                 ctx.cache
-                    .channel(*category_id)
+                    .category(*category_id)
                     .unwrap()
                     .delete(&ctx.http)
                     .await

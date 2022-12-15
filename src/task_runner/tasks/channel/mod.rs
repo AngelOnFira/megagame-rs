@@ -92,7 +92,7 @@ impl ChannelHandler {
 
                 Box::new(move |c: &mut CreateChannel| {
                     c.name(category.name);
-                    c.category(category.discord_id as u64);
+                    c.category(DiscordId::from(&category.discord_id));
                     c
                 })
             }
@@ -141,7 +141,7 @@ impl ChannelHandler {
                 .unwrap()
                 .into();
 
-            category.discord_id = Set(discord_channel.id.0 as i32);
+            category.discord_id = Set(DiscordId(discord_channel.id.0).into());
 
             let _category = category.update(&*db).await.unwrap();
         }
@@ -170,7 +170,7 @@ impl ChannelHandler {
                         .unwrap()
                         .unwrap();
 
-                let channel_id = DiscordId(channel.discord_id as u64);
+                let channel_id = DiscordId::from(&channel.discord_id);
 
                 // Delete it from the database
                 let res = channel.delete(&*db).await;
