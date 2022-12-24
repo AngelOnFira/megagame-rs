@@ -18,10 +18,7 @@ impl GameCommand for InitializeGame {
     }
 
     async fn run(_options: &[CommandDataOption], _db: DBWrapper) -> String {
-        // let _task = TaskType::MessageUser(MessageUser {
-        //     player_id: 133358326439346176,
-        //     message: String::from("Good day"),
-        // });
+        // Make 3 teams, the Airship, the Galleon, and the Submarine
         "Hey".to_string()
     }
 }

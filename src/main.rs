@@ -15,6 +15,7 @@ pub mod commands;
 pub mod db_wrapper;
 pub mod handler;
 pub mod task_runner;
+pub mod game_mechanics;
 
 pub const TEST_GUILD_ID: u64 = 345993194322001923;
 

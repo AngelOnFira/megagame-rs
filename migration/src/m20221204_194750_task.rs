@@ -7,7 +7,7 @@ pub struct Migration;
 enum Task {
     Table,
     Id,
-    Completed,
+    Status,
     Payload,
 }
 
@@ -26,8 +26,8 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Task::Completed).boolean().not_null())
-                    .col(ColumnDef::new(Task::Payload).string().not_null())
+                    .col(ColumnDef::new(Task::Status).json().not_null())
+                    .col(ColumnDef::new(Task::Payload).json().not_null())
                     .to_owned(),
             )
             .await

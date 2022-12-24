@@ -47,7 +47,13 @@ impl Task for RoleHandler {
 
 impl RoleHandler {
     async fn handle_role_create(&self, _task: &CreateRoleTasks, ctx: Arc<Context>, _db: DBWrapper) {
-        let _guild = ctx.cache.guild(self.guild_id).unwrap();
+        let guild = ctx.cache.guild(self.guild_id).unwrap();
+
+        guild.create_role(&ctx.http, |r| {
+            r.name("test");
+            r.color(0x00ff00);
+            r
+        }).await;
     }
 
     async fn handle_role_delete(

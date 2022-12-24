@@ -2,11 +2,30 @@ use std::ops::Deref;
 
 use entity::entities::task;
 use sea_orm::{prelude::*, Database, Set};
+use serde::{Deserialize, Serialize};
 
 use crate::task_runner::tasks::{DatabaseId, TaskType};
 #[derive(Debug, Clone)]
 pub struct DBWrapper {
     pub db: DatabaseConnection,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum TaskResult {
+    Pending,
+    Completed(TaskReturnData),
+    // Error(String),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum TaskReturnData {
+    ChannelId(DatabaseId),
+    CategoryId(DatabaseId),
+    TeamId(DatabaseId),
+    UserId(DatabaseId),
+    RoleId(DatabaseId),
+    MessageId(DatabaseId),
+    None,
 }
 
 impl DBWrapper {
@@ -28,7 +47,7 @@ impl DBWrapper {
         DatabaseId(
             task::ActiveModel {
                 payload: Set(serde_json::to_string(&task).unwrap()),
-                completed: Set(false),
+                status: Set(serde_json::to_string(&TaskResult::Pending).unwrap()),
                 ..Default::default()
             }
             .insert(&self.db)
@@ -40,28 +59,36 @@ impl DBWrapper {
 
     /// Waits for a task to be completed. This will poll the database once a
     /// second, and will cause a deadlock if the task is never completed.
-    pub async fn await_task(&self, id: DatabaseId) {
-        async fn check_progress(id: DatabaseId, db: &DatabaseConnection) -> bool {
+    pub async fn await_task(&self, id: DatabaseId) -> TaskResult {
+        async fn check_progress(id: DatabaseId, db: &DatabaseConnection) -> TaskResult {
             // Check if the task is completed
-            task::Entity::find_by_id(id.0)
-                .one(db)
-                .await
-                .unwrap()
-                .unwrap()
-                .completed
+            serde_json::from_str(
+                &task::Entity::find_by_id(id.0)
+                    .one(db)
+                    .await
+                    .unwrap()
+                    .unwrap()
+                    .status,
+            )
+            .unwrap()
         }
 
-        while check_progress(id, &self.db).await {
+        loop {
+            let status = check_progress(id, &self.db).await;
+            // If it's not pending, return
+            let TaskResult::Pending = status else {
+                return status;
+            };
+
             // Sleep for 1 second
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         }
     }
 
     /// Adds a task to the database and waits for it to be completed
-    pub async fn add_await_task(&self, task: TaskType) -> DatabaseId {
+    pub async fn add_await_task(&self, task: TaskType) -> TaskResult {
         let id = self.add_task(task).await;
-        self.await_task(id).await;
-        id
+        self.await_task(id).await
     }
 }
 
