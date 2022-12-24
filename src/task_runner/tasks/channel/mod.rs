@@ -8,7 +8,10 @@ use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelT
 use tracing::log;
 
 use super::{DatabaseId, DiscordId, Task, TaskTest};
-use crate::{db_wrapper::DBWrapper, task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel}};
+use crate::{
+    db_wrapper::{DBWrapper, TaskReturnData},
+    task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel},
+};
 
 pub mod tests;
 
@@ -49,7 +52,7 @@ pub enum DeleteChannelTasks {
 
 #[async_trait]
 impl Task for ChannelHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
         match &self.task {
             ChannelTasks::Create(task) => self.handle_channel_create(task, ctx, db).await,
             ChannelTasks::Delete(task) => self.handle_channel_delete(task, ctx, db).await,
@@ -63,7 +66,7 @@ impl ChannelHandler {
         task: &CreateChannelTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         let guild = ctx.cache.guild(*self.guild_id).unwrap();
 
         let channel_builder: Box<
@@ -145,6 +148,8 @@ impl ChannelHandler {
 
             let _category = category.update(&*db).await.unwrap();
         }
+
+        todo!()
     }
 
     async fn handle_channel_delete(
@@ -152,7 +157,7 @@ impl ChannelHandler {
         task: &DeleteChannelTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         let channel_id: DiscordId = match task {
             DeleteChannelTasks::TeamChannel { team_id } => {
                 // Get the team from the database
@@ -187,6 +192,8 @@ impl ChannelHandler {
             .delete(&ctx.http)
             .await
             .unwrap();
+
+        todo!()
     }
 }
 

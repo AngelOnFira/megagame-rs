@@ -5,7 +5,10 @@ use sea_orm::{prelude::*, Set};
 use serenity::client::Context;
 use tracing::log;
 
-use crate::{db_wrapper::DBWrapper, task_runner::tasks::TaskType};
+use crate::{
+    db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
+    task_runner::tasks::TaskType,
+};
 
 pub mod tasks;
 
@@ -16,9 +19,11 @@ pub struct TaskRunner {
 
 impl TaskRunner {
     pub async fn run_tasks(&self) {
+        let pending_string = serde_json::to_string(&TaskResult::Pending).unwrap();
+
         // Get all the incomplete tasks from the database
         let incomplete_tasks: Vec<task::Model> = match task::Entity::find()
-            .filter(task::Column::Completed.eq(false))
+            .filter(task::Column::Status.eq(pending_string))
             .all(&*self.db)
             .await
         {
@@ -36,14 +41,14 @@ impl TaskRunner {
             log::info!("Working on task: {:?}", task_payload);
 
             // Complete the tasks
-            let _task = task_payload
+            let task_status = task_payload
                 .route()
                 .handle(Arc::clone(&self.ctx), self.db.clone())
                 .await;
 
             // Set the task as completed
             let mut db_task_active_model: task::ActiveModel = db_task.into();
-            db_task_active_model.completed = Set(true);
+            db_task_active_model.status = Set(serde_json::to_string(&task_status).unwrap());
             db_task_active_model.update(&*self.db).await.unwrap();
         }
     }

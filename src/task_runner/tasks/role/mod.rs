@@ -7,7 +7,7 @@ use serenity::client::Context;
 use tracing::log;
 
 use super::{Task, TaskTest};
-use crate::db_wrapper::DBWrapper;
+use crate::db_wrapper::{DBWrapper, TaskReturnData};
 
 // pub mod tests;
 
@@ -37,7 +37,7 @@ pub enum DeleteRoleTasks {
 
 #[async_trait]
 impl Task for RoleHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
         match &self.task {
             RoleTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
             RoleTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
@@ -46,14 +46,23 @@ impl Task for RoleHandler {
 }
 
 impl RoleHandler {
-    async fn handle_role_create(&self, _task: &CreateRoleTasks, ctx: Arc<Context>, _db: DBWrapper) {
+    async fn handle_role_create(
+        &self,
+        _task: &CreateRoleTasks,
+        ctx: Arc<Context>,
+        _db: DBWrapper,
+    ) -> TaskReturnData {
         let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        guild.create_role(&ctx.http, |r| {
-            r.name("test");
-            r.color(0x00ff00);
-            r
-        }).await;
+        guild
+            .create_role(&ctx.http, |r| {
+                r.name("test");
+                // r.color(0x00ff00);
+                r
+            })
+            .await;
+
+        todo!()
     }
 
     async fn handle_role_delete(
@@ -61,7 +70,7 @@ impl RoleHandler {
         _task: &DeleteRoleTasks,
         _ctx: Arc<Context>,
         _db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         todo!()
     }
 }

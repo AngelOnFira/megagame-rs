@@ -30,11 +30,10 @@ impl MechanicHandler for TeamMechanicsHandler {
 impl TeamMechanicsHandler {
     async fn create_team(&self, name: &String, db: DBWrapper) {
         // Add the team to the database
-        
-        // Create the role
-        
-        // Create the team category
 
+        // Create the role
+
+        // Create the team category
     }
 
     async fn add_player_to_team(&self, db: DBWrapper) {

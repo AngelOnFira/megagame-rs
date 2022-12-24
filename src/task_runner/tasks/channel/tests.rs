@@ -10,7 +10,7 @@ pub mod tests {
         db_wrapper::DBWrapper,
         task_runner::tasks::{
             category::{CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks},
-            channel::{ChannelTasks, ChannelHandler},
+            channel::{ChannelHandler, ChannelTasks},
             test_helpers::TestHelpers,
             DatabaseId, DiscordId, TaskType,
         },
