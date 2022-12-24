@@ -6,7 +6,7 @@ use serenity::client::Context;
 use tracing::log;
 
 use crate::{
-    db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
+    db_wrapper::{DBWrapper, TaskResult},
     task_runner::tasks::TaskType,
 };
 

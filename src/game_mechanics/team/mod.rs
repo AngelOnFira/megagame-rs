@@ -28,7 +28,7 @@ impl MechanicHandler for TeamMechanicsHandler {
 }
 
 impl TeamMechanicsHandler {
-    async fn create_team(&self, name: &String, db: DBWrapper) {
+    async fn create_team(&self, _name: &String, _db: DBWrapper) {
         // Add the team to the database
 
         // Create the role
@@ -36,15 +36,15 @@ impl TeamMechanicsHandler {
         // Create the team category
     }
 
-    async fn add_player_to_team(&self, db: DBWrapper) {
+    async fn add_player_to_team(&self, _db: DBWrapper) {
         // Add the player to the team
     }
 
-    async fn remove_player_from_team(&self, db: DBWrapper) {
+    async fn remove_player_from_team(&self, _db: DBWrapper) {
         // Remove the player from the team
     }
 
-    async fn delete_team(&self, db: DBWrapper) {
+    async fn delete_team(&self, _db: DBWrapper) {
         // Delete the team from the database
     }
 }
