@@ -8,7 +8,10 @@ use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelT
 use tracing::log;
 
 use super::{DatabaseId, DiscordId, Task, TaskTest};
-use crate::{db_wrapper::DBWrapper, task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel}};
+use crate::{
+    db_wrapper::DBWrapper,
+    task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel},
+};
 
 pub mod tests;
 

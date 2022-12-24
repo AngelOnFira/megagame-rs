@@ -39,14 +39,14 @@ pub enum DeleteButtonTasks {
 impl Task for ButtonHandler {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
         match &self.task {
-            ButtonTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
-            ButtonTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
+            ButtonTasks::Create(task) => self.handle_button_create(task, ctx, db).await,
+            ButtonTasks::Delete(task) => self.handle_button_delete(task, ctx, db).await,
         }
     }
 }
 
 impl ButtonHandler {
-    async fn handle_role_create(
+    async fn handle_button_create(
         &self,
         _task: &CreateButtonTasks,
         ctx: Arc<Context>,
@@ -55,7 +55,7 @@ impl ButtonHandler {
         let _guild = ctx.cache.guild(self.guild_id).unwrap();
     }
 
-    async fn handle_role_delete(
+    async fn handle_button_delete(
         &self,
         _task: &DeleteButtonTasks,
         _ctx: Arc<Context>,
