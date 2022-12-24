@@ -1,11 +1,15 @@
 use async_trait::async_trait;
 
-use crate::db_wrapper::DBWrapper;
+use crate::{
+    db_wrapper::DBWrapper,
+    task_runner::tasks::role::{CreateRoleTasks, RoleHandler, RoleTasks},
+};
 
 use super::MechanicHandler;
 
 pub struct TeamMechanicsHandler {
-    task: TeamJobs,
+    pub guild_id: u64,
+    pub task: TeamJobs,
 }
 
 pub enum TeamJobs {
@@ -28,10 +32,23 @@ impl MechanicHandler for TeamMechanicsHandler {
 }
 
 impl TeamMechanicsHandler {
-    async fn create_team(&self, _name: &String, _db: DBWrapper) {
+    async fn create_team(&self, name: &String, db: DBWrapper) {
         // Add the team to the database
 
         // Create the role
+        let role_create_status = db
+            .add_await_task(crate::task_runner::tasks::TaskType::RoleHandler(
+                RoleHandler {
+                    guild_id: self.guild_id,
+                    task: RoleTasks::Create(CreateRoleTasks::Role {
+                        name: name.clone(),
+                        color: 0x00ff00,
+                    }),
+                },
+            ))
+            .await;
+
+        dbg!(role_create_status);
 
         // Create the team category
     }

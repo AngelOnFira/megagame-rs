@@ -14,7 +14,6 @@ use crate::db_wrapper::{DBWrapper, TaskReturnData};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RoleHandler {
     pub guild_id: u64,
-    pub category_id: u64,
     pub task: RoleTasks,
 }
 
@@ -27,6 +26,7 @@ pub enum RoleTasks {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CreateRoleTasks {
     TeamRole { team_id: u64, channel_db_id: u64 },
+    Role { name: String, color: u32 },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -60,7 +60,8 @@ impl RoleHandler {
                 // r.color(0x00ff00);
                 r
             })
-            .await;
+            .await
+            .unwrap();
 
         todo!()
     }

@@ -40,7 +40,12 @@ impl EventHandler for Handler {
                 _ => unreachable!(),
             };
 
-            let content = command_handler(&command.data.options, self.db.clone()).await;
+            let content = command_handler(
+                &command.data.options,
+                command.guild_id.unwrap(),
+                self.db.clone(),
+            )
+            .await;
 
             if let Err(why) = command
                 .create_interaction_response(&ctx.http, |response| {
