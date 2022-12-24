@@ -17,7 +17,7 @@ use tracing::log;
 
 use super::{DatabaseId, DiscordId, Task, TaskTest};
 use crate::{
-    db_wrapper::DBWrapper,
+    db_wrapper::{DBWrapper, TaskReturnData},
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
 };
 
@@ -49,7 +49,7 @@ pub enum DeleteCategoryTasks {
 
 #[async_trait]
 impl Task for CategoryHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
         match &self.task {
             CategoryTasks::Create(task) => self.handle_category_create(task, ctx, db).await,
             CategoryTasks::Delete(task) => self.handle_category_delete(task, ctx, db).await,
@@ -63,7 +63,7 @@ impl CategoryHandler {
         task: &CreateCategoryTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         let guild = ctx.cache.guild(*self.guild_id).unwrap();
 
         let everyone_role = guild.role_by_name("@everyone").unwrap();
@@ -164,6 +164,8 @@ impl CategoryHandler {
 
             let _team = team.update(&*db).await.unwrap();
         }
+
+        todo!()
     }
 
     async fn handle_category_delete(
@@ -171,7 +173,7 @@ impl CategoryHandler {
         task: &DeleteCategoryTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         match task {
             DeleteCategoryTasks::TeamCategory { team_id } => {
                 // Get the team from the database
@@ -211,6 +213,8 @@ impl CategoryHandler {
                     .unwrap();
             }
         };
+
+        todo!()
     }
 }
 

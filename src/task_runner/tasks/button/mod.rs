@@ -7,7 +7,7 @@ use serenity::client::Context;
 use tracing::log;
 
 use super::{Task, TaskTest};
-use crate::db_wrapper::DBWrapper;
+use crate::db_wrapper::{DBWrapper, TaskReturnData};
 
 // pub mod tests;
 
@@ -37,7 +37,7 @@ pub enum DeleteButtonTasks {
 
 #[async_trait]
 impl Task for ButtonHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
         match &self.task {
             ButtonTasks::Create(task) => self.handle_button_create(task, ctx, db).await,
             ButtonTasks::Delete(task) => self.handle_button_delete(task, ctx, db).await,
@@ -51,8 +51,10 @@ impl ButtonHandler {
         _task: &CreateButtonTasks,
         ctx: Arc<Context>,
         _db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         let _guild = ctx.cache.guild(self.guild_id).unwrap();
+
+        todo!()
     }
 
     async fn handle_button_delete(
@@ -60,7 +62,7 @@ impl ButtonHandler {
         _task: &DeleteButtonTasks,
         _ctx: Arc<Context>,
         _db: DBWrapper,
-    ) {
+    ) -> TaskReturnData {
         todo!()
     }
 }

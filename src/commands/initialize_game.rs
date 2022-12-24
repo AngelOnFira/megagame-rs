@@ -1,9 +1,17 @@
 use async_trait::async_trait;
 use serenity::{
-    builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
+    builder::CreateApplicationCommand,
+    model::prelude::{application_command::CommandDataOption, GuildId},
+    prelude::Context,
 };
 
-use crate::db_wrapper::DBWrapper;
+use crate::{
+    db_wrapper::DBWrapper,
+    game_mechanics::{
+        team::{TeamJobs, TeamMechanicsHandler},
+        MechanicHandler,
+    },
+};
 
 use super::GameCommand;
 
@@ -17,11 +25,19 @@ impl GameCommand for InitializeGame {
             .description("Initialize the game")
     }
 
-    async fn run(_options: &[CommandDataOption], _db: DBWrapper) -> String {
-        // let _task = TaskType::MessageUser(MessageUser {
-        //     player_id: 133358326439346176,
-        //     message: String::from("Good day"),
-        // });
-        "Hey".to_string()
+    async fn run(_options: &[CommandDataOption], guild_id: GuildId, db: DBWrapper) -> String {
+        // Make 3 teams, the Airship, the Galleon, and the Submarine
+        for name in ["Airship", "Galleon", "Submarine"] {
+            TeamMechanicsHandler {
+                task: TeamJobs::CreateTeam {
+                    name: name.to_string(),
+                },
+                guild_id: guild_id.into(),
+            }
+            .handle(db.clone())
+            .await;
+        }
+
+        "Made a team!".to_string()
     }
 }

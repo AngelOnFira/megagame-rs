@@ -1,7 +1,9 @@
 use async_trait::async_trait;
 
 use serenity::{
-    builder::CreateApplicationCommand, model::prelude::application_command::CommandDataOption,
+    builder::CreateApplicationCommand,
+    model::prelude::{application_command::CommandDataOption, GuildId},
+    prelude::Context,
 };
 
 use crate::db_wrapper::DBWrapper;
@@ -18,5 +20,5 @@ pub mod initialize_game;
 #[async_trait]
 pub trait GameCommand {
     fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand;
-    async fn run(options: &[CommandDataOption], db: DBWrapper) -> String;
+    async fn run(options: &[CommandDataOption], guild_id: GuildId, db: DBWrapper) -> String;
 }

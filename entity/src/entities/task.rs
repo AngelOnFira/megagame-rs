@@ -15,14 +15,14 @@ impl EntityName for Entity {
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
     pub id: i32,
-    pub completed: bool,
+    pub status: String,
     pub payload: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
 pub enum Column {
     Id,
-    Completed,
+    Status,
     Payload,
 }
 
@@ -46,7 +46,7 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::Id => ColumnType::Integer.def(),
-            Self::Completed => ColumnType::Boolean.def(),
+            Self::Status => ColumnType::String(None).def(),
             Self::Payload => ColumnType::String(None).def(),
         }
     }

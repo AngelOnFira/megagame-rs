@@ -12,7 +12,8 @@ pub mod tests {
             },
             test_helpers::{self, DatabaseStatus, DiscordStatus, TestHelpers},
             DatabaseId, DiscordId, TaskType,
-        }, TEST_GUILD_ID,
+        },
+        TEST_GUILD_ID,
     };
 
     pub async fn test_create_category(

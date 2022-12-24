@@ -13,6 +13,7 @@ use tracing_subscriber::EnvFilter;
 
 pub mod commands;
 pub mod db_wrapper;
+pub mod game_mechanics;
 pub mod handler;
 pub mod task_runner;
 

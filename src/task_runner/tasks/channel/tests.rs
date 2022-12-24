@@ -1,16 +1,16 @@
 pub mod tests {
     use std::sync::Arc;
 
-    use entity::entities::{category, guild, team};
-    use rand::{distributions::Alphanumeric, thread_rng, Rng};
-    use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+    use entity::entities::category;
+
+    use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
     use serenity::{model::prelude::Channel, prelude::Context};
 
     use crate::{
         db_wrapper::DBWrapper,
         task_runner::tasks::{
-            category::{CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks},
-            channel::{ChannelTasks, ChannelHandler},
+            category::CategoryCreateError,
+            channel::{ChannelHandler, ChannelTasks},
             test_helpers::TestHelpers,
             DatabaseId, DiscordId, TaskType,
         },
