@@ -15,7 +15,7 @@ use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RoleHandler {
-    pub guild_id: u64,
+    pub guild_id: DiscordId,
     pub task: RoleTasks,
 }
 

@@ -28,7 +28,7 @@ impl GameCommand for InitializeGame {
     async fn run(_options: &[CommandDataOption], guild_id: GuildId, db: DBWrapper) -> String {
         // Make 3 teams, the Airship, the Galleon, and the Submarine
         for name in ["Airship", "Galleon", "Submarine"] {
-            TeamMechanicsHandler {
+            let role_result = TeamMechanicsHandler {
                 task: TeamJobs::CreateTeam {
                     name: name.to_string(),
                 },

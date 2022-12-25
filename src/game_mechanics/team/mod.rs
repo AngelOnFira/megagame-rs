@@ -1,8 +1,13 @@
 use async_trait::async_trait;
 
 use crate::{
-    db_wrapper::DBWrapper,
-    task_runner::tasks::role::{CreateRoleTasks, RoleHandler, RoleTasks},
+    db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
+    task_runner::tasks::{
+        category::{CategoryHandler, CategoryTasks, CreateCategoryTasks},
+        channel::{ChannelHandler, ChannelTasks, CreateChannelTasks},
+        role::{CreateRoleTasks, RoleHandler, RoleTasks},
+        DiscordId, TaskType,
+    },
 };
 
 use super::MechanicHandler;
@@ -37,20 +42,41 @@ impl TeamMechanicsHandler {
 
         // Create the role
         let role_create_status = db
-            .add_await_task(crate::task_runner::tasks::TaskType::RoleHandler(
-                RoleHandler {
-                    guild_id: self.guild_id,
-                    task: RoleTasks::Create(CreateRoleTasks::Role {
-                        name: name.clone(),
-                        color: 0x00ff00,
-                    }),
-                },
-            ))
+            .add_await_task(TaskType::RoleHandler(RoleHandler {
+                guild_id: DiscordId(self.guild_id),
+                task: RoleTasks::Create(CreateRoleTasks::Role {
+                    name: name.clone(),
+                    color: 0x00ff00,
+                }),
+            }))
             .await;
 
-        dbg!(role_create_status);
-
         // Create the team category
+        let category_create_status = db
+            .add_await_task(TaskType::CategoryHandler(CategoryHandler {
+                guild_id: DiscordId(self.guild_id),
+                task: CategoryTasks::Create(CreateCategoryTasks::PublicCategory {
+                    name: name.clone(),
+                }),
+            }))
+            .await;
+
+        match category_create_status {
+            TaskResult::Completed(TaskReturnData::CategoryId(category_model)) => {
+                // Create the team channel
+                let channel_create_status = db
+                    .add_await_task(TaskType::ChannelHandler(ChannelHandler {
+                        guild_id: DiscordId(self.guild_id),
+                        task: ChannelTasks::Create(CreateChannelTasks::PublicChannel {
+                            name: name.clone(),
+                            category_id: DiscordId(category_model.discord_id.parse().unwrap()),
+                        }),
+                        category_id: DiscordId(category_model.discord_id.parse().unwrap()),
+                    }))
+                    .await;
+            }
+            _ => {}
+        };
     }
 
     async fn add_player_to_team(&self, _db: DBWrapper) {
