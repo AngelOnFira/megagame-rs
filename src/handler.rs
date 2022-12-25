@@ -36,9 +36,20 @@ impl EventHandler for Handler {
         if let Interaction::ApplicationCommand(command) = interaction {
             let command_handler = match command.data.name.as_str() {
                 "trade" => FakeTrade::run,
-                "init" => InitializeGame::run,
+                "initialize" => InitializeGame::run,
                 _ => unreachable!(),
             };
+
+            if let Err(why) = command
+                .create_interaction_response(&ctx.http, |response| {
+                    response
+                        .kind(InteractionResponseType::ChannelMessageWithSource)
+                        .interaction_response_data(|message| message.content("Handling command..."))
+                })
+                .await
+            {
+                println!("Cannot respond to slash command: {}", why);
+            }
 
             let content = command_handler(
                 &command.data.options,
@@ -46,17 +57,6 @@ impl EventHandler for Handler {
                 self.db.clone(),
             )
             .await;
-
-            if let Err(why) = command
-                .create_interaction_response(&ctx.http, |response| {
-                    response
-                        .kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|message| message.content(content))
-                })
-                .await
-            {
-                println!("Cannot respond to slash command: {}", why);
-            }
         }
     }
 

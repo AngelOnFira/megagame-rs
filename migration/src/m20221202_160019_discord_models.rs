@@ -15,7 +15,7 @@ enum Channel {
     Table,
     Id,
     DiscordId,
-    GuildId,
+    GuildFKId,
     Name,
     AllowNSFW,
 }
@@ -25,7 +25,7 @@ enum Role {
     Table,
     Id,
     DiscordId,
-    GuildId,
+    GuildFKId,
     Name,
 }
 
@@ -34,7 +34,7 @@ enum Category {
     Table,
     Id,
     DiscordId,
-    GuildId,
+    GuildFKId,
     Name,
 }
 
@@ -71,13 +71,13 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Channel::DiscordId).text().not_null())
-                    .col(ColumnDef::new(Channel::GuildId).integer().null())
+                    .col(ColumnDef::new(Channel::GuildFKId).integer().null())
                     .col(ColumnDef::new(Channel::Name).string().not_null())
                     .col(ColumnDef::new(Channel::AllowNSFW).boolean().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("channel_guild_fk")
-                            .from(Channel::Table, Channel::GuildId)
+                            .from(Channel::Table, Channel::GuildFKId)
                             .to(Guild::Table, Guild::Id),
                     )
                     .to_owned(),
@@ -97,12 +97,12 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Role::DiscordId).text().not_null())
-                    .col(ColumnDef::new(Role::GuildId).integer().null())
+                    .col(ColumnDef::new(Role::GuildFKId).integer().null())
                     .col(ColumnDef::new(Role::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("role_guild_fk")
-                            .from(Role::Table, Role::GuildId)
+                            .from(Role::Table, Role::GuildFKId)
                             .to(Guild::Table, Guild::Id),
                     )
                     .to_owned(),
@@ -122,12 +122,12 @@ impl MigrationTrait for Migration {
                             .primary_key(),
                     )
                     .col(ColumnDef::new(Category::DiscordId).text().not_null())
-                    .col(ColumnDef::new(Category::GuildId).integer().null())
+                    .col(ColumnDef::new(Category::GuildFKId).integer().null())
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("category_guild_fk")
-                            .from(Category::Table, Category::GuildId)
+                            .from(Category::Table, Category::GuildFKId)
                             .to(Guild::Table, Guild::Id)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::SetNull),

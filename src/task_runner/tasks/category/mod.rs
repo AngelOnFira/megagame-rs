@@ -17,7 +17,7 @@ use tracing::log;
 
 use super::{DatabaseId, DiscordId, Task, TaskTest};
 use crate::{
-    db_wrapper::{DBWrapper, TaskReturnData},
+    db_wrapper::{DBWrapper, TaskReturnData, TaskResult},
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
 };
 
@@ -49,7 +49,7 @@ pub enum DeleteCategoryTasks {
 
 #[async_trait]
 impl Task for CategoryHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
         match &self.task {
             CategoryTasks::Create(task) => self.handle_category_create(task, ctx, db).await,
             CategoryTasks::Delete(task) => self.handle_category_delete(task, ctx, db).await,
@@ -63,7 +63,7 @@ impl CategoryHandler {
         task: &CreateCategoryTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         let guild = ctx.cache.guild(*self.guild_id).unwrap();
 
         let everyone_role = guild.role_by_name("@everyone").unwrap();
@@ -152,7 +152,7 @@ impl CategoryHandler {
                 None => category::ActiveModel {
                     name: Set(discord_category.name),
                     discord_id: Set(DiscordId(discord_category.id.0).into()),
-                    guild_id: Set(Some(guild.id as i32)),
+                    guild_fk_id: Set(Some(guild.id as i32)),
                     ..Default::default()
                 }
                 .insert(&*db)
@@ -173,7 +173,7 @@ impl CategoryHandler {
         task: &DeleteCategoryTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         match task {
             DeleteCategoryTasks::TeamCategory { team_id } => {
                 // Get the team from the database

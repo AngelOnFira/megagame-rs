@@ -7,7 +7,7 @@ use serenity::client::Context;
 use tracing::log;
 
 use super::{Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskReturnData};
+use crate::db_wrapper::{DBWrapper, TaskReturnData, TaskResult};
 
 // pub mod tests;
 
@@ -37,7 +37,7 @@ pub enum DeleteDropdownTasks {
 
 #[async_trait]
 impl Task for DropdownHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
         match &self.task {
             DropdownTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
             DropdownTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
@@ -51,7 +51,7 @@ impl DropdownHandler {
         _task: &CreateDropdownTasks,
         ctx: Arc<Context>,
         _db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         let _guild = ctx.cache.guild(self.guild_id).unwrap();
 
         todo!()
@@ -62,7 +62,7 @@ impl DropdownHandler {
         _task: &DeleteDropdownTasks,
         _ctx: Arc<Context>,
         _db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         todo!()
     }
 }

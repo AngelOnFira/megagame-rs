@@ -2,12 +2,14 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 
+use entity::entities::role;
+use sea_orm::{ActiveModelTrait, Set};
 use serde::{Deserialize, Serialize};
 use serenity::client::Context;
 use tracing::log;
 
-use super::{Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskReturnData};
+use super::{DatabaseId, DiscordId, Task, TaskTest};
+use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
 
@@ -37,7 +39,7 @@ pub enum DeleteRoleTasks {
 
 #[async_trait]
 impl Task for RoleHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
         match &self.task {
             RoleTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
             RoleTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
@@ -48,22 +50,43 @@ impl Task for RoleHandler {
 impl RoleHandler {
     async fn handle_role_create(
         &self,
-        _task: &CreateRoleTasks,
+        task: &CreateRoleTasks,
         ctx: Arc<Context>,
-        _db: DBWrapper,
-    ) -> TaskReturnData {
+        db: DBWrapper,
+    ) -> TaskResult {
         let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        guild
-            .create_role(&ctx.http, |r| {
-                r.name("test");
-                // r.color(0x00ff00);
-                r
-            })
-            .await
-            .unwrap();
+        match task {
+            CreateRoleTasks::TeamRole {
+                team_id,
+                channel_db_id,
+            } => todo!(),
+            CreateRoleTasks::Role { name, color } => {
+                // Create the role
+                let role_discord = guild
+                    .create_role(&ctx.http, |r| {
+                        r.name(name);
+                        // r.color(*color);
+                        r
+                    })
+                    .await
+                    .unwrap();
 
-        todo!()
+                // TODO: Set the guild
+
+                // Add the role to the database
+                let role_database = role::ActiveModel {
+                    discord_id: Set(DiscordId(role_discord.id.0).into()),
+                    // guild_id: Set(Some(self.guild_id)),
+                    name: Set(role_discord.name),
+                    ..Default::default()
+                };
+
+                let role_database = role_database.insert(&*db).await.unwrap();
+
+                TaskResult::Completed(TaskReturnData::RoleId(DatabaseId(role_database.id)))
+            }
+        }
     }
 
     async fn handle_role_delete(
@@ -71,7 +94,7 @@ impl RoleHandler {
         _task: &DeleteRoleTasks,
         _ctx: Arc<Context>,
         _db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         todo!()
     }
 }

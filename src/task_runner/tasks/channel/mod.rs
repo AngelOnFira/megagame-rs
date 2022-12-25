@@ -9,7 +9,7 @@ use tracing::log;
 
 use super::{DatabaseId, DiscordId, Task, TaskTest};
 use crate::{
-    db_wrapper::{DBWrapper, TaskReturnData},
+    db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
     task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel},
 };
 
@@ -52,7 +52,7 @@ pub enum DeleteChannelTasks {
 
 #[async_trait]
 impl Task for ChannelHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskReturnData {
+    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
         match &self.task {
             ChannelTasks::Create(task) => self.handle_channel_create(task, ctx, db).await,
             ChannelTasks::Delete(task) => self.handle_channel_delete(task, ctx, db).await,
@@ -66,7 +66,7 @@ impl ChannelHandler {
         task: &CreateChannelTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         let guild = ctx.cache.guild(*self.guild_id).unwrap();
 
         let channel_builder: Box<
@@ -157,7 +157,7 @@ impl ChannelHandler {
         task: &DeleteChannelTasks,
         ctx: Arc<Context>,
         db: DBWrapper,
-    ) -> TaskReturnData {
+    ) -> TaskResult {
         let channel_id: DiscordId = match task {
             DeleteChannelTasks::TeamChannel { team_id } => {
                 // Get the team from the database
