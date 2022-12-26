@@ -84,7 +84,7 @@ impl RoleHandler {
 
                 let role_database = role_database.insert(&*db).await.unwrap();
 
-                TaskResult::Completed(TaskReturnData::RoleId(DatabaseId(role_database.id)))
+                TaskResult::Completed(TaskReturnData::RoleId(role_database))
             }
         }
     }

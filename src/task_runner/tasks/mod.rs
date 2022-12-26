@@ -2,7 +2,7 @@ use std::{fmt::Debug, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use serenity::{client::Context, model::prelude::ChannelId};
+use serenity::{client::Context, model::prelude::{ChannelId, GuildId}};
 
 use crate::db_wrapper::{DBWrapper, TaskReturnData, TaskResult};
 
@@ -105,6 +105,12 @@ impl From<&String> for DiscordId {
 impl Into<ChannelId> for DiscordId {
     fn into(self) -> ChannelId {
         ChannelId(self.0)
+    }
+}
+
+impl Into<GuildId> for DiscordId {
+    fn into(self) -> GuildId {
+        GuildId(self.0)
     }
 }
 
