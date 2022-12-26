@@ -81,11 +81,13 @@ impl DBWrapper {
             };
 
             // Sleep for 1 second
-            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+            tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
         }
     }
 
     /// Adds a task to the database and waits for it to be completed
+    ///
+    /// TODO: Find a way to make this proccess multiple tasks at once
     pub async fn add_await_task(&self, task: TaskType) -> TaskResult {
         let id = self.add_task(task).await;
         self.await_task(id).await

@@ -17,7 +17,6 @@ enum Channel {
     DiscordId,
     GuildFKId,
     Name,
-    AllowNSFW,
 }
 
 #[derive(Iden)]
@@ -73,7 +72,6 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Channel::DiscordId).text().not_null())
                     .col(ColumnDef::new(Channel::GuildFKId).integer().null())
                     .col(ColumnDef::new(Channel::Name).string().not_null())
-                    .col(ColumnDef::new(Channel::AllowNSFW).boolean().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("channel_guild_fk")

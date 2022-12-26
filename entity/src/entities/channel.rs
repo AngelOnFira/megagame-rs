@@ -18,7 +18,6 @@ pub struct Model {
     pub discord_id: String,
     pub guild_fk_id: Option<i32>,
     pub name: String,
-    pub allow_nsfw: bool,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
@@ -27,7 +26,6 @@ pub enum Column {
     DiscordId,
     GuildFkId,
     Name,
-    AllowNsfw,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
@@ -55,7 +53,6 @@ impl ColumnTrait for Column {
             Self::DiscordId => ColumnType::String(None).def(),
             Self::GuildFkId => ColumnType::Integer.def().null(),
             Self::Name => ColumnType::String(None).def(),
-            Self::AllowNsfw => ColumnType::Boolean.def(),
         }
     }
 }
