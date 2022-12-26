@@ -2,14 +2,17 @@ use std::sync::Arc;
 
 use async_trait::async_trait;
 use entity::entities::{channel, team};
-use sea_orm::{ActiveModelTrait, EntityTrait, ModelTrait, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, ModelTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelType};
 use tracing::log;
 
-use super::{DatabaseId, DiscordId, Task, TaskTest};
+use super::{get_guild, DatabaseId, DiscordId, Task, TaskTest};
 use crate::{
-    db_wrapper::{DBWrapper, TaskResult},
+    db_wrapper::{
+        DBWrapper, TaskResult,
+        TaskReturnData::{self, ChannelModel},
+    },
     task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel},
 };
 
@@ -18,44 +21,31 @@ pub mod tests;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ChannelHandler {
     pub guild_id: DiscordId,
-    pub category_id: DiscordId,
     pub task: ChannelTasks,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ChannelTasks {
-    Create(CreateChannelTasks),
-    Delete(DeleteChannelTasks),
+    Create(ChannelCreateData),
+    Delete { id: DiscordId },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum CreateChannelTasks {
-    TeamChannel {
-        team_id: DatabaseId,
-        channel_id: DatabaseId,
-    },
-    PublicChannel {
-        category_id: DiscordId,
-        name: String,
-    },
-    TeamVoiceChannel {
-        team_id: DatabaseId,
-        name: String,
-    },
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum DeleteChannelTasks {
-    TeamChannel { team_id: DatabaseId },
-    PublicChannel { id: DiscordId },
+pub struct ChannelCreateData {
+    pub name: String,
+    pub category_id: Option<DiscordId>,
+    pub kind: ChannelType,
 }
 
 #[async_trait]
 impl Task for ChannelHandler {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
         match &self.task {
-            ChannelTasks::Create(task) => self.handle_channel_create(task, ctx, db).await,
-            ChannelTasks::Delete(task) => self.handle_channel_delete(task, ctx, db).await,
+            ChannelTasks::Create(channel_create_task) => {
+                self.handle_channel_create(channel_create_task, ctx, db)
+                    .await
+            }
+            ChannelTasks::Delete { id } => self.handle_channel_delete(*id, ctx, db).await,
         }
     }
 }
@@ -63,137 +53,72 @@ impl Task for ChannelHandler {
 impl ChannelHandler {
     async fn handle_channel_create(
         &self,
-        task: &CreateChannelTasks,
+        data: &ChannelCreateData,
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> TaskResult {
-        let guild = ctx.cache.guild(*self.guild_id).unwrap();
+        let (discord_guild, database_guild) =
+            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
         let channel_builder: Box<
             dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
-        > = match task {
-            CreateChannelTasks::TeamChannel {
-                team_id,
-                channel_id,
-            } => {
-                // Get the team from the database
-                let _team: team::Model = team::Entity::find_by_id(**team_id)
-                    .one(&*db)
-                    .await
-                    .unwrap()
-                    .unwrap();
+        > = Box::new(move |c: &mut CreateChannel| {
+            c.name(data.name.clone());
 
-                // There will already be a channel in the database for this
-                // team, since it needs to be created before the team is.
-
-                // Get the channel from the database
-                let category: channel::Model = channel::Entity::find_by_id(**channel_id)
-                    .one(&*db)
-                    .await
-                    .unwrap()
-                    .unwrap();
-
-                Box::new(move |c: &mut CreateChannel| {
-                    c.name(category.name);
-                    c.category(DiscordId::from(&category.discord_id));
-                    c
-                })
+            if let Some(category) = &data.category_id {
+                c.category(*category);
             }
-            CreateChannelTasks::PublicChannel {
-                ref name,
-                category_id,
-            } => Box::new(move |c: &mut CreateChannel| {
-                c.name(name);
-                c.category(**category_id);
-                c
-            }),
-            CreateChannelTasks::TeamVoiceChannel { team_id, name } => {
-                // Get the team from the database
-                let team: team::Model = team::Entity::find_by_id(**team_id)
-                    .one(&*db)
-                    .await
-                    .unwrap()
-                    .unwrap();
 
-                Box::new(move |c: &mut CreateChannel| {
-                    c.name(name);
-                    c.category(team.category_id.unwrap() as u64);
-                    c.kind(ChannelType::Voice);
-                    c
-                })
-            }
-        };
+            c.kind(data.kind);
+            c
+        });
 
         // Create the channel
-        let discord_channel = guild
+        let discord_channel = discord_guild
             .create_channel(&ctx.http, channel_builder)
             .await
             .unwrap();
 
-        // If it's a team channel, safe it to the database
-        if let CreateChannelTasks::TeamChannel {
-            team_id: _,
-            channel_id,
-        } = task
-        {
-            // Get the channel from the database
-            let mut category: channel::ActiveModel = channel::Entity::find_by_id(**channel_id)
-                .one(&*db)
-                .await
-                .unwrap()
-                .unwrap()
-                .into();
-
-            category.discord_id = Set(DiscordId(discord_channel.id.0).into());
-
-            let _category = category.update(&*db).await.unwrap();
+        // Add it to the database
+        let database_category = channel::ActiveModel {
+            discord_id: Set(DiscordId(discord_channel.id.into()).into()),
+            guild_fk_id: Set(Some(database_guild.id)),
+            name: Set(data.name.clone()),
+            ..Default::default()
         }
+        .insert(&*db)
+        .await
+        .unwrap();
 
-        todo!()
+        // Return the database model
+        TaskResult::Completed(ChannelModel(database_category))
     }
 
     async fn handle_channel_delete(
         &self,
-        task: &DeleteChannelTasks,
+        id: DiscordId,
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> TaskResult {
-        let channel_id: DiscordId = match task {
-            DeleteChannelTasks::TeamChannel { team_id } => {
-                // Get the team from the database
-                let team: team::Model = team::Entity::find_by_id(**team_id)
-                    .one(&*db)
-                    .await
-                    .unwrap()
-                    .unwrap();
-
-                // Get the channel from the database
-                let channel: channel::Model =
-                    channel::Entity::find_by_id(team.category_id.unwrap())
-                        .one(&*db)
-                        .await
-                        .unwrap()
-                        .unwrap();
-
-                let channel_id = DiscordId::from(&channel.discord_id);
-
-                // Delete it from the database
-                let _res = channel.delete(&*db).await;
-
-                channel_id
-            }
-            DeleteChannelTasks::PublicChannel { id } => *id,
-        };
-
-        // Delete it from discord
+        // Delete the channel from Discord
         ctx.cache
-            .channel(*channel_id)
+            .channel(*id)
             .unwrap()
             .delete(&ctx.http)
             .await
             .unwrap();
 
-        todo!()
+        // Delete the channel from the database
+        let channel = channel::Entity::find()
+            .filter(channel::Column::DiscordId.eq(*id))
+            .one(&*db)
+            .await
+            .unwrap()
+            .unwrap();
+
+        channel.delete(&*db).await.unwrap();
+
+        TaskResult::Completed(TaskReturnData::None)
     }
 }
 

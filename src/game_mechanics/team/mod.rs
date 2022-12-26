@@ -1,10 +1,11 @@
 use async_trait::async_trait;
+use serenity::model::prelude::ChannelType;
 
 use crate::{
     db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
     task_runner::tasks::{
         category::{CategoryHandler, CategoryTasks},
-        channel::{ChannelHandler, ChannelTasks, CreateChannelTasks},
+        channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
         role::{CreateRoleTasks, RoleHandler, RoleTasks},
         DiscordId, TaskType,
     },
@@ -59,22 +60,22 @@ impl TeamMechanicsHandler {
             }))
             .await;
 
-        match category_create_status {
-            TaskResult::Completed(TaskReturnData::CategoryModel(category_model)) => {
-                // Create the team channel
-                let _channel_create_status = db
-                    .add_await_task(TaskType::ChannelHandler(ChannelHandler {
-                        guild_id: DiscordId(self.guild_id),
-                        task: ChannelTasks::Create(CreateChannelTasks::PublicChannel {
-                            name: name.clone(),
-                            category_id: DiscordId(category_model.discord_id.parse().unwrap()),
-                        }),
-                        category_id: DiscordId(category_model.discord_id.parse().unwrap()),
-                    }))
-                    .await;
-            }
-            _ => {}
+        let category_model = match category_create_status {
+            TaskResult::Completed(TaskReturnData::CategoryModel(category_model)) => category_model,
+            _ => panic!("Category not created"),
         };
+
+        // Create the team channel
+        let _channel_create_status = db
+            .add_await_task(TaskType::ChannelHandler(ChannelHandler {
+                guild_id: DiscordId(self.guild_id),
+                task: ChannelTasks::Create(ChannelCreateData {
+                    name: name.clone(),
+                    category_id: Some(DiscordId(category_model.discord_id.parse().unwrap())),
+                    kind: ChannelType::Text,
+                }),
+            }))
+            .await;
     }
 
     async fn add_player_to_team(&self, _db: DBWrapper) {

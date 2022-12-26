@@ -36,7 +36,15 @@ impl TaskRunner {
 
         // Iterate through open tasks in the DB
         for db_task in incomplete_tasks {
-            let task_payload: TaskType = serde_json::from_str(&db_task.payload).unwrap();
+            let task_payload: TaskType = match serde_json::from_str(&db_task.payload) {
+                Ok(task) => task,
+                Err(why) => {
+                    panic!(
+                        "Error parsing task: {:?}\nThe payload was {:?}",
+                        why, &db_task.payload
+                    )
+                }
+            };
 
             log::info!("Working on task: {:?}", task_payload);
 
