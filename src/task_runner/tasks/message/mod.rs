@@ -7,7 +7,7 @@ use serenity::client::Context;
 use tracing::log;
 
 use super::{Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskReturnData, TaskResult};
+use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
 

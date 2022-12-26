@@ -62,7 +62,7 @@ impl TeamMechanicsHandler {
             .await;
 
         match category_create_status {
-            TaskResult::Completed(TaskReturnData::CategoryId(category_model)) => {
+            TaskResult::Completed(TaskReturnData::CategoryModel(category_model)) => {
                 // Create the team channel
                 let channel_create_status = db
                     .add_await_task(TaskType::ChannelHandler(ChannelHandler {

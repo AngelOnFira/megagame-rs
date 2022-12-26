@@ -1,10 +1,15 @@
 use std::{fmt::Debug, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
+use entity::entities::guild;
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
-use serenity::{client::Context, model::prelude::{ChannelId, GuildId}};
+use serenity::{
+    client::Context,
+    model::prelude::{ChannelId, Guild, GuildId},
+};
 
-use crate::db_wrapper::{DBWrapper, TaskReturnData, TaskResult};
+use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 use self::{
     button::ButtonHandler, category::CategoryHandler, channel::ChannelHandler,
@@ -123,6 +128,36 @@ impl Deref for DatabaseId {
     fn deref(&self) -> &Self::Target {
         &self.0
     }
+}
+
+/// Get the guild from the cache and the database. If the guild is not in the
+/// database, it will be created.
+pub async fn get_guild(
+    ctx: Arc<Context>,
+    db: DBWrapper,
+    guild_id: DiscordId,
+) -> (Guild, guild::Model) {
+    let discord_guild = ctx.cache.guild(guild_id).unwrap();
+
+    // Get or create the guild
+    let guild_option = guild::Entity::find()
+        .filter(guild::Column::DiscordId.eq(guild_id.to_string()))
+        .one(&*db)
+        .await
+        .unwrap();
+
+    let database_guild = match guild_option {
+        Some(guild) => guild,
+        None => guild::ActiveModel {
+            discord_id: Set(guild_id.into()),
+            ..Default::default()
+        }
+        .insert(&*db)
+        .await
+        .unwrap(),
+    };
+
+    (discord_guild, database_guild)
 }
 
 // impl Task {

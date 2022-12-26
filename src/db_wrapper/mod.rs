@@ -1,6 +1,6 @@
 use std::ops::Deref;
 
-use entity::entities::{task, role, channel, category};
+use entity::entities::{category, channel, role, task};
 use sea_orm::{prelude::*, Database, Set};
 use serde::{Deserialize, Serialize};
 
@@ -19,11 +19,11 @@ pub enum TaskResult {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TaskReturnData {
-    ChannelId(channel::Model),
-    CategoryId(category::Model),
+    ChannelModel(channel::Model),
+    CategoryModel(category::Model),
     TeamId(DatabaseId),
     UserId(DatabaseId),
-    RoleId(role::Model),
+    RoleModel(role::Model),
     MessageId(DatabaseId),
     None,
 }
