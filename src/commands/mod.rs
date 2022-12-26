@@ -3,7 +3,6 @@ use async_trait::async_trait;
 use serenity::{
     builder::CreateApplicationCommand,
     model::prelude::{application_command::CommandDataOption, GuildId},
-    prelude::Context,
 };
 
 use crate::db_wrapper::DBWrapper;

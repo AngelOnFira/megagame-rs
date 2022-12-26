@@ -4,15 +4,11 @@ pub mod tests {
     use serenity::prelude::Context;
 
     use crate::{
-        db_wrapper::{
-            DBWrapper,
-            TaskResult::{Completed, Error, Pending},
-            TaskReturnData,
-        },
+        db_wrapper::{DBWrapper, TaskResult::Completed, TaskReturnData},
         task_runner::tasks::{
             category::{CategoryCreateError, CategoryHandler, CategoryTasks},
             test_helpers::{self, DatabaseStatus, DiscordStatus, TestHelpers},
-            DatabaseId, DiscordId, TaskType,
+            DiscordId, TaskType,
         },
         TEST_GUILD_ID,
     };

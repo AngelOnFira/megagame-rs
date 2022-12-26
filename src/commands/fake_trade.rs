@@ -3,7 +3,6 @@ use async_trait::async_trait;
 use serenity::{
     builder::CreateApplicationCommand,
     model::prelude::{application_command::CommandDataOption, GuildId},
-    prelude::Context,
 };
 
 use crate::{
@@ -24,7 +23,7 @@ impl GameCommand for FakeTrade {
         command.name("trade").description("Start a test trade")
     }
 
-    async fn run(_options: &[CommandDataOption], guild_id: GuildId, db: DBWrapper) -> String {
+    async fn run(_options: &[CommandDataOption], _guild_id: GuildId, db: DBWrapper) -> String {
         // Add a channel create task
         db.add_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: DiscordId(345993194322001923),

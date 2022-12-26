@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serenity::client::Context;
 use tracing::log;
 
-use super::{DatabaseId, DiscordId, Task, TaskTest};
+use super::{DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
@@ -58,10 +58,10 @@ impl RoleHandler {
 
         match task {
             CreateRoleTasks::TeamRole {
-                team_id,
-                channel_db_id,
+                team_id: _,
+                channel_db_id: _,
             } => todo!(),
-            CreateRoleTasks::Role { name, color } => {
+            CreateRoleTasks::Role { name, color: _ } => {
                 // Create the role
                 let role_discord = guild
                     .create_role(&ctx.http, |r| {

@@ -41,7 +41,7 @@ impl TeamMechanicsHandler {
         // Add the team to the database
 
         // Create the role
-        let role_create_status = db
+        let _role_create_status = db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: RoleTasks::Create(CreateRoleTasks::Role {
@@ -62,7 +62,7 @@ impl TeamMechanicsHandler {
         match category_create_status {
             TaskResult::Completed(TaskReturnData::CategoryModel(category_model)) => {
                 // Create the team channel
-                let channel_create_status = db
+                let _channel_create_status = db
                     .add_await_task(TaskType::ChannelHandler(ChannelHandler {
                         guild_id: DiscordId(self.guild_id),
                         task: ChannelTasks::Create(CreateChannelTasks::PublicChannel {

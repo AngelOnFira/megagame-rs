@@ -9,7 +9,7 @@ use serenity::{
     model::prelude::{ChannelId, Guild, GuildId},
 };
 
-use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
+use crate::db_wrapper::{DBWrapper, TaskResult};
 
 use self::{
     button::ButtonHandler, category::CategoryHandler, channel::ChannelHandler,

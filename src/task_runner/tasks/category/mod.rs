@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use crate::task_runner::tasks::TaskReturnData::CategoryModel;
 use async_trait::async_trait;
-use entity::entities::{category, guild, team};
+use entity::entities::category;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, ModelTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
@@ -11,12 +10,12 @@ use serenity::{
     model::{
         channel::{ChannelType, PermissionOverwriteType},
         permissions::Permissions,
-        prelude::{Guild, PermissionOverwrite},
+        prelude::PermissionOverwrite,
     },
 };
 use tracing::log;
 
-use super::{get_guild, DatabaseId, DiscordId, Task, TaskTest};
+use super::{get_guild, DiscordId, Task, TaskTest};
 use crate::{
     db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},

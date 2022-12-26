@@ -51,7 +51,7 @@ impl EventHandler for Handler {
                 println!("Cannot respond to slash command: {}", why);
             }
 
-            let content = command_handler(
+            let _content = command_handler(
                 &command.data.options,
                 command.guild_id.unwrap(),
                 self.db.clone(),
