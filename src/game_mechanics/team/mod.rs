@@ -1,11 +1,15 @@
 use async_trait::async_trait;
-use serenity::model::prelude::ChannelType;
+use serenity::{
+    model::prelude::{ChannelType, RoleId},
+    utils::MessageBuilder,
+};
 
 use crate::{
     db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
     task_runner::tasks::{
         category::{CategoryHandler, CategoryTasks},
         channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
+        message::{MessageHandler, MessageTasks, SendChannelMessage},
         role::{CreateRoleTasks, RoleHandler, RoleTasks},
         DiscordId, TaskType,
     },
@@ -42,7 +46,7 @@ impl TeamMechanicsHandler {
         // Add the team to the database
 
         // Create the role
-        let _role_create_status = db
+        let role_create_status = db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: RoleTasks::Create(CreateRoleTasks::Role {
@@ -51,6 +55,11 @@ impl TeamMechanicsHandler {
                 }),
             }))
             .await;
+
+        let role_model = match role_create_status {
+            TaskResult::Completed(TaskReturnData::RoleModel(role_model)) => role_model,
+            _ => panic!("Role not created"),
+        };
 
         // Create the team category
         let category_create_status = db
@@ -66,13 +75,34 @@ impl TeamMechanicsHandler {
         };
 
         // Create the team channel
-        let _channel_create_status = db
+        let channel_create_status = db
             .add_await_task(TaskType::ChannelHandler(ChannelHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: ChannelTasks::Create(ChannelCreateData {
                     name: name.clone(),
                     category_id: Some(DiscordId(category_model.discord_id.parse().unwrap())),
                     kind: ChannelType::Text,
+                }),
+            }))
+            .await;
+
+        let channel_model = match channel_create_status {
+            TaskResult::Completed(TaskReturnData::ChannelModel(channel_model)) => channel_model,
+            _ => panic!("Channel not created"),
+        };
+
+        // Write a message in the team channel that pings the role of the
+        // players
+        let message_create_status = db
+            .add_await_task(TaskType::MessageHandler(MessageHandler {
+                guild_id: DiscordId(self.guild_id),
+                task: MessageTasks::SendChannelMessage(SendChannelMessage {
+                    channel_id: DiscordId(channel_model.discord_id.parse().unwrap()),
+                    message: MessageBuilder::new()
+                        .push("Welcome to the team ")
+                        .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
+                        .push("!")
+                        .build(),
                 }),
             }))
             .await;

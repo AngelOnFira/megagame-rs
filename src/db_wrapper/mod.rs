@@ -4,7 +4,7 @@ use entity::entities::{category, channel, role, task};
 use sea_orm::{prelude::*, Database, Set};
 use serde::{Deserialize, Serialize};
 
-use crate::task_runner::tasks::{DatabaseId, TaskType};
+use crate::task_runner::tasks::{DatabaseId, DiscordId, TaskType};
 #[derive(Debug, Clone)]
 pub struct DBWrapper {
     pub db: DatabaseConnection,
@@ -24,7 +24,7 @@ pub enum TaskReturnData {
     TeamId(DatabaseId),
     UserId(DatabaseId),
     RoleModel(role::Model),
-    MessageId(DatabaseId),
+    MessageId(DiscordId),
     None,
 }
 

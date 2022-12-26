@@ -107,6 +107,12 @@ impl From<&String> for DiscordId {
     }
 }
 
+impl Into<u64> for DiscordId {
+    fn into(self) -> u64 {
+        self.0
+    }
+}
+
 impl Into<ChannelId> for DiscordId {
     fn into(self) -> ChannelId {
         ChannelId(self.0)

@@ -3,67 +3,64 @@ use std::sync::Arc;
 use async_trait::async_trait;
 
 use serde::{Deserialize, Serialize};
-use serenity::client::Context;
+use serenity::{client::Context, model::prelude::ChannelId};
 use tracing::log;
 
-use super::{Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskResult};
+use super::{get_guild, DiscordId, Task, TaskTest};
+use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageHandler {
-    pub guild_id: u64,
-    pub category_id: u64,
+    pub guild_id: DiscordId,
     pub task: MessageTasks,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum MessageTasks {
-    Create(CreateMessageTasks),
-    Delete(DeleteMessageTasks),
+    SendChannelMessage(SendChannelMessage),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum CreateMessageTasks {
-    TeamMessage { team_id: u64, channel_db_id: u64 },
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum DeleteMessageTasks {
-    TeamChannel { team_id: u64 },
-    PublicChannel { id: u64 },
+pub struct SendChannelMessage {
+    pub channel_id: DiscordId,
+    pub message: String,
 }
 
 #[async_trait]
 impl Task for MessageHandler {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
         match &self.task {
-            MessageTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
-            MessageTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
+            MessageTasks::SendChannelMessage(send_channel_message) => {
+                self.handle_send_channel_message(send_channel_message.clone(), ctx, db)
+                    .await
+            }
         }
     }
 }
 
 impl MessageHandler {
-    async fn handle_role_create(
+    async fn handle_send_channel_message(
         &self,
-        _task: &CreateMessageTasks,
+        send_channel_message: SendChannelMessage,
         ctx: Arc<Context>,
-        _db: DBWrapper,
+        db: DBWrapper,
     ) -> TaskResult {
-        let _guild = ctx.cache.guild(self.guild_id).unwrap();
+        let (discord_guild, database_guild) =
+            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        todo!()
-    }
+        let channel_id = ChannelId(*send_channel_message.channel_id);
 
-    async fn handle_role_delete(
-        &self,
-        _task: &DeleteMessageTasks,
-        _ctx: Arc<Context>,
-        _db: DBWrapper,
-    ) -> TaskResult {
-        todo!()
+        let message = channel_id
+            .send_message(&ctx.http, |m| {
+                m.content(send_channel_message.message);
+                m
+            })
+            .await
+            .unwrap();
+
+        TaskResult::Completed(TaskReturnData::MessageId(DiscordId(message.id.into())))
     }
 }
 
