@@ -4,12 +4,13 @@ pub mod tests {
     use serenity::prelude::Context;
 
     use crate::{
-        db_wrapper::DBWrapper,
+        db_wrapper::{
+            DBWrapper,
+            TaskResult::{Completed, Error, Pending},
+            TaskReturnData,
+        },
         task_runner::tasks::{
-            category::{
-                CategoryCreateError, CategoryHandler, CategoryTasks, CreateCategoryTasks,
-                DeleteCategoryTasks,
-            },
+            category::{CategoryCreateError, CategoryHandler, CategoryTasks},
             test_helpers::{self, DatabaseStatus, DiscordStatus, TestHelpers},
             DatabaseId, DiscordId, TaskType,
         },
@@ -26,13 +27,20 @@ pub mod tests {
         let test_team = test_helper.generate_team().await;
 
         // Create the create category task
-        db.add_await_task(TaskType::CategoryHandler(CategoryHandler {
-            guild_id: DiscordId(TEST_GUILD_ID),
-            task: CategoryTasks::Create(CreateCategoryTasks::TeamCategory {
-                team_id: DatabaseId(test_team.id as i32),
-            }),
-        }))
-        .await;
+        let category_task_result = db
+            .add_await_task(TaskType::CategoryHandler(CategoryHandler {
+                guild_id: DiscordId(TEST_GUILD_ID),
+                task: CategoryTasks::Create {
+                    name: test_team.name.clone(),
+                },
+            }))
+            .await;
+
+        // Make sure we got a category back
+        let category_model = match category_task_result {
+            Completed(TaskReturnData::CategoryModel(model)) => model,
+            _ => return Err(CategoryCreateError::CategoryNotCreated),
+        };
 
         // Check if the category was created
         if let DiscordStatus::DoesNotExist = test_helper
@@ -57,9 +65,9 @@ pub mod tests {
         // Create the delete category task
         db.add_await_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: DiscordId(345993194322001923),
-            task: CategoryTasks::Delete(DeleteCategoryTasks::TeamCategory {
-                team_id: DatabaseId(test_team.id as i32),
-            }),
+            task: CategoryTasks::Delete {
+                discord_id: (&category_model.discord_id).into(),
+            },
         }))
         .await;
 

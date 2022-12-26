@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use crate::{
     db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
     task_runner::tasks::{
-        category::{CategoryHandler, CategoryTasks, CreateCategoryTasks},
+        category::{CategoryHandler, CategoryTasks},
         channel::{ChannelHandler, ChannelTasks, CreateChannelTasks},
         role::{CreateRoleTasks, RoleHandler, RoleTasks},
         DiscordId, TaskType,
@@ -55,9 +55,7 @@ impl TeamMechanicsHandler {
         let category_create_status = db
             .add_await_task(TaskType::CategoryHandler(CategoryHandler {
                 guild_id: DiscordId(self.guild_id),
-                task: CategoryTasks::Create(CreateCategoryTasks::PublicCategory {
-                    name: name.clone(),
-                }),
+                task: CategoryTasks::Create { name: name.clone() },
             }))
             .await;
 

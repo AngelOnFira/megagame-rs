@@ -9,7 +9,7 @@ use serenity::{
 use crate::{
     db_wrapper::DBWrapper,
     task_runner::tasks::{
-        category::{CategoryHandler, CategoryTasks, CreateCategoryTasks},
+        category::{CategoryHandler, CategoryTasks},
         DiscordId, TaskType,
     },
 };
@@ -28,9 +28,9 @@ impl GameCommand for FakeTrade {
         // Add a channel create task
         db.add_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: DiscordId(345993194322001923),
-            task: CategoryTasks::Create(CreateCategoryTasks::PublicCategory {
+            task: CategoryTasks::Create {
                 name: "test".to_string(),
-            }),
+            },
         }))
         .await;
         "Hey, I'm alive!".to_string()

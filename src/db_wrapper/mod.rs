@@ -14,7 +14,7 @@ pub struct DBWrapper {
 pub enum TaskResult {
     Pending,
     Completed(TaskReturnData),
-    // Error(String),
+    Error(String),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
