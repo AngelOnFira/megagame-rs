@@ -3,7 +3,7 @@ use std::sync::Arc;
 use entity::entities::{category, team};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
-use serenity::{model::prelude::Channel, prelude::Context};
+use serenity::{all::ChannelType, model::prelude::Channel, prelude::Context};
 
 use crate::{db_wrapper::DBWrapper, TEST_GUILD_ID};
 
@@ -69,8 +69,8 @@ impl TestHelpers {
                     .channels
                     .iter()
                     .filter(|(_, channel)| {
-                        if let Channel::Category(category) = channel {
-                            category.name == name
+                        if let ChannelType::Category = channel.kind {
+                            channel.name == name
                         } else {
                             false
                         }

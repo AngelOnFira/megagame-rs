@@ -7,12 +7,10 @@ use crate::{
 use crate::commands::GameCommand;
 
 use serenity::{
+    all::Interaction,
     async_trait,
-    model::{
-        application::interaction::{Interaction, InteractionResponseType},
-        gateway::Ready,
-        id::GuildId,
-    },
+    builder::{CreateInteractionResponse, CreateInteractionResponseMessage},
+    model::{gateway::Ready, id::GuildId},
     prelude::*,
 };
 use std::{
@@ -33,7 +31,7 @@ pub struct Handler {
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::ApplicationCommand(command) = interaction {
+        if let Interaction::Command(command) = interaction {
             let command_handler = match command.data.name.as_str() {
                 "trade" => FakeTrade::run,
                 "initialize" => InitializeGame::run,
@@ -41,18 +39,19 @@ impl EventHandler for Handler {
             };
 
             if let Err(why) = command
-                .create_interaction_response(&ctx.http, |response| {
-                    response
-                        .kind(InteractionResponseType::ChannelMessageWithSource)
-                        .interaction_response_data(|message| message.content("Handling command..."))
-                })
+                .create_response(
+                    &ctx.http,
+                    CreateInteractionResponse::Message(
+                        CreateInteractionResponseMessage::new().content("Handling command..."),
+                    ),
+                )
                 .await
             {
                 println!("Cannot respond to slash command: {}", why);
             }
 
             let _content = command_handler(
-                &command.data.options,
+                &command.data.options(),
                 command.guild_id.unwrap(),
                 self.db.clone(),
             )
@@ -65,11 +64,10 @@ impl EventHandler for Handler {
 
         for guild in ctx.cache.guilds().iter() {
             GuildId(guild.0)
-                .set_application_commands(&ctx.http, |commands| {
-                    commands
-                        .create_application_command(|command| FakeTrade::register(command))
-                        .create_application_command(|command| InitializeGame::register(command))
-                })
+                .set_application_commands(
+                    &ctx.http,
+                    vec![FakeTrade::register(), InitializeGame::register()],
+                )
                 .await
                 .unwrap();
         }

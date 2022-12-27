@@ -60,18 +60,11 @@ impl ChannelHandler {
         let (discord_guild, database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        let channel_builder: Box<
-            dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
-        > = Box::new(move |c: &mut CreateChannel| {
-            c.name(data.name.clone());
+        let mut channel_builder = CreateChannel::new(data.name.clone()).kind(data.kind);
 
-            if let Some(category) = &data.category_id {
-                c.category(*category);
-            }
-
-            c.kind(data.kind);
-            c
-        });
+        if let Some(category) = &data.category_id {
+            channel_builder = channel_builder.category(*category);
+        }
 
         // Create the channel
         let discord_channel = discord_guild

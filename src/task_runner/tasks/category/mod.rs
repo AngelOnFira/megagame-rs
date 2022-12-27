@@ -59,29 +59,25 @@ impl CategoryHandler {
 
         let everyone_role = discord_guild.role_by_name("@everyone").unwrap();
 
-        let category_builder: Box<
-            dyn FnOnce(&mut CreateChannel) -> &mut CreateChannel + Send + Sync,
-        > = Box::new(|c: &mut CreateChannel| {
-            c.name(name);
-            c.kind(ChannelType::Category);
-            c.permissions(vec![PermissionOverwrite {
-                allow: Permissions::VIEW_CHANNEL,
-                deny: Permissions::SEND_TTS_MESSAGES,
-                kind: PermissionOverwriteType::Role(everyone_role.id),
-            }]);
-            c
-        });
-
         // Create the category
         let discord_category = discord_guild
-            .create_channel(&ctx.http, category_builder)
+            .create_channel(
+                &ctx.http,
+                CreateChannel::new(name)
+                    .kind(ChannelType::Category)
+                    .permissions(vec![PermissionOverwrite {
+                        allow: Permissions::VIEW_CHANNEL,
+                        deny: Permissions::SEND_TTS_MESSAGES,
+                        kind: PermissionOverwriteType::Role(everyone_role.id),
+                    }]),
+            )
             .await
             .unwrap();
 
         // Save the category to the database
         let database_category = category::ActiveModel {
             name: Set(discord_category.name),
-            discord_id: Set(DiscordId(discord_category.id.0).into()),
+            discord_id: Set(DiscordId(discord_category.id.0.get()).into()),
             guild_fk_id: Set(Some(database_guild.id)),
             ..Default::default()
         }
@@ -100,7 +96,7 @@ impl CategoryHandler {
     ) -> TaskResult {
         // Delete the category from Discord
         ctx.cache
-            .category(*category_discord_id)
+            .channel(*category_discord_id)
             .unwrap()
             .delete(&ctx.http)
             .await

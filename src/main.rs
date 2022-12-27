@@ -6,8 +6,8 @@ use db_wrapper::DBWrapper;
 use handler::Handler;
 
 use sea_orm::{prelude::*, Database};
-use serenity::prelude::*;
-use std::{env, sync::atomic::AtomicBool};
+use serenity::{prelude::*, all::ApplicationId};
+use std::{env, sync::atomic::AtomicBool, num::NonZeroU64};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 
@@ -80,7 +80,7 @@ async fn main() {
     let db_wrapper = DBWrapper::new(db.clone());
 
     let mut client = Client::builder(&token, gateway_intents)
-        .application_id(451862707746897961)
+        .application_id(ApplicationId(NonZeroU64::new(451862707746897961).unwrap()))
         .event_handler(Handler {
             is_loop_running: AtomicBool::new(false),
             run_tests: args.test,

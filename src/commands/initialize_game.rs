@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use serenity::{
-    builder::CreateApplicationCommand,
-    model::prelude::{application_command::CommandDataOption, GuildId},
+    all::{GuildId, ResolvedOption},
+    builder::CreateCommand,
 };
 
 use crate::{
@@ -18,13 +18,11 @@ pub struct InitializeGame;
 
 #[async_trait]
 impl GameCommand for InitializeGame {
-    fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand {
-        command
-            .name("initialize")
-            .description("Initialize the game")
+    fn register() -> CreateCommand {
+        CreateCommand::new("initialize").description("Initialize the game")
     }
 
-    async fn run(_options: &[CommandDataOption], guild_id: GuildId, db: DBWrapper) -> String {
+    async fn run(_options: &[ResolvedOption], guild_id: GuildId, db: DBWrapper) -> String {
         // Make 3 teams, the Airship, the Galleon, and the Submarine
         for name in ["Airship", "Galleon", "Submarine"] {
             let _role_result = TeamMechanicsHandler {

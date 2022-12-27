@@ -5,10 +5,10 @@ use async_trait::async_trait;
 use entity::entities::role;
 use sea_orm::{ActiveModelTrait, Set};
 use serde::{Deserialize, Serialize};
-use serenity::client::Context;
+use serenity::{builder::EditRole, client::Context};
 use tracing::log;
 
-use super::{DiscordId, Task, TaskTest};
+use super::{DiscordId, Task, TaskTest, get_guild};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
@@ -54,7 +54,8 @@ impl RoleHandler {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> TaskResult {
-        let guild = ctx.cache.guild(self.guild_id).unwrap();
+        let (discord_guild, database_guild) =
+            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
         match task {
             CreateRoleTasks::TeamRole {
@@ -63,12 +64,8 @@ impl RoleHandler {
             } => todo!(),
             CreateRoleTasks::Role { name, color: _ } => {
                 // Create the role
-                let role_discord = guild
-                    .create_role(&ctx.http, |r| {
-                        r.name(name);
-                        // r.color(*color);
-                        r
-                    })
+                let role_discord = discord_guild
+                    .create_role(&ctx.http, EditRole::new().name(name))
                     .await
                     .unwrap();
 
@@ -76,7 +73,7 @@ impl RoleHandler {
 
                 // Add the role to the database
                 let role_database = role::ActiveModel {
-                    discord_id: Set(DiscordId(role_discord.id.0).into()),
+                    discord_id: Set(DiscordId::from(role_discord.id.0).into()),
                     // guild_id: Set(Some(self.guild_id)),
                     name: Set(role_discord.name),
                     ..Default::default()

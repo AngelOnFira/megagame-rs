@@ -48,8 +48,8 @@ pub mod tests {
             .channels
             .iter()
             .filter(|(_, channel)| {
-                if let Channel::Category(category) = channel {
-                    category.name == test_team.name
+                if let ChannelType::Category = channel.kind {
+                    channel.name == test_team.name
                 } else {
                     false
                 }

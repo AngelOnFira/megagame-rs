@@ -1,9 +1,9 @@
-use std::sync::Arc;
+use std::{num::NonZeroU64, sync::Arc};
 
 use async_trait::async_trait;
 
 use serde::{Deserialize, Serialize};
-use serenity::{client::Context, model::prelude::ChannelId};
+use serenity::{builder::CreateMessage, client::Context, model::prelude::ChannelId};
 use tracing::log;
 
 use super::{get_guild, DiscordId, Task, TaskTest};
@@ -50,13 +50,13 @@ impl MessageHandler {
         let (discord_guild, database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        let channel_id = ChannelId(*send_channel_message.channel_id);
+        let channel_id = ChannelId(NonZeroU64::new(*send_channel_message.channel_id).unwrap());
 
         let message = channel_id
-            .send_message(&ctx.http, |m| {
-                m.content(send_channel_message.message);
-                m
-            })
+            .send_message(
+                &ctx.http,
+                CreateMessage::new().content(send_channel_message.message),
+            )
             .await
             .unwrap();
 

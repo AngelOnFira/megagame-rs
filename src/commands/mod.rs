@@ -1,9 +1,6 @@
 use async_trait::async_trait;
 
-use serenity::{
-    builder::CreateApplicationCommand,
-    model::prelude::{application_command::CommandDataOption, GuildId},
-};
+use serenity::{all::ResolvedOption, builder::CreateCommand, model::prelude::GuildId};
 
 use crate::db_wrapper::DBWrapper;
 
@@ -18,6 +15,6 @@ pub mod initialize_game;
 // game commands within the Discord bot.
 #[async_trait]
 pub trait GameCommand {
-    fn register(command: &mut CreateApplicationCommand) -> &mut CreateApplicationCommand;
-    async fn run(options: &[CommandDataOption], guild_id: GuildId, db: DBWrapper) -> String;
+    fn register() -> CreateCommand;
+    async fn run(options: &[ResolvedOption], guild_id: GuildId, db: DBWrapper) -> String;
 }

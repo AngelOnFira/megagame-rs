@@ -1,4 +1,4 @@
-use std::{fmt::Debug, ops::Deref, sync::Arc};
+use std::{fmt::Debug, num::NonZeroU64, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 use entity::entities::guild;
@@ -107,6 +107,18 @@ impl From<&String> for DiscordId {
     }
 }
 
+impl From<NonZeroU64> for DiscordId {
+    fn from(id: NonZeroU64) -> Self {
+        DiscordId(id.get())
+    }
+}
+
+impl Into<NonZeroU64> for DiscordId {
+    fn into(self) -> NonZeroU64 {
+        NonZeroU64::new(self.0).unwrap()
+    }
+}
+
 impl Into<u64> for DiscordId {
     fn into(self) -> u64 {
         self.0
@@ -115,13 +127,13 @@ impl Into<u64> for DiscordId {
 
 impl Into<ChannelId> for DiscordId {
     fn into(self) -> ChannelId {
-        ChannelId(self.0)
+        ChannelId(NonZeroU64::new(self.0).unwrap())
     }
 }
 
 impl Into<GuildId> for DiscordId {
     fn into(self) -> GuildId {
-        GuildId(self.0)
+        GuildId(NonZeroU64::new(self.0).unwrap())
     }
 }
 
@@ -143,7 +155,7 @@ pub async fn get_guild(
     db: DBWrapper,
     guild_id: DiscordId,
 ) -> (Guild, guild::Model) {
-    let discord_guild = ctx.cache.guild(guild_id).unwrap();
+    let discord_guild = ctx.cache.guild(guild_id).map(|g| g.clone()).unwrap();
 
     // Get or create the guild
     let guild_option = guild::Entity::find()
