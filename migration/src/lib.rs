@@ -8,6 +8,7 @@ mod m20221203_194700_trade;
 mod m20221203_195037_team;
 mod m20221203_195047_player;
 mod m20221204_194750_task;
+mod m20221227_134343_message_component_data;
 
 pub struct Migrator;
 
@@ -23,6 +24,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20221203_195037_team::Migration),
             Box::new(m20221203_195047_player::Migration),
             Box::new(m20221204_194750_task::Migration),
+            Box::new(m20221227_134343_message_component_data::Migration),
         ]
     }
 }

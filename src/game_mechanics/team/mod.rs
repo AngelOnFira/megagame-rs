@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use serenity::{
+    all::ReactionType,
     builder::{
         CreateButton, CreateInteractionResponseMessage, CreateSelectMenu, CreateSelectMenuKind,
         CreateSelectMenuOption,
@@ -13,7 +14,9 @@ use crate::{
     task_runner::tasks::{
         category::{CategoryHandler, CategoryTasks},
         channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
-        message::{MessageHandler, MessageTasks, SendChannelMessage},
+        message::{
+            message_component::MessageComponent, MessageHandler, MessageTasks, SendChannelMessage,
+        },
         role::{CreateRoleTasks, RoleHandler, RoleTasks},
         DiscordId, TaskType,
     },
@@ -108,9 +111,17 @@ impl TeamMechanicsHandler {
                         .push("!")
                         .build(),
                     select_menu: None,
+                    buttons: Vec::new(),
                 }),
             }))
             .await;
+
+        fn sound_button(name: &str, emoji: ReactionType) -> CreateButton {
+            // To add an emoji to buttons, use .emoji(). The method accepts anything ReactionType or
+            // anything that can be converted to it. For a list of that, search Trait Implementations in the
+            // docs for From<...>.
+            CreateButton::new(name)
+        }
 
         // Add a team menu to the team channel
         let _message_create_status = db
@@ -139,6 +150,10 @@ impl TeamMechanicsHandler {
                         .custom_id("animal_select")
                         .placeholder("No animal selected"),
                     ),
+                    buttons: vec![MessageComponent::<CreateButton>::new(None, db.clone())
+                        .await
+                        .component
+                        .emoji("🐕".parse::<ReactionType>().unwrap())],
                 }),
             }))
             .await;

@@ -2,6 +2,7 @@
 
 pub use super::{
     category::Entity as Category, channel::Entity as Channel, currency::Entity as Currency,
-    guild::Entity as Guild, player::Entity as Player, post::Entity as Post, role::Entity as Role,
-    task::Entity as Task, team::Entity as Team, wallet::Entity as Wallet,
+    guild::Entity as Guild, message_component_data::Entity as MessageComponentData,
+    player::Entity as Player, post::Entity as Post, role::Entity as Role, task::Entity as Task,
+    team::Entity as Team, wallet::Entity as Wallet,
 };

@@ -26,3 +26,9 @@ sea-orm-cli generate entity \
     --expanded-format \
     --with-serde both
 ```
+
+## Making a new migration
+
+```bash
+sea-orm-cli migrate generate <name>
+```

@@ -1,19 +1,24 @@
-use std::{num::NonZeroU64, sync::Arc};
+use std::{borrow::BorrowMut, num::NonZeroU64, sync::Arc};
 
 use async_trait::async_trait;
 
+use entity::entities::message_component_data;
+use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 use serenity::{
-    builder::{CreateMessage, CreateSelectMenu},
+    builder::{CreateButton, CreateMessage, CreateSelectMenu},
     client::Context,
     model::prelude::ChannelId,
 };
 use tracing::log;
+use uuid::Uuid;
+
+use self::message_component::MessageComponent;
 
 use super::{get_guild, DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
-// pub mod tests;
+pub mod message_component;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageHandler {
@@ -31,6 +36,7 @@ pub struct SendChannelMessage {
     pub channel_id: DiscordId,
     pub message: String,
     pub select_menu: Option<CreateSelectMenu>,
+    pub buttons: Vec<CreateButton>,
 }
 
 #[async_trait]
@@ -57,12 +63,20 @@ impl MessageHandler {
 
         let channel_id = ChannelId(NonZeroU64::new(*send_channel_message.channel_id).unwrap());
 
+        // Set up the message builder
         let mut message_builder = CreateMessage::new().content(send_channel_message.message);
 
+        // Add the select menu if there is one
         if let Some(select_menu) = send_channel_message.select_menu {
             message_builder = message_builder.select_menu(select_menu);
         }
 
+        // Add any buttons
+        for button in send_channel_message.buttons {
+            message_builder = message_builder.button(button);
+        }
+
+        // Send the message
         let message = channel_id
             .send_message(&ctx.http, message_builder)
             .await

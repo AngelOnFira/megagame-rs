@@ -6,6 +6,7 @@ pub mod category;
 pub mod channel;
 pub mod currency;
 pub mod guild;
+pub mod message_component_data;
 pub mod player;
 pub mod post;
 pub mod role;
