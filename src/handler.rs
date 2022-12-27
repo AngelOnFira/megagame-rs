@@ -31,31 +31,37 @@ pub struct Handler {
 #[async_trait]
 impl EventHandler for Handler {
     async fn interaction_create(&self, ctx: Context, interaction: Interaction) {
-        if let Interaction::Command(command) = interaction {
-            let command_handler = match command.data.name.as_str() {
-                "trade" => FakeTrade::run,
-                "initialize" => InitializeGame::run,
-                _ => unreachable!(),
-            };
+        match interaction {
+            Interaction::Command(command) => {
+                let command_handler = match command.data.name.as_str() {
+                    "trade" => FakeTrade::run,
+                    "initialize" => InitializeGame::run,
+                    _ => unreachable!(),
+                };
 
-            if let Err(why) = command
-                .create_response(
-                    &ctx.http,
-                    CreateInteractionResponse::Message(
-                        CreateInteractionResponseMessage::new().content("Handling command..."),
-                    ),
+                if let Err(why) = command
+                    .create_response(
+                        &ctx.http,
+                        CreateInteractionResponse::Message(
+                            CreateInteractionResponseMessage::new().content("Handling command..."),
+                        ),
+                    )
+                    .await
+                {
+                    println!("Cannot respond to slash command: {}", why);
+                }
+
+                let _content = command_handler(
+                    &command.data.options(),
+                    command.guild_id.unwrap(),
+                    self.db.clone(),
                 )
-                .await
-            {
-                println!("Cannot respond to slash command: {}", why);
+                .await;
             }
-
-            let _content = command_handler(
-                &command.data.options(),
-                command.guild_id.unwrap(),
-                self.db.clone(),
-            )
-            .await;
+            Interaction::Component(component) => {
+                dbg!(&component);
+            }
+            _ => (),
         }
     }
 
