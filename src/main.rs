@@ -51,6 +51,7 @@ async fn main() {
         "want",
         "kube",
         "tower",
+        "tokio_tungstenite",
     ];
 
     let off_list = &["sqlx"];

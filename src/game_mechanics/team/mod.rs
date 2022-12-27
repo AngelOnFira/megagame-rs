@@ -1,5 +1,9 @@
 use async_trait::async_trait;
 use serenity::{
+    builder::{
+        CreateButton, CreateInteractionResponseMessage, CreateSelectMenu, CreateSelectMenuKind,
+        CreateSelectMenuOption,
+    },
     model::prelude::{ChannelType, RoleId},
     utils::MessageBuilder,
 };
@@ -45,28 +49,25 @@ impl TeamMechanicsHandler {
     async fn create_team(&self, name: &String, db: DBWrapper) {
         // Add the team to the database
 
-        // println!(
-        //     "{}",
-        //     MessageBuilder::new()
-        //         .content("Please select your favorite animal")
-        //         .components(|c| {
-        //             c.create_action_row(|row| {
-        //                 // An action row can only contain one select menu!
-        //                 row.create_select_menu(|menu| {
-        //                     menu.custom_id("animal_select");
-        //                     menu.placeholder("No animal selected");
-        //                     menu.options(|f| {
-        //                         f.create_option(|o| o.label("🐈 meow").value("Cat"));
-        //                         f.create_option(|o| o.label("🐕 woof").value("Dog"));
-        //                         f.create_option(|o| o.label("🐎 neigh").value("Horse"));
-        //                         f.create_option(|o| o.label("🦙 hoooooooonk").value("Alpaca"));
-        //                         f.create_option(|o| o.label("🦀 crab rave").value("Ferris"))
-        //                     })
-        //                 })
-        //             })
-        //         })
-        //         .build()
-        // );
+        println!(
+            "{:?}",
+            serde_json::to_string_pretty(
+                &CreateSelectMenu::new(
+                    "animal_select",
+                    CreateSelectMenuKind::String {
+                        options: vec![
+                            CreateSelectMenuOption::new("🐈 meow", "Cat"),
+                            CreateSelectMenuOption::new("🐕 woof", "Dog"),
+                            CreateSelectMenuOption::new("🐎 neigh", "Horse"),
+                            CreateSelectMenuOption::new("🦙 hoooooooonk", "Alpaca"),
+                            CreateSelectMenuOption::new("🦀 crab rave", "Ferris"),
+                        ],
+                    }
+                )
+                .custom_id("animal_select")
+                .placeholder("No animal selected"),
+            )
+        );
 
         // Create the role
         let role_create_status = db
@@ -131,6 +132,19 @@ impl TeamMechanicsHandler {
             .await;
 
         // Add a team menu to the team channel
+        let _message_create_status = db
+            .add_await_task(TaskType::MessageHandler(MessageHandler {
+                guild_id: DiscordId(self.guild_id),
+                task: MessageTasks::SendChannelMessage(SendChannelMessage {
+                    channel_id: DiscordId(channel_model.discord_id.parse().unwrap()),
+                    message: MessageBuilder::new()
+                        .push("Welcome to the team ")
+                        .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
+                        .push("!")
+                        .build(),
+                }),
+            }))
+            .await;
     }
 
     async fn add_player_to_team(&self, _db: DBWrapper) {
