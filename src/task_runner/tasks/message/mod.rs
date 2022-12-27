@@ -3,7 +3,11 @@ use std::{num::NonZeroU64, sync::Arc};
 use async_trait::async_trait;
 
 use serde::{Deserialize, Serialize};
-use serenity::{builder::CreateMessage, client::Context, model::prelude::ChannelId};
+use serenity::{
+    builder::{CreateMessage, CreateSelectMenu},
+    client::Context,
+    model::prelude::ChannelId,
+};
 use tracing::log;
 
 use super::{get_guild, DiscordId, Task, TaskTest};
@@ -26,6 +30,7 @@ pub enum MessageTasks {
 pub struct SendChannelMessage {
     pub channel_id: DiscordId,
     pub message: String,
+    pub select_menu: Option<CreateSelectMenu>,
 }
 
 #[async_trait]
@@ -52,11 +57,14 @@ impl MessageHandler {
 
         let channel_id = ChannelId(NonZeroU64::new(*send_channel_message.channel_id).unwrap());
 
+        let mut message_builder = CreateMessage::new().content(send_channel_message.message);
+
+        if let Some(select_menu) = send_channel_message.select_menu {
+            message_builder = message_builder.select_menu(select_menu);
+        }
+
         let message = channel_id
-            .send_message(
-                &ctx.http,
-                CreateMessage::new().content(send_channel_message.message),
-            )
+            .send_message(&ctx.http, message_builder)
             .await
             .unwrap();
 

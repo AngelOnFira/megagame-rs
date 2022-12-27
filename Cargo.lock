@@ -2281,7 +2281,7 @@ dependencies = [
 [[package]]
 name = "serenity"
 version = "0.11.5"
-source = "git+https://github.com/serenity-rs/serenity?branch=next#ba3be69166f54c5986e4cc9438bc5bb4606fa4c2"
+source = "git+https://github.com/angelonfira/serenity?branch=next#a7600e565240a9b520109ac34cb3334be337892b"
 dependencies = [
  "async-trait",
  "base64",

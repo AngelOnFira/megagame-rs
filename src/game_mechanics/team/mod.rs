@@ -49,26 +49,6 @@ impl TeamMechanicsHandler {
     async fn create_team(&self, name: &String, db: DBWrapper) {
         // Add the team to the database
 
-        println!(
-            "{:?}",
-            serde_json::to_string_pretty(
-                &CreateSelectMenu::new(
-                    "animal_select",
-                    CreateSelectMenuKind::String {
-                        options: vec![
-                            CreateSelectMenuOption::new("🐈 meow", "Cat"),
-                            CreateSelectMenuOption::new("🐕 woof", "Dog"),
-                            CreateSelectMenuOption::new("🐎 neigh", "Horse"),
-                            CreateSelectMenuOption::new("🦙 hoooooooonk", "Alpaca"),
-                            CreateSelectMenuOption::new("🦀 crab rave", "Ferris"),
-                        ],
-                    }
-                )
-                .custom_id("animal_select")
-                .placeholder("No animal selected"),
-            )
-        );
-
         // Create the role
         let role_create_status = db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
@@ -127,6 +107,7 @@ impl TeamMechanicsHandler {
                         .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
                         .push("!")
                         .build(),
+                    select_menu: None,
                 }),
             }))
             .await;
@@ -142,6 +123,22 @@ impl TeamMechanicsHandler {
                         .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
                         .push("!")
                         .build(),
+                    select_menu: Some(
+                        CreateSelectMenu::new(
+                            "animal_select",
+                            CreateSelectMenuKind::String {
+                                options: vec![
+                                    CreateSelectMenuOption::new("🐈 meow", "Cat"),
+                                    CreateSelectMenuOption::new("🐕 woof", "Dog"),
+                                    CreateSelectMenuOption::new("🐎 neigh", "Horse"),
+                                    CreateSelectMenuOption::new("🦙 hoooooooonk", "Alpaca"),
+                                    CreateSelectMenuOption::new("🦀 crab rave", "Ferris"),
+                                ],
+                            },
+                        )
+                        .custom_id("animal_select")
+                        .placeholder("No animal selected"),
+                    ),
                 }),
             }))
             .await;
