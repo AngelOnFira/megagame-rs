@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serenity::{builder::EditRole, client::Context};
 use tracing::log;
 
-use super::{DiscordId, Task, TaskTest, get_guild};
+use super::{get_guild, DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
@@ -54,7 +54,7 @@ impl RoleHandler {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> TaskResult {
-        let (discord_guild, database_guild) =
+        let (discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
         match task {

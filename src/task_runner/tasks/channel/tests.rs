@@ -4,10 +4,7 @@ pub mod tests {
     use entity::entities::category;
 
     use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-    use serenity::{
-        model::prelude::{Channel, ChannelType},
-        prelude::Context,
-    };
+    use serenity::{model::prelude::ChannelType, prelude::Context};
 
     use crate::{
         db_wrapper::DBWrapper,
@@ -15,7 +12,7 @@ pub mod tests {
             category::CategoryCreateError,
             channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
             test_helpers::TestHelpers,
-            DatabaseId, DiscordId, TaskType,
+            DiscordId, TaskType,
         },
         TEST_GUILD_ID,
     };

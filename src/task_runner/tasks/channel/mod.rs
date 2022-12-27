@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
-use entity::entities::{channel, team};
+use entity::entities::channel;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, ModelTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelType};
 use tracing::log;
 
-use super::{get_guild, DatabaseId, DiscordId, Task, TaskTest};
+use super::{get_guild, DiscordId, Task, TaskTest};
 use crate::{
     db_wrapper::{
         DBWrapper, TaskResult,

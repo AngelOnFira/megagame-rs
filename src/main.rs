@@ -6,8 +6,8 @@ use db_wrapper::DBWrapper;
 use handler::Handler;
 
 use sea_orm::{prelude::*, Database};
-use serenity::{prelude::*, all::ApplicationId};
-use std::{env, sync::atomic::AtomicBool, num::NonZeroU64};
+use serenity::{all::ApplicationId, prelude::*};
+use std::{env, num::NonZeroU64, sync::atomic::AtomicBool};
 use tracing::Level;
 use tracing_subscriber::EnvFilter;
 

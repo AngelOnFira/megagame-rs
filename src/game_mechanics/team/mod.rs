@@ -116,7 +116,7 @@ impl TeamMechanicsHandler {
 
         // Write a message in the team channel that pings the role of the
         // players
-        let message_create_status = db
+        let _message_create_status = db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {

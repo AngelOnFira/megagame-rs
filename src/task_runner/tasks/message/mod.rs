@@ -47,7 +47,7 @@ impl MessageHandler {
         ctx: Arc<Context>,
         db: DBWrapper,
     ) -> TaskResult {
-        let (discord_guild, database_guild) =
+        let (_discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
         let channel_id = ChannelId(NonZeroU64::new(*send_channel_message.channel_id).unwrap());

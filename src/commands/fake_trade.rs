@@ -1,5 +1,8 @@
 use async_trait::async_trait;
-use serenity::{builder::CreateCommand, all::{GuildId, ResolvedOption}};
+use serenity::{
+    all::{GuildId, ResolvedOption},
+    builder::CreateCommand,
+};
 
 use crate::{
     db_wrapper::DBWrapper,
