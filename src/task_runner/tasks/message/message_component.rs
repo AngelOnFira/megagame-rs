@@ -1,20 +1,11 @@
-use std::{num::NonZeroU64, sync::Arc};
-
-use async_trait::async_trait;
-
 use entity::entities::message_component_data;
 use sea_orm::{ActiveModelTrait, Set};
 use serde::{Deserialize, Serialize};
-use serenity::{
-    builder::{CreateButton, CreateMessage, CreateSelectMenu},
-    client::Context,
-    model::prelude::ChannelId,
-};
-use tracing::log;
+use serenity::builder::CreateButton;
+
 use uuid::Uuid;
 
-use super::{get_guild, DiscordId, Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
+use crate::db_wrapper::DBWrapper;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageComponent<C: SerenityComponent> {

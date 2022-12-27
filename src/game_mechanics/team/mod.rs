@@ -1,10 +1,7 @@
 use async_trait::async_trait;
 use serenity::{
     all::ReactionType,
-    builder::{
-        CreateButton, CreateInteractionResponseMessage, CreateSelectMenu, CreateSelectMenuKind,
-        CreateSelectMenuOption,
-    },
+    builder::{CreateButton, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption},
     model::prelude::{ChannelType, RoleId},
     utils::MessageBuilder,
 };
@@ -116,7 +113,7 @@ impl TeamMechanicsHandler {
             }))
             .await;
 
-        fn sound_button(name: &str, emoji: ReactionType) -> CreateButton {
+        fn sound_button(name: &str, _emoji: ReactionType) -> CreateButton {
             // To add an emoji to buttons, use .emoji(). The method accepts anything ReactionType or
             // anything that can be converted to it. For a list of that, search Trait Implementations in the
             // docs for From<...>.

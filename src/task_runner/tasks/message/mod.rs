@@ -1,9 +1,7 @@
-use std::{borrow::BorrowMut, num::NonZeroU64, sync::Arc};
+use std::{num::NonZeroU64, sync::Arc};
 
 use async_trait::async_trait;
 
-use entity::entities::message_component_data;
-use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 use serenity::{
     builder::{CreateButton, CreateMessage, CreateSelectMenu},
@@ -11,9 +9,6 @@ use serenity::{
     model::prelude::ChannelId,
 };
 use tracing::log;
-use uuid::Uuid;
-
-use self::message_component::MessageComponent;
 
 use super::{get_guild, DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
