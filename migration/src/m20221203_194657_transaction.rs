@@ -3,19 +3,19 @@ use sea_orm_migration::prelude::*;
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
-#[derive(Iden)]
-enum Transaction {
-    Table,
-    Id,
-    Amount,
-    Currency,
-    CreatedDate,
-    ModifiedDate,
-    FromWallet,
-    ToWallet,
-    InitiatingPlayer,
-    State,
-}
+// #[derive(Iden)]
+// enum Transaction {
+//     Table,
+//     Id,
+//     Amount,
+//     Currency,
+//     CreatedDate,
+//     ModifiedDate,
+//     FromWallet,
+//     ToWallet,
+//     InitiatingPlayer,
+//     State,
+// }
 
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {

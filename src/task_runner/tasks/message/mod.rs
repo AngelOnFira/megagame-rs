@@ -10,6 +10,8 @@ use serenity::{
 };
 use tracing::log;
 
+use self::message_component::MessageComponent;
+
 use super::{get_guild, DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
@@ -31,7 +33,7 @@ pub struct SendChannelMessage {
     pub channel_id: DiscordId,
     pub message: String,
     pub select_menu: Option<CreateSelectMenu>,
-    pub buttons: Vec<CreateButton>,
+    pub buttons: Vec<MessageComponent<CreateButton>>,
 }
 
 #[async_trait]
@@ -67,8 +69,9 @@ impl MessageHandler {
         }
 
         // Add any buttons
-        for button in send_channel_message.buttons {
-            message_builder = message_builder.button(button);
+        for message_component_button in send_channel_message.buttons {
+            message_builder =
+                message_builder.button(message_component_button.build(db.clone()).await);
         }
 
         // Send the message

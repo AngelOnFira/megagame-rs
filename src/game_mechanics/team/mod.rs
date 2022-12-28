@@ -147,13 +147,10 @@ impl TeamMechanicsHandler {
                         .custom_id("animal_select")
                         .placeholder("No animal selected"),
                     ),
-                    buttons: vec![
-                        MessageComponent::<CreateButton>::new(None, db.clone())
-                            .await
-                            .component
-                            .emoji("🐕".parse::<ReactionType>().unwrap()),
-                            MessageComponent::new(CreateButton::new("").emoji("🐕".parse::<ReactionType>().unwrap()), None),
-                    ],
+                    buttons: vec![MessageComponent::new(
+                        CreateButton::new("").emoji("🐕".parse::<ReactionType>().unwrap()),
+                        None,
+                    )],
                 }),
             }))
             .await;

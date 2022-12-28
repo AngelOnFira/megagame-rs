@@ -3,14 +3,14 @@ use sea_orm_migration::prelude::*;
 #[derive(DeriveMigrationName)]
 pub struct Migration;
 
-#[derive(Iden)]
-enum Trade {
-    Table,
-    Id,
-    InitiatingParty,
-    ReceivingParty,
-    Transactions,
-}
+// #[derive(Iden)]
+// enum Trade {
+//     Table,
+//     Id,
+//     InitiatingParty,
+//     ReceivingParty,
+//     Transactions,
+// }
 
 // TODO: Fix this migration
 

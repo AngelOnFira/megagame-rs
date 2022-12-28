@@ -15,7 +15,7 @@ pub struct MessageComponent<C: SerenityComponent> {
 
 impl<C: SerenityComponent> MessageComponent<C> {
     // TODO: should this be refactored out of the type? More use shall tell.
-    pub async fn new(component: C, data: Option<MessageData>) -> Self {
+    pub fn new(component: C, data: Option<MessageData>) -> Self {
         MessageComponent { component, data }
     }
 
@@ -23,7 +23,9 @@ impl<C: SerenityComponent> MessageComponent<C> {
         &self.component
     }
 
-    pub async fn get_id(&self, db: DBWrapper) -> C {
+    /// Finalize the component and add it to the database, then return the
+    /// internal component
+    pub async fn build(self, db: DBWrapper) -> C {
         // Serialize the data
         let data = serde_json::to_string(&self.data).unwrap();
 

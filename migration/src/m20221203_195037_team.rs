@@ -26,19 +26,12 @@ pub enum Team {
 enum Channel {
     Table,
     Id,
-    DiscordId,
-    GuildId,
-    Name,
-    AllowNSFW,
 }
 
 #[derive(Iden)]
 enum Category {
     Table,
     Id,
-    DiscordId,
-    GuildId,
-    Name,
 }
 
 #[async_trait::async_trait]
