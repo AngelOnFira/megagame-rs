@@ -59,7 +59,7 @@ impl EventHandler for Handler {
                 .await;
             }
             Interaction::Component(component) => {
-                dbg!(&component);
+                dbg!(&component.data);
             }
             _ => (),
         }
