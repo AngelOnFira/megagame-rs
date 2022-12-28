@@ -12,9 +12,7 @@ use crate::commands::GameCommand;
 use entity::entities::message_component_data;
 use sea_orm::EntityTrait;
 use serenity::{
-    all::{
-        ComponentInteraction, ComponentInteractionData, ComponentInteractionDataKind, Interaction,
-    },
+    all::{ComponentInteractionDataKind, Interaction},
     async_trait,
     builder::{CreateInteractionResponse, CreateInteractionResponseMessage},
     model::{gateway::Ready, id::GuildId},

@@ -1,12 +1,12 @@
 use async_trait::async_trait;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 use crate::db_wrapper::DBWrapper;
 
-use self::{team::TeamMechanicsHandler, menu::MenuMechanicsHandler};
+use self::{menu::MenuMechanicsHandler, team::TeamMechanicsHandler};
 
-pub mod team;
 pub mod menu;
+pub mod team;
 
 #[async_trait]
 pub trait MechanicHandler: Send + Sync {
@@ -22,8 +22,12 @@ pub enum MechanicFunction {
 impl MechanicFunction {
     pub async fn handle(&self, db: DBWrapper) {
         match self {
-            MechanicFunction::Team(team_mechanics_handler) => team_mechanics_handler.handle(db).await,
-            MechanicFunction::Menu(menu_mechanics_handler) => menu_mechanics_handler.handle(db).await,
+            MechanicFunction::Team(team_mechanics_handler) => {
+                team_mechanics_handler.handle(db).await
+            }
+            MechanicFunction::Menu(menu_mechanics_handler) => {
+                menu_mechanics_handler.handle(db).await
+            }
         }
     }
 }
