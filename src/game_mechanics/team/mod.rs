@@ -131,9 +131,9 @@ impl TeamMechanicsHandler {
                         .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
                         .push("!")
                         .build(),
-                    select_menu: Some(
+                    select_menu: Some(MessageComponent::new(
                         CreateSelectMenu::new(
-                            "animal_select",
+                            "",
                             CreateSelectMenuKind::String {
                                 options: vec![
                                     CreateSelectMenuOption::new("🐈 meow", "Cat"),
@@ -144,9 +144,9 @@ impl TeamMechanicsHandler {
                                 ],
                             },
                         )
-                        .custom_id("animal_select")
                         .placeholder("No animal selected"),
-                    ),
+                        None,
+                    )),
                     buttons: vec![MessageComponent::new(
                         CreateButton::new("").emoji("🐕".parse::<ReactionType>().unwrap()),
                         None,

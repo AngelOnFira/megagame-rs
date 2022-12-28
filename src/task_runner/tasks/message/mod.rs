@@ -32,7 +32,7 @@ pub enum MessageTasks {
 pub struct SendChannelMessage {
     pub channel_id: DiscordId,
     pub message: String,
-    pub select_menu: Option<CreateSelectMenu>,
+    pub select_menu: Option<MessageComponent<CreateSelectMenu>>,
     pub buttons: Vec<MessageComponent<CreateButton>>,
 }
 
@@ -65,7 +65,7 @@ impl MessageHandler {
 
         // Add the select menu if there is one
         if let Some(select_menu) = send_channel_message.select_menu {
-            message_builder = message_builder.select_menu(select_menu);
+            message_builder = message_builder.select_menu(select_menu.build(db.clone()).await);
         }
 
         // Add any buttons

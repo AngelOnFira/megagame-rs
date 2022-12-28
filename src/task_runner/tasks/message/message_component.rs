@@ -63,7 +63,9 @@ impl<C: SerenityComponent> MessageComponent<C> {
 // }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum MessageData {}
+pub enum MessageData {
+    
+}
 
 pub trait SerenityComponent {
     fn update_id(self, id: String) -> Self;
