@@ -36,6 +36,17 @@ pub struct SendChannelMessage {
     pub buttons: Vec<MessageComponent<CreateButton>>,
 }
 
+impl Default for SendChannelMessage {
+    fn default() -> Self {
+        Self {
+            channel_id: DiscordId(0),
+            message: String::new(),
+            select_menu: None,
+            buttons: Vec::new(),
+        }
+    }
+}
+
 #[async_trait]
 impl Task for MessageHandler {
     async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {

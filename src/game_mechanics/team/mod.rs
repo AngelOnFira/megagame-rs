@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use serde::{Deserialize, Serialize};
 use serenity::{
     all::{ButtonStyle, ReactionType},
     builder::{CreateButton, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption},
@@ -8,11 +9,16 @@ use serenity::{
 
 use crate::{
     db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
+    game_mechanics::{
+        menu::{MenuJobs, MenuMechanicsHandler},
+        MechanicFunction,
+    },
     task_runner::tasks::{
         category::{CategoryHandler, CategoryTasks},
         channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
         message::{
-            message_component::MessageComponent, MessageHandler, MessageTasks, SendChannelMessage,
+            message_component::{MessageComponent, MessageData},
+            MessageHandler, MessageTasks, SendChannelMessage,
         },
         role::{CreateRoleTasks, RoleHandler, RoleTasks},
         DiscordId, TaskType,
@@ -21,11 +27,13 @@ use crate::{
 
 use super::MechanicHandler;
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TeamMechanicsHandler {
     pub guild_id: u64,
     pub task: TeamJobs,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TeamJobs {
     CreateTeam { name: String },
     AddPlayerToTeam,
@@ -107,8 +115,7 @@ impl TeamMechanicsHandler {
                         .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
                         .push("!")
                         .build(),
-                    select_menu: None,
-                    buttons: Vec::new(),
+                    ..Default::default()
                 }),
             }))
             .await;
@@ -154,7 +161,14 @@ impl TeamMechanicsHandler {
                                 .disabled(false)
                                 .label("Start Trade")
                                 .emoji("💱".parse::<ReactionType>().unwrap()),
-                            None,
+                            Some(MessageData::Function(MechanicFunction::Menu(
+                                MenuMechanicsHandler {
+                                    guild_id: self.guild_id,
+                                    task: MenuJobs::StartTradeMenu {
+                                        channel_id: DiscordId::from(&channel_model.discord_id),
+                                    },
+                                },
+                            ))),
                         ),
                         MessageComponent::new(
                             CreateButton::new("")

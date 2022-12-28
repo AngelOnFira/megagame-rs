@@ -1,13 +1,20 @@
 use crate::{
     commands::{fake_trade::FakeTrade, initialize_game::InitializeGame},
     db_wrapper::DBWrapper,
-    task_runner::{tasks::run_tests, TaskRunner},
+    task_runner::{
+        tasks::{message::message_component::MessageData, run_tests},
+        TaskRunner,
+    },
 };
 
 use crate::commands::GameCommand;
 
+use entity::entities::message_component_data;
+use sea_orm::EntityTrait;
 use serenity::{
-    all::Interaction,
+    all::{
+        ComponentInteraction, ComponentInteractionData, ComponentInteractionDataKind, Interaction,
+    },
     async_trait,
     builder::{CreateInteractionResponse, CreateInteractionResponseMessage},
     model::{gateway::Ready, id::GuildId},
@@ -59,7 +66,54 @@ impl EventHandler for Handler {
                 .await;
             }
             Interaction::Component(component) => {
-                dbg!(&component.data);
+                // Get the payload of the custom_id
+                let payload =
+                    message_component_data::Entity::find_by_id(component.data.custom_id.clone())
+                        .one(&*self.db)
+                        .await
+                        .unwrap()
+                        .unwrap()
+                        .payload;
+
+                // Deserialize the payload
+                let task = *serde_json::from_str::<Box<Option<MessageData>>>(&payload).unwrap();
+
+                // The task might be none, in which case return
+                if task.is_none() {
+                    if let Err(why) = component
+                        .create_response(
+                            &ctx.http,
+                            CreateInteractionResponse::Message(
+                                CreateInteractionResponseMessage::new()
+                                    .content("That interaction is empty!"),
+                            ),
+                        )
+                        .await
+                    {
+                        println!("Cannot respond to slash command: {}", why);
+                    }
+                    return;
+                }
+
+                let task = task.unwrap();
+
+                match &component.data.kind {
+                    ComponentInteractionDataKind::Button => {
+                        println!("Button pressed: {:?}", task);
+
+                        // If the task is a TaskType, add it to the database, if
+                        // it's a function, run it
+                        match task {
+                            MessageData::Task(task_type) => {
+                                let _ = self.db.add_await_task(task_type).await;
+                            }
+                            MessageData::Function(mechanic_function) => {
+                                mechanic_function.handle(self.db.clone()).await;
+                            }
+                        }
+                    }
+                    _ => {}
+                }
             }
             _ => (),
         }

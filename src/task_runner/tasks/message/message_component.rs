@@ -5,18 +5,23 @@ use serenity::builder::{CreateButton, CreateSelectMenu};
 
 use uuid::Uuid;
 
-use crate::db_wrapper::DBWrapper;
+use crate::{
+    db_wrapper::DBWrapper, game_mechanics::MechanicFunction, task_runner::tasks::TaskType,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MessageComponent<C: SerenityComponent> {
     pub component: C,
-    pub data: Option<MessageData>,
+    pub data: Box<Option<MessageData>>,
 }
 
 impl<C: SerenityComponent> MessageComponent<C> {
     // TODO: should this be refactored out of the type? More use shall tell.
     pub fn new(component: C, data: Option<MessageData>) -> Self {
-        MessageComponent { component, data }
+        MessageComponent {
+            component,
+            data: Box::new(data),
+        }
     }
 
     pub fn get_component(&self) -> &C {
@@ -64,7 +69,8 @@ impl<C: SerenityComponent> MessageComponent<C> {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum MessageData {
-    
+    Task(TaskType),
+    Function(MechanicFunction),
 }
 
 pub trait SerenityComponent {
