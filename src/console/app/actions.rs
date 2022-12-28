@@ -6,7 +6,6 @@ use std::{
 
 use crate::console::inputs::key::Key;
 
-
 /// We define all available action
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Action {

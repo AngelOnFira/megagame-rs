@@ -1,5 +1,5 @@
 use sea_orm::DatabaseConnection;
-use tracing::log::{self, debug, warn, error};
+use tracing::log::{self, debug, error, warn};
 
 use self::{
     actions::{Action, Actions},

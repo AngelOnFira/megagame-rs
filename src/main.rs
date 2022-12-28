@@ -5,7 +5,11 @@ use clap::Parser;
 use db_wrapper::DBWrapper;
 use handler::Handler;
 
-use console::{app::App, io::IoEvent, start_ui};
+use console::{
+    app::App,
+    io::{handler::IoAsyncHandler, IoEvent},
+    start_ui,
+};
 use eyre::Result;
 use sea_orm::{prelude::*, Database};
 use serenity::{all::ApplicationId, prelude::*};
@@ -14,7 +18,7 @@ use std::{
     num::NonZeroU64,
     sync::{atomic::AtomicBool, Arc},
 };
-use tracing::Level;
+use tracing::{info, Level};
 use tracing_subscriber::EnvFilter;
 
 pub mod commands;
@@ -36,6 +40,32 @@ struct Args {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    // Early initialization of the logger
+
+    // // Set max_log_level to Trace
+    // tui_logger::init_logger(log::LevelFilter::Info).unwrap();
+
+    // // Set default level for unknown targets to Trace
+    // tui_logger::set_default_level(log::LevelFilter::Info);
+
+    // // Set the log level of noisy targets to Off
+    // tui_logger::set_level_for_target("tokio_util", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("h2", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("rustls", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("serenity", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("tungstenite", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("async_tungstenite", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("hyper", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("trust_dns_resolver", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("trust_dns_proto", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("reqwest", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("mio", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("want", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("kube", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("tower", log::LevelFilter::Off);
+    // tui_logger::set_level_for_target("tokio_tungstenite",
+    // log::LevelFilter::Off);
+
     let append_info = |mut f: EnvFilter, list: &[&str], level: &str| {
         for l in list {
             f = f.add_directive(format!("{}={}", l, level).parse().unwrap());
@@ -88,7 +118,7 @@ async fn main() -> Result<()> {
     let db_wrapper = DBWrapper::new(db.clone());
 
     // Start the Serenity client in a new Tokio thread
-    tokio::spawn(async move {
+    let serenity_handle = tokio::spawn(async move {
         let mut client = Client::builder(&token, gateway_intents)
             .application_id(ApplicationId(NonZeroU64::new(451862707746897961).unwrap()))
             .event_handler(Handler {
@@ -100,18 +130,29 @@ async fn main() -> Result<()> {
             .expect("Err creating client");
 
         if let Err(why) = client.start().await {
-            println!("Client error: {:?}", why);
+            info!("Client error: {:?}", why);
         }
     });
 
-    let (sync_io_tx, mut sync_io_rx) = tokio::sync::mpsc::channel::<IoEvent>(100);
+    // let (sync_io_tx, mut sync_io_rx) = tokio::sync::mpsc::channel::<IoEvent>(100);
 
-    // We need to share the App between thread
-    let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone())));
-    let app_ui = Arc::clone(&app);
+    // // We need to share the App between thread
+    // let app = Arc::new(tokio::sync::Mutex::new(App::new(sync_io_tx.clone())));
+    // let app_ui = Arc::clone(&app);
 
-    // Start the TUI on this thread
-    start_ui(&app_ui).await?;
+    // // Handle Console IO in a specifc thread
+    // tokio::spawn(async move {
+    //     let mut handler = IoAsyncHandler::new(app);
+    //     while let Some(io_event) = sync_io_rx.recv().await {
+    //         handler.handle_io_event(io_event).await;
+    //     }
+    // });
+
+    // // Start the TUI on this thread
+    // start_ui(&app_ui).await?;
+
+    // Wait for the serenity client to finish
+    serenity_handle.await?;
 
     Ok(())
 }

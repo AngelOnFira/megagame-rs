@@ -1,19 +1,43 @@
 use std::time::Duration;
 
 use symbols::line;
-use tui::backend::Backend;
-use tui::layout::{Alignment, Constraint, Direction, Layout, Rect};
-use tui::style::{Color, Modifier, Style};
-use tui::text::{Span, Spans};
-use tui::widgets::{Block, BorderType, Borders, Cell, LineGauge, Paragraph, Row, Table};
-use tui::{symbols, Frame};
+use tui::{
+    backend::Backend,
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
+    style::{Color, Modifier, Style},
+    symbols,
+    text::{Span, Spans},
+    widgets::{Block, BorderType, Borders, Cell, LineGauge, Paragraph, Row, Table},
+    Frame,
+};
 use tui_logger::TuiLoggerWidget;
 
-use super::App;
-use super::actions::Actions;
-use super::state::AppState;
+use super::{actions::Actions, state::AppState, App};
 
-pub fn draw<B>(rect: &mut Frame<B>, app: &mut App)
+// pub fn draw<B: Backend>(f: &mut Frame<B>, app: &mut App) {
+//     let chunks = Layout::default()
+//         .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
+//         .split(f.size());
+//     let titles = app
+//         .tabs
+//         .titles
+//         .iter()
+//         .map(|t| Spans::from(Span::styled(*t, Style::default().fg(Color::Green))))
+//         .collect();
+//     let tabs = Tabs::new(titles)
+//         .block(Block::default().borders(Borders::ALL).title(app.title))
+//         .highlight_style(Style::default().fg(Color::Yellow))
+//         .select(app.tabs.index);
+//     f.render_widget(tabs, chunks[0]);
+//     match app.tabs.index {
+//         0 => draw_first_tab(f, app, chunks[1]),
+//         1 => draw_second_tab(f, app, chunks[1]),
+//         2 => draw_third_tab(f, app, chunks[1]),
+//         _ => {}
+//     };
+// }
+
+pub fn draw_logs_tab<B>(rect: &mut Frame<B>, app: &mut App)
 where
     B: Backend,
 {

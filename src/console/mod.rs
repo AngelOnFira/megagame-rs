@@ -37,7 +37,7 @@ pub async fn start_ui(app: &Arc<tokio::sync::Mutex<App>>) -> Result<()> {
         let mut app = app.lock().await;
 
         // Render
-        terminal.draw(|rect| ui::draw(rect, &mut app))?;
+        terminal.draw(|rect| ui::draw_logs_tab(rect, &mut app))?;
 
         // Handle inputs
         let result = match events.next().await {

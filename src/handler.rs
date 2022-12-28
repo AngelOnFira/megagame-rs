@@ -25,7 +25,7 @@ use std::{
     },
     time::Duration,
 };
-use tracing::log;
+use tracing::{info, log};
 
 pub struct Handler {
     pub is_loop_running: AtomicBool,
@@ -53,7 +53,7 @@ impl EventHandler for Handler {
                     )
                     .await
                 {
-                    println!("Cannot respond to slash command: {}", why);
+                    info!("Cannot respond to slash command: {}", why);
                 }
 
                 let _content = command_handler(
@@ -88,7 +88,7 @@ impl EventHandler for Handler {
                         )
                         .await
                     {
-                        println!("Cannot respond to slash command: {}", why);
+                        info!("Cannot respond to slash command: {}", why);
                     }
                     return;
                 }
@@ -97,7 +97,7 @@ impl EventHandler for Handler {
 
                 match &component.data.kind {
                     ComponentInteractionDataKind::Button => {
-                        println!("Button pressed: {:?}", task);
+                        info!("Button pressed: {:?}", task);
 
                         // If the task is a TaskType, add it to the database, if
                         // it's a function, run it
@@ -118,7 +118,7 @@ impl EventHandler for Handler {
     }
 
     async fn ready(&self, ctx: Context, ready: Ready) {
-        println!("{} is connected!", ready.user.name);
+        info!("{} is connected!", ready.user.name);
 
         for guild in ctx.cache.guilds().iter() {
             GuildId(guild.0)
@@ -132,7 +132,7 @@ impl EventHandler for Handler {
     }
 
     async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
-        println!("Cache built successfully!");
+        info!("Cache built successfully!");
 
         let ctx = Arc::new(ctx);
 
