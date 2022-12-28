@@ -1,0 +1,3 @@
+struct DBHelper;
+
+impl DBHelper {}

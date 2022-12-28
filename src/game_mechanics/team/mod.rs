@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ButtonStyle, ReactionType},
+    all::{ButtonStyle, ComponentInteraction, ReactionType},
     builder::{CreateButton, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption},
     model::prelude::{ChannelType, RoleId},
     utils::MessageBuilder,
@@ -25,7 +25,7 @@ use crate::{
     },
 };
 
-use super::MechanicHandler;
+use super::{MechanicHandler, MechanicHandlerWrapper};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TeamMechanicsHandler {
@@ -43,22 +43,23 @@ pub enum TeamJobs {
 
 #[async_trait]
 impl MechanicHandler for TeamMechanicsHandler {
-    async fn handle(&self, db: DBWrapper) {
+    async fn handle(&self, handler: MechanicHandlerWrapper) {
         match &self.task {
-            TeamJobs::CreateTeam { name } => self.create_team(name, db).await,
-            TeamJobs::AddPlayerToTeam => self.add_player_to_team(db).await,
-            TeamJobs::RemovePlayerFromTeam => self.remove_player_from_team(db).await,
-            TeamJobs::DeleteTeam => self.delete_team(db).await,
+            TeamJobs::CreateTeam { name } => self.create_team(handler, name).await,
+            TeamJobs::AddPlayerToTeam => self.add_player_to_team(handler).await,
+            TeamJobs::RemovePlayerFromTeam => self.remove_player_from_team(handler).await,
+            TeamJobs::DeleteTeam => self.delete_team(handler).await,
         }
     }
 }
 
 impl TeamMechanicsHandler {
-    async fn create_team(&self, name: &String, db: DBWrapper) {
+    async fn create_team(&self, handler: MechanicHandlerWrapper, name: &String) {
         // Add the team to the database
 
         // Create the role
-        let role_create_status = db
+        let role_create_status = handler
+            .db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: RoleTasks::Create(CreateRoleTasks::Role {
@@ -74,7 +75,8 @@ impl TeamMechanicsHandler {
         };
 
         // Create the team category
-        let category_create_status = db
+        let category_create_status = handler
+            .db
             .add_await_task(TaskType::CategoryHandler(CategoryHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: CategoryTasks::Create { name: name.clone() },
@@ -87,7 +89,8 @@ impl TeamMechanicsHandler {
         };
 
         // Create the team channel
-        let channel_create_status = db
+        let channel_create_status = handler
+            .db
             .add_await_task(TaskType::ChannelHandler(ChannelHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: ChannelTasks::Create(ChannelCreateData {
@@ -105,7 +108,8 @@ impl TeamMechanicsHandler {
 
         // Write a message in the team channel that pings the role of the
         // players
-        let _message_create_status = db
+        let _message_create_status = handler
+            .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
@@ -128,7 +132,8 @@ impl TeamMechanicsHandler {
         }
 
         // Add a team menu to the team channel
-        let _message_create_status = db
+        let _message_create_status = handler
+            .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
                 guild_id: DiscordId(self.guild_id),
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
@@ -176,7 +181,14 @@ impl TeamMechanicsHandler {
                                 .disabled(false)
                                 .label("Open Comms")
                                 .emoji("💬".parse::<ReactionType>().unwrap()),
-                            None,
+                            Some(MessageData::Function(MechanicFunction::Menu(
+                                MenuMechanicsHandler {
+                                    guild_id: self.guild_id,
+                                    task: MenuJobs::OpenComms {
+                                        channel_id: DiscordId::from(&channel_model.discord_id),
+                                    },
+                                },
+                            ))),
                         ),
                         MessageComponent::new(
                             CreateButton::new("")
@@ -192,15 +204,15 @@ impl TeamMechanicsHandler {
             .await;
     }
 
-    async fn add_player_to_team(&self, _db: DBWrapper) {
+    async fn add_player_to_team(&self, handler: MechanicHandlerWrapper) {
         // Add the player to the team
     }
 
-    async fn remove_player_from_team(&self, _db: DBWrapper) {
+    async fn remove_player_from_team(&self, handler: MechanicHandlerWrapper) {
         // Remove the player from the team
     }
 
-    async fn delete_team(&self, _db: DBWrapper) {
+    async fn delete_team(&self, handler: MechanicHandlerWrapper) {
         // Delete the team from the database
     }
 }

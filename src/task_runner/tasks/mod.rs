@@ -2,11 +2,11 @@ use std::{fmt::Debug, num::NonZeroU64, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 use entity::entities::guild;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set, PrimaryKeyTrait, EnumIter, DerivePrimaryKey};
 use serde::{Deserialize, Serialize};
 use serenity::{
     client::Context,
-    model::prelude::{ChannelId, Guild, GuildId},
+    model::prelude::{ChannelId, Guild, GuildId}, all::UserId,
 };
 
 use crate::db_wrapper::{DBWrapper, TaskResult};
@@ -137,8 +137,22 @@ impl Into<GuildId> for DiscordId {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+impl From<UserId> for DiscordId {
+    fn from(id: UserId) -> Self {
+        DiscordId(id.0.get())
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, DerivePrimaryKey)]
 pub struct DatabaseId(pub i32);
+
+// impl PrimaryKeyTrait for DatabaseId {
+//     type ValueType = i32;
+
+//     fn auto_increment() -> bool {
+//         true
+//     }
+// }
 
 impl Deref for DatabaseId {
     type Target = i32;
