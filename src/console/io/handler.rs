@@ -7,7 +7,7 @@ use crate::console::app::{state::AppState, App};
 
 use super::IoEvent;
 
-use sea_orm::{Database, EntityTrait, PaginatorTrait};
+use sea_orm::Database;
 
 /// In the IO thread, we handle IO event without blocking the UI thread
 pub struct IoAsyncHandler {
@@ -48,7 +48,7 @@ impl IoAsyncHandler {
     }
 
     pub async fn do_get_books(&mut self) -> Result<()> {
-        if let AppState::Initialized { db, books, .. } = self.app.lock().await.state_mut() {
+        if let AppState::Initialized { .. } = self.app.lock().await.state_mut() {
             // let books_query = &book::Entity::find()
             //     .paginate(db, 30)
             //     .fetch_and_next()

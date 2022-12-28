@@ -5,19 +5,10 @@ use clap::Parser;
 use db_wrapper::DBWrapper;
 use handler::Handler;
 
-use console::{
-    app::App,
-    io::{handler::IoAsyncHandler, IoEvent},
-    start_ui,
-};
 use eyre::Result;
 use sea_orm::{prelude::*, Database};
 use serenity::{all::ApplicationId, prelude::*};
-use std::{
-    env,
-    num::NonZeroU64,
-    sync::{atomic::AtomicBool, Arc},
-};
+use std::{env, num::NonZeroU64, sync::atomic::AtomicBool};
 use tracing::{info, Level};
 use tracing_subscriber::EnvFilter;
 

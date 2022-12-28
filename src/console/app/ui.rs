@@ -1,13 +1,9 @@
-use std::time::Duration;
-
-use symbols::line;
 use tui::{
     backend::Backend,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    symbols,
-    text::{Span, Spans},
-    widgets::{Block, BorderType, Borders, Cell, LineGauge, Paragraph, Row, Table},
+    text::Span,
+    widgets::{Block, BorderType, Borders, Cell, Paragraph, Row, Table},
     Frame,
 };
 use tui_logger::TuiLoggerWidget;
@@ -67,7 +63,7 @@ where
         .constraints([Constraint::Min(20), Constraint::Length(32)].as_ref())
         .split(chunks[1]);
 
-    let body = draw_body(app.is_loading(), app.state());
+    let _body = draw_body(app.is_loading(), app.state());
     // match app.state_mut() {
     //     AppState::Initialized {
     //         books_tablestate, ..
@@ -106,8 +102,8 @@ fn check_size(rect: &Rect) {
 
 fn draw_body<'a>(_loading: bool, state: &AppState) -> Table<'a> {
     let books = if let Some(books) = state.books() {
-        let mut rows = Vec::new();
-        for book in books {
+        let rows = Vec::new();
+        for _book in books {
             // rows.push(Row::new(vec![
             //     Cell::from(book.name.to_string()),
             //     Cell::from(book.isbn.to_string()),
