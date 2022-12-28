@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serenity::{
-    all::ReactionType,
+    all::{ButtonStyle, ReactionType},
     builder::{CreateButton, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption},
     model::prelude::{ChannelType, RoleId},
     utils::MessageBuilder,
@@ -147,10 +147,32 @@ impl TeamMechanicsHandler {
                         .placeholder("No animal selected"),
                         None,
                     )),
-                    buttons: vec![MessageComponent::new(
-                        CreateButton::new("").emoji("🐕".parse::<ReactionType>().unwrap()),
-                        None,
-                    )],
+                    buttons: vec![
+                        MessageComponent::new(
+                            CreateButton::new("")
+                                .style(ButtonStyle::Primary)
+                                .disabled(false)
+                                .label("Start Trade")
+                                .emoji("💱".parse::<ReactionType>().unwrap()),
+                            None,
+                        ),
+                        MessageComponent::new(
+                            CreateButton::new("")
+                                .style(ButtonStyle::Primary)
+                                .disabled(false)
+                                .label("Open Comms")
+                                .emoji("💬".parse::<ReactionType>().unwrap()),
+                            None,
+                        ),
+                        MessageComponent::new(
+                            CreateButton::new("")
+                                .style(ButtonStyle::Primary)
+                                .disabled(false)
+                                .label("Update Bank")
+                                .emoji("💰".parse::<ReactionType>().unwrap()),
+                            None,
+                        ),
+                    ],
                 }),
             }))
             .await;
