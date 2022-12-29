@@ -93,13 +93,14 @@ impl DBWrapper {
         self.await_task(id).await
     }
 
-    /// Helper to find a model by its ID
-    async fn find_by_id<T: EntityTrait>(
-        id: DatabaseId,
-        db: &DatabaseConnection,
-    ) -> <T as sea_orm::EntityTrait>::Model {
-        T::find_by_id(id.0).one(db).await.unwrap().unwrap()
-    }
+    // TODO: Try to make this work?
+    // /// Helper to find a model by its ID
+    // async fn find_by_id<T: EntityTrait>(
+    //     id: DatabaseId,
+    //     db: &DatabaseConnection,
+    // ) -> <T as sea_orm::EntityTrait>::Model {
+    //     T::find_by_id(id.0).one(db).await.unwrap().unwrap()
+    // }
 }
 
 impl Deref for DBWrapper {

@@ -8,7 +8,7 @@ use crate::{
     db_wrapper::DBWrapper,
     game_mechanics::{
         team::{TeamJobs, TeamMechanicsHandler},
-        MechanicHandler,
+        MechanicHandler, MechanicHandlerWrapper,
     },
 };
 
@@ -31,7 +31,10 @@ impl GameCommand for InitializeGame {
                 },
                 guild_id: guild_id.into(),
             }
-            .handle(db.clone())
+            .handle(MechanicHandlerWrapper {
+                db: db.clone(),
+                interaction: None,
+            })
             .await;
         }
 

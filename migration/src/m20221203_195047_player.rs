@@ -7,6 +7,7 @@ pub struct Migration;
 enum Player {
     Table,
     Id,
+    DiscordId,
     Name,
     TeamId,
     Guild,
@@ -33,6 +34,7 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
+                    .col(ColumnDef::new(Player::DiscordId).string().not_null())
                     .col(ColumnDef::new(Player::Name).string().not_null())
                     .col(ColumnDef::new(Player::TeamId).integer().not_null())
                     .col(ColumnDef::new(Player::Guild).integer().null())

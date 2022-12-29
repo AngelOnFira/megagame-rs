@@ -15,6 +15,7 @@ impl EntityName for Entity {
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
     pub id: i32,
+    pub discord_id: String,
     pub name: String,
     pub team_id: i32,
     pub guild: Option<i32>,
@@ -23,6 +24,7 @@ pub struct Model {
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
 pub enum Column {
     Id,
+    DiscordId,
     Name,
     TeamId,
     Guild,
@@ -50,6 +52,7 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::Id => ColumnType::Integer.def(),
+            Self::DiscordId => ColumnType::String(None).def(),
             Self::Name => ColumnType::String(None).def(),
             Self::TeamId => ColumnType::Integer.def(),
             Self::Guild => ColumnType::Integer.def().null(),

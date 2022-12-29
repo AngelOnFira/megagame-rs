@@ -22,7 +22,7 @@ pub enum MechanicFunction {
 
 pub struct MechanicHandlerWrapper {
     pub db: DBWrapper,
-    pub interaction: ComponentInteraction,
+    pub interaction: Option<ComponentInteraction>,
 }
 
 impl MechanicFunction {

@@ -2,7 +2,7 @@ use std::{fmt::Debug, num::NonZeroU64, ops::Deref, sync::Arc};
 
 use async_trait::async_trait;
 use entity::entities::guild;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set, PrimaryKeyTrait, EnumIter, DerivePrimaryKey};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
     client::Context,
@@ -143,16 +143,8 @@ impl From<UserId> for DiscordId {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, DerivePrimaryKey)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct DatabaseId(pub i32);
-
-// impl PrimaryKeyTrait for DatabaseId {
-//     type ValueType = i32;
-
-//     fn auto_increment() -> bool {
-//         true
-//     }
-// }
 
 impl Deref for DatabaseId {
     type Target = i32;

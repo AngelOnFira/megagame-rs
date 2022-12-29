@@ -1,6 +1,7 @@
 use crate::{
     commands::{fake_trade::FakeTrade, initialize_game::InitializeGame},
     db_wrapper::DBWrapper,
+    game_mechanics::MechanicHandlerWrapper,
     task_runner::{
         tasks::{message::message_component::MessageData, run_tests},
         TaskRunner,
@@ -106,7 +107,12 @@ impl EventHandler for Handler {
                                 let _ = self.db.add_await_task(task_type).await;
                             }
                             MessageData::Function(mechanic_function) => {
-                                mechanic_function.handle(self.db.clone()).await;
+                                mechanic_function
+                                    .handle(MechanicHandlerWrapper {
+                                        db: self.db.clone(),
+                                        interaction: Some(component),
+                                    })
+                                    .await;
                             }
                         }
                     }
