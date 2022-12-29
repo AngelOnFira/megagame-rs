@@ -53,7 +53,11 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Channel::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Guild::DiscordId).big_integer().primary_key())
+                    .col(
+                        ColumnDef::new(Channel::DiscordId)
+                            .big_integer()
+                            .primary_key(),
+                    )
                     .col(ColumnDef::new(Channel::GuildFKId).big_integer().null())
                     .col(ColumnDef::new(Channel::Name).string().not_null())
                     .foreign_key(
@@ -72,7 +76,7 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Role::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Guild::DiscordId).big_integer().primary_key())
+                    .col(ColumnDef::new(Role::DiscordId).big_integer().primary_key())
                     .col(ColumnDef::new(Role::GuildFKId).big_integer().null())
                     .col(ColumnDef::new(Role::Name).string().not_null())
                     .foreign_key(
@@ -91,7 +95,11 @@ impl MigrationTrait for Migration {
                 Table::create()
                     .table(Category::Table)
                     .if_not_exists()
-                    .col(ColumnDef::new(Guild::DiscordId).big_integer().primary_key())
+                    .col(
+                        ColumnDef::new(Category::DiscordId)
+                            .big_integer()
+                            .primary_key(),
+                    )
                     .col(ColumnDef::new(Category::GuildFKId).big_integer().null())
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .foreign_key(

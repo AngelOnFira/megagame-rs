@@ -1,19 +1,9 @@
-use std::{fmt::Debug, num::NonZeroU64, ops::Deref, sync::Arc};
-
-use async_trait::async_trait;
 use entity::entities::guild;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
-use serde::{Deserialize, Serialize};
-use serenity::{
-    all::UserId,
-    client::Context,
-    model::prelude::{ChannelId, Guild, GuildId},
-};
 
-use crate::{
-    db_wrapper::{DBWrapper, TaskResult},
-    task_runner::tasks::DiscordId,
-};
+use serenity::{client::Context, model::prelude::Guild};
+
+use crate::{db_wrapper::DBWrapper, task_runner::tasks::DiscordId};
 
 /// Get the guild from the cache and the database. If the guild is not in the
 /// database, it will be created.

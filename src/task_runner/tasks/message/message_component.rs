@@ -1,5 +1,5 @@
 use entity::entities::message_component_data;
-use sea_orm::{ActiveModelTrait, Set, JsonValue, Value};
+use sea_orm::{ActiveModelTrait, Set};
 use serde::{Deserialize, Serialize};
 use serenity::builder::{CreateButton, CreateSelectMenu};
 

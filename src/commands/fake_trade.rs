@@ -27,7 +27,7 @@ impl GameCommand for FakeTrade {
         _options: &[ResolvedOption],
         _guild_id: GuildId,
         db: DBWrapper,
-        ctx: Context,
+        _ctx: Context,
     ) -> String {
         // Add a channel create task
         db.add_task(TaskType::CategoryHandler(CategoryHandler {

@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use entity::entities::task;
 use sea_orm::{prelude::*, Set};
 use serenity::client::Context;

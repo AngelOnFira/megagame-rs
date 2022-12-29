@@ -3,14 +3,14 @@ use entity::entities::team;
 use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ButtonStyle, ComponentInteraction, ReactionType},
+    all::{ButtonStyle, ReactionType},
     builder::{CreateButton, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption},
     model::prelude::{ChannelType, RoleId},
     utils::MessageBuilder,
 };
 
 use crate::{
-    db_wrapper::{helpers::get_guild, DBWrapper, TaskResult, TaskReturnData},
+    db_wrapper::{helpers::get_guild, TaskResult, TaskReturnData},
     game_mechanics::{
         menu::{MenuJobs, MenuMechanicsHandler},
         MechanicFunction,
@@ -58,11 +58,11 @@ impl MechanicHandler for TeamMechanicsHandler {
 impl TeamMechanicsHandler {
     async fn create_team(&self, handler: MechanicHandlerWrapper, name: &String) {
         // Get the guild
-        let (discord_guild, database_guild) =
+        let (_discord_guild, database_guild) =
             get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
 
         // Add the team to the database
-        let team_model = team::ActiveModel {
+        let _team_model = team::ActiveModel {
             // id: todo!(),
             // name: todo!(),
             // abreviation: todo!(),
@@ -246,15 +246,15 @@ impl TeamMechanicsHandler {
             .await;
     }
 
-    async fn add_player_to_team(&self, handler: MechanicHandlerWrapper) {
+    async fn add_player_to_team(&self, _handler: MechanicHandlerWrapper) {
         // Add the player to the team
     }
 
-    async fn remove_player_from_team(&self, handler: MechanicHandlerWrapper) {
+    async fn remove_player_from_team(&self, _handler: MechanicHandlerWrapper) {
         // Remove the player from the team
     }
 
-    async fn delete_team(&self, handler: MechanicHandlerWrapper) {
+    async fn delete_team(&self, _handler: MechanicHandlerWrapper) {
         // Delete the team from the database
     }
 }

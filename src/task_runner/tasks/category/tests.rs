@@ -1,5 +1,4 @@
 pub mod tests {
-    use std::sync::Arc;
 
     use serenity::prelude::Context;
 

@@ -20,10 +20,7 @@ use serenity::{
     prelude::*,
 };
 use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
+    sync::atomic::{AtomicBool, Ordering},
     time::Duration,
 };
 use tracing::{info, log};

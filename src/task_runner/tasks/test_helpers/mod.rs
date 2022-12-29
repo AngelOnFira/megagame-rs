@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use entity::entities::{category, team};
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};

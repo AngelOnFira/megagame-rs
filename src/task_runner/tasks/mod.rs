@@ -1,13 +1,13 @@
-use std::{fmt::Debug, num::NonZeroU64, ops::Deref, sync::Arc};
+use std::{fmt::Debug, num::NonZeroU64, ops::Deref};
 
 use async_trait::async_trait;
-use entity::entities::guild;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+
+use sea_orm::ActiveModelTrait;
 use serde::{Deserialize, Serialize};
 use serenity::{
     all::UserId,
     client::Context,
-    model::prelude::{ChannelId, Guild, GuildId},
+    model::prelude::{ChannelId, GuildId},
 };
 
 use crate::db_wrapper::{DBWrapper, TaskResult};

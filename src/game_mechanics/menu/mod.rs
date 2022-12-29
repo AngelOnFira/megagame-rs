@@ -2,14 +2,11 @@ use async_trait::async_trait;
 use entity::entities::player;
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
-use serenity::{all::ComponentInteraction, utils::MessageBuilder};
+use serenity::utils::MessageBuilder;
 
-use crate::{
-    db_wrapper::DBWrapper,
-    task_runner::tasks::{
-        message::{MessageHandler, MessageTasks, SendChannelMessage},
-        DiscordId, TaskType,
-    },
+use crate::task_runner::tasks::{
+    message::{MessageHandler, MessageTasks, SendChannelMessage},
+    DiscordId, TaskType,
 };
 
 use super::{MechanicHandler, MechanicHandlerWrapper};
@@ -63,7 +60,7 @@ impl MenuMechanicsHandler {
             handler.interaction.unwrap().member.unwrap().user.id.into();
 
         // Get the player from the database
-        let player = player::Entity::find()
+        let _player = player::Entity::find()
             .filter(player::Column::DiscordId.eq(discord_user_id.0))
             .one(&*handler.db)
             .await
@@ -91,7 +88,7 @@ impl MenuMechanicsHandler {
             handler.interaction.unwrap().member.unwrap().user.id.into();
 
         // Get the player from the database
-        let player = player::Entity::find()
+        let _player = player::Entity::find()
             .filter(player::Column::DiscordId.eq(discord_user_id.0))
             .one(&*handler.db)
             .await
