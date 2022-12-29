@@ -98,28 +98,25 @@ impl EventHandler for Handler {
 
                 let task = task.unwrap();
 
-                match &component.data.kind {
-                    ComponentInteractionDataKind::Button => {
-                        info!("Button pressed: {:?}", task);
+                if let ComponentInteractionDataKind::Button = &component.data.kind {
+                    info!("Button pressed: {:?}", task);
 
-                        // If the task is a TaskType, add it to the database, if
-                        // it's a function, run it
-                        match task {
-                            MessageData::Task(task_type) => {
-                                let _ = self.db.add_await_task(task_type).await;
-                            }
-                            MessageData::Function(mechanic_function) => {
-                                mechanic_function
-                                    .handle(MechanicHandlerWrapper {
-                                        db: self.db.clone(),
-                                        interaction: Some(component),
-                                        ctx: ctx.clone(),
-                                    })
-                                    .await;
-                            }
+                    // If the task is a TaskType, add it to the database, if
+                    // it's a function, run it
+                    match task {
+                        MessageData::Task(task_type) => {
+                            let _ = self.db.add_await_task(task_type).await;
+                        }
+                        MessageData::Function(mechanic_function) => {
+                            mechanic_function
+                                .handle(MechanicHandlerWrapper {
+                                    db: self.db.clone(),
+                                    interaction: Some(component),
+                                    ctx: ctx.clone(),
+                                })
+                                .await;
                         }
                     }
-                    _ => {}
                 }
             }
             _ => (),
@@ -145,9 +142,10 @@ impl EventHandler for Handler {
 
         if !self.is_loop_running.load(Ordering::Relaxed) {
             let db_clone = self.db.clone();
+            let ctx_clone = ctx.clone();
             tokio::spawn(async move {
                 let runner = TaskRunner {
-                    ctx: ctx.clone(),
+                    ctx: ctx_clone,
                     db: db_clone,
                 };
 

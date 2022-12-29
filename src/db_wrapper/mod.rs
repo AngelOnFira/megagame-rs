@@ -49,8 +49,8 @@ impl DBWrapper {
         // Add a task to the database
         DatabaseId(
             task::ActiveModel {
-                payload: Set(serde_json::to_string(&task).unwrap()),
-                status: Set(serde_json::to_string(&TaskResult::Pending).unwrap()),
+                payload: Set(serde_json::to_value(&task).unwrap()),
+                status: Set(serde_json::to_value(&TaskResult::Pending).unwrap()),
                 ..Default::default()
             }
             .insert(&self.db)
@@ -65,8 +65,8 @@ impl DBWrapper {
     pub async fn await_task(&self, id: DatabaseId) -> TaskResult {
         async fn check_progress(id: DatabaseId, db: &DatabaseConnection) -> TaskResult {
             // Check if the task is completed
-            serde_json::from_str(
-                &task::Entity::find_by_id(id.0)
+            serde_json::from_value(
+                task::Entity::find_by_id(id.0)
                     .one(db)
                     .await
                     .unwrap()

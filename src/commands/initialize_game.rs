@@ -41,7 +41,7 @@ impl GameCommand for InitializeGame {
             .handle(MechanicHandlerWrapper {
                 db: db.clone(),
                 interaction: None,
-                ctx,
+                ctx: ctx.clone(),
             })
             .await;
         }

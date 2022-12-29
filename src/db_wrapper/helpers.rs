@@ -30,7 +30,7 @@ pub async fn get_guild(ctx: Context, db: DBWrapper, guild_id: DiscordId) -> (Gui
     let database_guild = match guild_option {
         Some(guild) => guild,
         None => guild::ActiveModel {
-            discord_id: Set(guild_id.into()),
+            discord_id: Set(*guild_id as i64),
             ..Default::default()
         }
         .insert(&*db)
