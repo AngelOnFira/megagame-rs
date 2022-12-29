@@ -13,7 +13,7 @@ use tracing::log;
 use self::message_component::MessageComponent;
 
 use super::{DiscordId, Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
+use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild};
 
 pub mod message_component;
 
@@ -49,7 +49,7 @@ impl Default for SendChannelMessage {
 
 #[async_trait]
 impl Task for MessageHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
+    async fn handle(&self, ctx: Context, db: DBWrapper) -> TaskResult {
         match &self.task {
             MessageTasks::SendChannelMessage(send_channel_message) => {
                 self.handle_send_channel_message(send_channel_message.clone(), ctx, db)
@@ -63,7 +63,7 @@ impl MessageHandler {
     async fn handle_send_channel_message(
         &self,
         send_channel_message: SendChannelMessage,
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
         let (_discord_guild, _database_guild) =
@@ -97,7 +97,7 @@ impl MessageHandler {
 
 #[async_trait]
 impl TaskTest for MessageHandler {
-    async fn run_tests(_ctx: Arc<Context>, _db: DBWrapper) {
+    async fn run_tests(_ctx: Context, _db: DBWrapper) {
         log::info!("Testing categories");
         // assert_not_error(test_create_channel(ctx, db).await);
     }

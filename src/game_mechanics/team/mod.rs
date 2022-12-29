@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use entity::entities::team;
+use sea_orm::Set;
 use serde::{Deserialize, Serialize};
 use serenity::{
     all::{ButtonStyle, ComponentInteraction, ReactionType},
@@ -9,7 +10,7 @@ use serenity::{
 };
 
 use crate::{
-    db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild},
+    db_wrapper::{helpers::get_guild, DBWrapper, TaskResult, TaskReturnData},
     game_mechanics::{
         menu::{MenuJobs, MenuMechanicsHandler},
         MechanicFunction,
@@ -30,7 +31,7 @@ use super::{MechanicHandler, MechanicHandlerWrapper};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TeamMechanicsHandler {
-    pub guild_id: u64,
+    pub guild_id: DiscordId,
     pub task: TeamJobs,
 }
 
@@ -57,8 +58,8 @@ impl MechanicHandler for TeamMechanicsHandler {
 impl TeamMechanicsHandler {
     async fn create_team(&self, handler: MechanicHandlerWrapper, name: &String) {
         // Get the guild
-        get_guild(handler.ctx, handler.db, self.guild_id).await;
-        
+        let (discord_guild, database_guild) =
+            get_guild(handler.ctx, handler.db, self.guild_id).await;
 
         // Add the team to the database
         let team_model = team::ActiveModel {
@@ -76,10 +77,12 @@ impl TeamMechanicsHandler {
             // trade_channel_id: todo!(),
             // menu_channel_id: todo!(),
             // bank_embed_id: todo!(),
-            name: name.clone(),
-            abreviation: name.clone(),
-
-        }
+            name: Set(name.clone()),
+            abreviation: Set(None),
+            fk_guild_id: Set(database_guild.id),
+            created_at: Set(None),
+            ..Default::default()
+        };
 
         // Create the role
         let role_create_status = handler

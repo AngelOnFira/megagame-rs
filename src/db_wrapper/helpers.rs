@@ -10,17 +10,14 @@ use serenity::{
     model::prelude::{ChannelId, Guild, GuildId},
 };
 
-use crate::{db_wrapper::{DBWrapper, TaskResult}, task_runner::tasks::DiscordId};
-
-
+use crate::{
+    db_wrapper::{DBWrapper, TaskResult},
+    task_runner::tasks::DiscordId,
+};
 
 /// Get the guild from the cache and the database. If the guild is not in the
 /// database, it will be created.
-pub async fn get_guild(
-    ctx: Arc<Context>,
-    db: DBWrapper,
-    guild_id: DiscordId,
-) -> (Guild, guild::Model) {
+pub async fn get_guild(ctx: Context, db: DBWrapper, guild_id: DiscordId) -> (Guild, guild::Model) {
     let discord_guild = ctx.cache.guild(guild_id).map(|g| g.clone()).unwrap();
 
     // Get or create the guild

@@ -70,7 +70,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Team::Wallet).integer())
                     .col(ColumnDef::new(Team::FKBankEmbedId).integer())
                     // Team guild
-                    .col(ColumnDef::new(Team::FKGuildId).integer())
+                    .col(ColumnDef::new(Team::FKGuildId).uuid())
                     .foreign_key(
                         ForeignKey::create()
                             .name("team_guild_fk")
@@ -78,7 +78,7 @@ impl MigrationTrait for Migration {
                             .to(Guild::Table, Guild::DiscordId),
                     )
                     // Team role
-                    .col(ColumnDef::new(Team::FKTeamRoleId).integer())
+                    .col(ColumnDef::new(Team::FKTeamRoleId).uuid())
                     .foreign_key(
                         ForeignKey::create()
                         .name("team_role_fk")
@@ -86,7 +86,7 @@ impl MigrationTrait for Migration {
                         .to(Role::Table, Role::DiscordId),
                     )
                     // Team category
-                    .col(ColumnDef::new(Team::FKTeamCategoryId).integer().null())
+                    .col(ColumnDef::new(Team::FKTeamCategoryId).uuid().null())
                     .foreign_key(
                         ForeignKey::create()
                         .name("team_category_fk")
@@ -94,7 +94,7 @@ impl MigrationTrait for Migration {
                         .to(Category::Table, Category::DiscordId),
                     )
                     // Team general channel
-                    .col(ColumnDef::new(Team::FKGeneralChannelId).integer().null())
+                    .col(ColumnDef::new(Team::FKGeneralChannelId).uuid().null())
                     .foreign_key(
                         ForeignKey::create()
                         .name("team_general_channel_fk")
@@ -102,7 +102,7 @@ impl MigrationTrait for Migration {
                         .to(Channel::Table, Channel::DiscordId),
                     )
                     // Team trade channel
-                    .col(ColumnDef::new(Team::FKTradeChannelId).integer().null())
+                    .col(ColumnDef::new(Team::FKTradeChannelId).uuid().null())
                     .foreign_key(
                         ForeignKey::create()
                         .name("team_trade_channel_fk")
@@ -110,7 +110,7 @@ impl MigrationTrait for Migration {
                         .to(Channel::Table, Channel::DiscordId),
                     )
                     // Team menu channel
-                    .col(ColumnDef::new(Team::FKMenuChannelId).integer().null())
+                    .col(ColumnDef::new(Team::FKMenuChannelId).uuid().null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("team_menu_channel_fk")

@@ -14,15 +14,13 @@ impl EntityName for Entity {
 
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
-    pub id: i32,
-    pub discord_id: String,
+    pub discord_id: Option<String>,
     pub guild_fk_id: Option<i32>,
     pub name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
 pub enum Column {
-    Id,
     DiscordId,
     GuildFkId,
     Name,
@@ -30,27 +28,27 @@ pub enum Column {
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
 pub enum PrimaryKey {
-    Id,
+    DiscordId,
 }
 
 impl PrimaryKeyTrait for PrimaryKey {
-    type ValueType = i32;
+    type ValueType = Option<String>;
     fn auto_increment() -> bool {
-        true
+        false
     }
 }
 
 #[derive(Copy, Clone, Debug, EnumIter)]
 pub enum Relation {
     Guild,
+    Team,
 }
 
 impl ColumnTrait for Column {
     type EntityName = Entity;
     fn def(&self) -> ColumnDef {
         match self {
-            Self::Id => ColumnType::Integer.def(),
-            Self::DiscordId => ColumnType::String(None).def(),
+            Self::DiscordId => ColumnType::String(None).def().null(),
             Self::GuildFkId => ColumnType::Integer.def().null(),
             Self::Name => ColumnType::String(None).def(),
         }
@@ -62,8 +60,9 @@ impl RelationTrait for Relation {
         match self {
             Self::Guild => Entity::belongs_to(super::guild::Entity)
                 .from(Column::GuildFkId)
-                .to(super::guild::Column::Id)
+                .to(super::guild::Column::DiscordId)
                 .into(),
+            Self::Team => Entity::has_many(super::team::Entity).into(),
         }
     }
 }
@@ -71,6 +70,12 @@ impl RelationTrait for Relation {
 impl Related<super::guild::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Guild.def()
+    }
+}
+
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Team.def()
     }
 }
 

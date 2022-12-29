@@ -112,6 +112,7 @@ impl EventHandler for Handler {
                                     .handle(MechanicHandlerWrapper {
                                         db: self.db.clone(),
                                         interaction: Some(component),
+                                        ctx: ctx.clone(),
                                     })
                                     .await;
                             }
@@ -174,7 +175,7 @@ impl EventHandler for Handler {
     }
 }
 
-// async fn run_tests(ctx: Arc<Context>) {
+// async fn run_tests(ctx: Context) {
 //     let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
 //         Ok(db) => db,
 //         Err(err) => panic!("Error connecting to database: {:?}", err),

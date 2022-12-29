@@ -10,8 +10,9 @@ use tracing::log;
 use super::{DiscordId, Task, TaskTest};
 use crate::{
     db_wrapper::{
+        helpers::get_guild,
         DBWrapper, TaskResult,
-        TaskReturnData::{self, ChannelModel}, helpers::get_guild,
+        TaskReturnData::{self, ChannelModel},
     },
     task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel},
 };
@@ -39,7 +40,7 @@ pub struct ChannelCreateData {
 
 #[async_trait]
 impl Task for ChannelHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
+    async fn handle(&self, ctx: Context, db: DBWrapper) -> TaskResult {
         match &self.task {
             ChannelTasks::Create(channel_create_task) => {
                 self.handle_channel_create(channel_create_task, ctx, db)
@@ -54,7 +55,7 @@ impl ChannelHandler {
     async fn handle_channel_create(
         &self,
         data: &ChannelCreateData,
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
         let (discord_guild, database_guild) =
@@ -90,7 +91,7 @@ impl ChannelHandler {
     async fn handle_channel_delete(
         &self,
         id: DiscordId,
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
         // Delete the channel from Discord
@@ -117,7 +118,7 @@ impl ChannelHandler {
 
 #[async_trait]
 impl TaskTest for ChannelHandler {
-    async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+    async fn run_tests(ctx: Context, db: DBWrapper) {
         log::info!("Testing categories");
         assert_not_error(test_create_channel(ctx, db).await);
     }

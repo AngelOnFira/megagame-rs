@@ -17,17 +17,17 @@ pub struct Model {
     pub id: i32,
     pub name: String,
     pub abreviation: Option<String>,
-    pub guild: Option<i32>,
     pub created_at: Option<String>,
     pub updated_at: Option<String>,
     pub emoji: Option<String>,
     pub wallet: Option<i32>,
-    pub role: Option<i32>,
-    pub category_id: Option<i32>,
-    pub general_channel_id: Option<i32>,
-    pub trade_channel_id: Option<i32>,
-    pub menu_channel_id: Option<i32>,
-    pub bank_embed_id: Option<i32>,
+    pub fk_bank_embed_id: Option<i32>,
+    pub fk_guild_id: Option<String>,
+    pub fk_team_role_id: Option<String>,
+    pub fk_team_category_id: Option<String>,
+    pub fk_general_channel_id: Option<String>,
+    pub fk_trade_channel_id: Option<String>,
+    pub fk_menu_channel_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
@@ -35,17 +35,17 @@ pub enum Column {
     Id,
     Name,
     Abreviation,
-    Guild,
     CreatedAt,
     UpdatedAt,
     Emoji,
     Wallet,
-    Role,
-    CategoryId,
-    GeneralChannelId,
-    TradeChannelId,
-    MenuChannelId,
-    BankEmbedId,
+    FkBankEmbedId,
+    FkGuildId,
+    FkTeamRoleId,
+    FkTeamCategoryId,
+    FkGeneralChannelId,
+    FkTradeChannelId,
+    FkMenuChannelId,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
@@ -66,7 +66,9 @@ pub enum Relation {
     Channel3,
     Channel2,
     Channel1,
+    Guild,
     Player,
+    Role,
 }
 
 impl ColumnTrait for Column {
@@ -76,17 +78,17 @@ impl ColumnTrait for Column {
             Self::Id => ColumnType::Integer.def(),
             Self::Name => ColumnType::String(None).def(),
             Self::Abreviation => ColumnType::String(None).def().null(),
-            Self::Guild => ColumnType::Integer.def().null(),
             Self::CreatedAt => ColumnType::String(None).def().null(),
             Self::UpdatedAt => ColumnType::String(None).def().null(),
             Self::Emoji => ColumnType::String(None).def().null(),
             Self::Wallet => ColumnType::Integer.def().null(),
-            Self::Role => ColumnType::Integer.def().null(),
-            Self::CategoryId => ColumnType::Integer.def().null(),
-            Self::GeneralChannelId => ColumnType::Integer.def().null(),
-            Self::TradeChannelId => ColumnType::Integer.def().null(),
-            Self::MenuChannelId => ColumnType::Integer.def().null(),
-            Self::BankEmbedId => ColumnType::Integer.def().null(),
+            Self::FkBankEmbedId => ColumnType::Integer.def().null(),
+            Self::FkGuildId => ColumnType::String(None).def().null(),
+            Self::FkTeamRoleId => ColumnType::String(None).def().null(),
+            Self::FkTeamCategoryId => ColumnType::String(None).def().null(),
+            Self::FkGeneralChannelId => ColumnType::String(None).def().null(),
+            Self::FkTradeChannelId => ColumnType::String(None).def().null(),
+            Self::FkMenuChannelId => ColumnType::String(None).def().null(),
         }
     }
 }
@@ -95,22 +97,30 @@ impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {
         match self {
             Self::Category => Entity::belongs_to(super::category::Entity)
-                .from(Column::CategoryId)
-                .to(super::category::Column::Id)
+                .from(Column::FkTeamCategoryId)
+                .to(super::category::Column::DiscordId)
                 .into(),
             Self::Channel3 => Entity::belongs_to(super::channel::Entity)
-                .from(Column::MenuChannelId)
-                .to(super::channel::Column::Id)
+                .from(Column::FkMenuChannelId)
+                .to(super::channel::Column::DiscordId)
                 .into(),
             Self::Channel2 => Entity::belongs_to(super::channel::Entity)
-                .from(Column::TradeChannelId)
-                .to(super::channel::Column::Id)
+                .from(Column::FkTradeChannelId)
+                .to(super::channel::Column::DiscordId)
                 .into(),
             Self::Channel1 => Entity::belongs_to(super::channel::Entity)
-                .from(Column::GeneralChannelId)
-                .to(super::channel::Column::Id)
+                .from(Column::FkGeneralChannelId)
+                .to(super::channel::Column::DiscordId)
+                .into(),
+            Self::Guild => Entity::belongs_to(super::guild::Entity)
+                .from(Column::FkGuildId)
+                .to(super::guild::Column::DiscordId)
                 .into(),
             Self::Player => Entity::has_many(super::player::Entity).into(),
+            Self::Role => Entity::belongs_to(super::role::Entity)
+                .from(Column::FkTeamRoleId)
+                .to(super::role::Column::DiscordId)
+                .into(),
         }
     }
 }
@@ -121,9 +131,21 @@ impl Related<super::category::Entity> for Entity {
     }
 }
 
+impl Related<super::guild::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Guild.def()
+    }
+}
+
 impl Related<super::player::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Player.def()
+    }
+}
+
+impl Related<super::role::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Role.def()
     }
 }
 

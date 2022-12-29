@@ -13,7 +13,7 @@ use crate::{
 pub mod tasks;
 
 pub struct TaskRunner {
-    pub ctx: Arc<Context>,
+    pub ctx: Context,
     pub db: DBWrapper,
 }
 
@@ -51,7 +51,7 @@ impl TaskRunner {
             // Complete the tasks
             let task_status = task_payload
                 .route()
-                .handle(Arc::clone(&self.ctx), self.db.clone())
+                .handle(self.ctx.clone(), self.db.clone())
                 .await;
 
             // Set the task as completed

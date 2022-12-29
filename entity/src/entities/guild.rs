@@ -14,25 +14,23 @@ impl EntityName for Entity {
 
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
-    pub id: i32,
-    pub discord_id: String,
+    pub discord_id: Option<String>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
 pub enum Column {
-    Id,
     DiscordId,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
 pub enum PrimaryKey {
-    Id,
+    DiscordId,
 }
 
 impl PrimaryKeyTrait for PrimaryKey {
-    type ValueType = i32;
+    type ValueType = Option<String>;
     fn auto_increment() -> bool {
-        true
+        false
     }
 }
 
@@ -41,14 +39,14 @@ pub enum Relation {
     Category,
     Channel,
     Role,
+    Team,
 }
 
 impl ColumnTrait for Column {
     type EntityName = Entity;
     fn def(&self) -> ColumnDef {
         match self {
-            Self::Id => ColumnType::Integer.def(),
-            Self::DiscordId => ColumnType::String(None).def(),
+            Self::DiscordId => ColumnType::String(None).def().null(),
         }
     }
 }
@@ -59,6 +57,7 @@ impl RelationTrait for Relation {
             Self::Category => Entity::has_many(super::category::Entity).into(),
             Self::Channel => Entity::has_many(super::channel::Entity).into(),
             Self::Role => Entity::has_many(super::role::Entity).into(),
+            Self::Team => Entity::has_many(super::team::Entity).into(),
         }
     }
 }
@@ -78,6 +77,12 @@ impl Related<super::channel::Entity> for Entity {
 impl Related<super::role::Entity> for Entity {
     fn to() -> RelationDef {
         Relation::Role.def()
+    }
+}
+
+impl Related<super::team::Entity> for Entity {
+    fn to() -> RelationDef {
+        Relation::Team.def()
     }
 }
 

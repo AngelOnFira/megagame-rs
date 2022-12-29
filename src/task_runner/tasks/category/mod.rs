@@ -17,7 +17,7 @@ use tracing::log;
 
 use super::{DiscordId, Task, TaskTest};
 use crate::{
-    db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild},
+    db_wrapper::{helpers::get_guild, DBWrapper, TaskResult, TaskReturnData},
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
 };
 
@@ -37,7 +37,7 @@ pub enum CategoryTasks {
 
 #[async_trait]
 impl Task for CategoryHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
+    async fn handle(&self, ctx: Context, db: DBWrapper) -> TaskResult {
         match &self.task {
             CategoryTasks::Create { name } => self.handle_category_create(name, ctx, db).await,
             CategoryTasks::Delete { discord_id } => {
@@ -48,12 +48,7 @@ impl Task for CategoryHandler {
 }
 
 impl CategoryHandler {
-    async fn handle_category_create(
-        &self,
-        name: &str,
-        ctx: Arc<Context>,
-        db: DBWrapper,
-    ) -> TaskResult {
+    async fn handle_category_create(&self, name: &str, ctx: Context, db: DBWrapper) -> TaskResult {
         let (discord_guild, database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
@@ -91,7 +86,7 @@ impl CategoryHandler {
     async fn handle_category_delete(
         &self,
         category_discord_id: &DiscordId,
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
         // Delete the category from Discord

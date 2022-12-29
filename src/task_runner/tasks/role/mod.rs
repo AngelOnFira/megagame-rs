@@ -9,7 +9,7 @@ use serenity::{builder::EditRole, client::Context};
 use tracing::log;
 
 use super::{DiscordId, Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
+use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild};
 
 // pub mod tests;
 
@@ -39,7 +39,7 @@ pub enum DeleteRoleTasks {
 
 #[async_trait]
 impl Task for RoleHandler {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult {
+    async fn handle(&self, ctx: Context, db: DBWrapper) -> TaskResult {
         match &self.task {
             RoleTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
             RoleTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
@@ -51,7 +51,7 @@ impl RoleHandler {
     async fn handle_role_create(
         &self,
         task: &CreateRoleTasks,
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
         let (discord_guild, _database_guild) =
@@ -89,7 +89,7 @@ impl RoleHandler {
     async fn handle_role_delete(
         &self,
         _task: &DeleteRoleTasks,
-        _ctx: Arc<Context>,
+        _ctx: Context,
         _db: DBWrapper,
     ) -> TaskResult {
         todo!()
@@ -98,7 +98,7 @@ impl RoleHandler {
 
 #[async_trait]
 impl TaskTest for RoleHandler {
-    async fn run_tests(_ctx: Arc<Context>, _db: DBWrapper) {
+    async fn run_tests(_ctx: Context, _db: DBWrapper) {
         log::info!("Testing categories");
         // assert_not_error(test_create_channel(ctx, db).await);
     }

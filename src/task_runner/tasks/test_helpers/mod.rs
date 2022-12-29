@@ -10,7 +10,7 @@ use crate::{db_wrapper::DBWrapper, TEST_GUILD_ID};
 use super::DatabaseId;
 
 pub(crate) struct TestHelpers {
-    ctx: Arc<Context>,
+    ctx: Context,
     db: DBWrapper,
 }
 
@@ -35,7 +35,7 @@ pub enum DatabaseStatus {
 }
 
 impl TestHelpers {
-    pub async fn new(ctx: Arc<Context>, db: DBWrapper) -> Self {
+    pub async fn new(ctx: Context, db: DBWrapper) -> Self {
         Self { db, ctx }
     }
 

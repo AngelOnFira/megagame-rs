@@ -18,7 +18,7 @@ pub mod tests {
     };
 
     pub async fn test_create_channel(
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> Result<(), CategoryCreateError> {
         let test_helper = TestHelpers::new(ctx.clone(), db.clone()).await;

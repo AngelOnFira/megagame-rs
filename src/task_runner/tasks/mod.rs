@@ -57,7 +57,7 @@ impl TaskType {
 
 #[async_trait]
 pub trait Task: Send + Sync {
-    async fn handle(&self, ctx: Arc<Context>, db: DBWrapper) -> TaskResult;
+    async fn handle(&self, ctx: Context, db: DBWrapper) -> TaskResult;
 }
 
 #[async_trait]
@@ -132,6 +132,12 @@ impl Into<GuildId> for DiscordId {
     }
 }
 
+impl From<GuildId> for DiscordId {
+    fn from(id: GuildId) -> Self {
+        DiscordId(id.0.get())
+    }
+}
+
 impl From<UserId> for DiscordId {
     fn from(id: UserId) -> Self {
         DiscordId(id.0.get())
@@ -150,11 +156,11 @@ impl Deref for DatabaseId {
 }
 
 // impl Task {
-//     pub async fn message_user(&self, ctx: Arc<Context>) {
+//     pub async fn message_user(&self, ctx: Context) {
 
 //     }
 
-//     pub async fn create_dropdown(&self, ctx: Arc<Context>) {
+//     pub async fn create_dropdown(&self, ctx: Context) {
 //         let dropdown = if let TaskType::CreateDropdown(dropdown) = &self.task {
 //             dropdown
 //         } else {
@@ -181,7 +187,7 @@ impl Deref for DatabaseId {
 //             .unwrap();
 //     }
 
-//     pub async fn create_team_channel(&self, ctx: Arc<Context>) {
+//     pub async fn create_team_channel(&self, ctx: Context) {
 //         let team_channel = if let TaskType::CreateTeamChannel(team_channel) = &self.task {
 //             team_channel
 //         } else {

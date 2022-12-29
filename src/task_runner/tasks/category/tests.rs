@@ -14,7 +14,7 @@ pub mod tests {
     };
 
     pub async fn test_create_category(
-        ctx: Arc<Context>,
+        ctx: Context,
         db: DBWrapper,
     ) -> Result<(), CategoryCreateError> {
         let test_helper = TestHelpers::new(ctx, db.clone()).await;
