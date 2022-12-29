@@ -12,7 +12,7 @@ use tracing::log;
 
 use self::message_component::MessageComponent;
 
-use super::{get_guild, DiscordId, Task, TaskTest};
+use super::{DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 pub mod message_component;

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use serenity::{builder::EditRole, client::Context};
 use tracing::log;
 
-use super::{get_guild, DiscordId, Task, TaskTest};
+use super::{DiscordId, Task, TaskTest};
 use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;

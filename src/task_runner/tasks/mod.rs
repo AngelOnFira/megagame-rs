@@ -5,21 +5,20 @@ use entity::entities::guild;
 use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
+    all::UserId,
     client::Context,
-    model::prelude::{ChannelId, Guild, GuildId}, all::UserId,
+    model::prelude::{ChannelId, Guild, GuildId},
 };
 
 use crate::db_wrapper::{DBWrapper, TaskResult};
 
 use self::{
-    button::ButtonHandler, category::CategoryHandler, channel::ChannelHandler,
-    dropdown::DropdownHandler, message::MessageHandler, role::RoleHandler, thread::ThreadHandler,
+    category::CategoryHandler, channel::ChannelHandler, message::MessageHandler, role::RoleHandler,
+    thread::ThreadHandler,
 };
 
-pub mod button;
 pub mod category;
 pub mod channel;
-pub mod dropdown;
 pub mod message;
 pub mod role;
 pub mod test_helpers;
@@ -37,10 +36,8 @@ pub struct DbTask {
 /// Each of these structs might have their own `impl`s to operate on the data.
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TaskType {
-    ButtonHandler(ButtonHandler),
     CategoryHandler(CategoryHandler),
     ChannelHandler(ChannelHandler),
-    DropdownHandler(DropdownHandler),
     MessageHandler(MessageHandler),
     RoleHandler(RoleHandler),
     ThreadHandler(ThreadHandler),
@@ -49,10 +46,8 @@ pub enum TaskType {
 impl TaskType {
     pub fn route(&self) -> &dyn Task {
         match self {
-            TaskType::ButtonHandler(task_handler) => task_handler,
             TaskType::CategoryHandler(task_handler) => task_handler,
             TaskType::ChannelHandler(task_handler) => task_handler,
-            TaskType::DropdownHandler(task_handler) => task_handler,
             TaskType::MessageHandler(task_handler) => task_handler,
             TaskType::RoleHandler(task_handler) => task_handler,
             TaskType::ThreadHandler(task_handler) => task_handler,
@@ -67,10 +62,10 @@ pub trait Task: Send + Sync {
 
 #[async_trait]
 pub trait TaskTest: Send + Sync {
-    async fn run_tests(ctx: Arc<Context>, db: DBWrapper);
+    async fn run_tests(ctx: Context, db: DBWrapper);
 }
 
-pub async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+pub async fn run_tests(ctx: Context, db: DBWrapper) {
     CategoryHandler::run_tests(ctx, db).await;
 }
 
@@ -152,36 +147,6 @@ impl Deref for DatabaseId {
     fn deref(&self) -> &Self::Target {
         &self.0
     }
-}
-
-/// Get the guild from the cache and the database. If the guild is not in the
-/// database, it will be created.
-pub async fn get_guild(
-    ctx: Arc<Context>,
-    db: DBWrapper,
-    guild_id: DiscordId,
-) -> (Guild, guild::Model) {
-    let discord_guild = ctx.cache.guild(guild_id).map(|g| g.clone()).unwrap();
-
-    // Get or create the guild
-    let guild_option = guild::Entity::find()
-        .filter(guild::Column::DiscordId.eq(guild_id.to_string()))
-        .one(&*db)
-        .await
-        .unwrap();
-
-    let database_guild = match guild_option {
-        Some(guild) => guild,
-        None => guild::ActiveModel {
-            discord_id: Set(guild_id.into()),
-            ..Default::default()
-        }
-        .insert(&*db)
-        .await
-        .unwrap(),
-    };
-
-    (discord_guild, database_guild)
 }
 
 // impl Task {

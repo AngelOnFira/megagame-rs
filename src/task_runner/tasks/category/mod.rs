@@ -15,9 +15,9 @@ use serenity::{
 };
 use tracing::log;
 
-use super::{get_guild, DiscordId, Task, TaskTest};
+use super::{DiscordId, Task, TaskTest};
 use crate::{
-    db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
+    db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild},
     task_runner::tasks::{assert_not_error, category::tests::tests::test_create_category},
 };
 
@@ -118,7 +118,7 @@ impl CategoryHandler {
 
 #[async_trait]
 impl TaskTest for CategoryHandler {
-    async fn run_tests(ctx: Arc<Context>, db: DBWrapper) {
+    async fn run_tests(ctx: Context, db: DBWrapper) {
         log::info!("Testing categories");
         assert_not_error(test_create_category(ctx, db).await);
     }

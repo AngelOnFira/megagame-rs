@@ -7,11 +7,11 @@ use serde::{Deserialize, Serialize};
 use serenity::{builder::CreateChannel, client::Context, model::channel::ChannelType};
 use tracing::log;
 
-use super::{get_guild, DiscordId, Task, TaskTest};
+use super::{DiscordId, Task, TaskTest};
 use crate::{
     db_wrapper::{
         DBWrapper, TaskResult,
-        TaskReturnData::{self, ChannelModel},
+        TaskReturnData::{self, ChannelModel}, helpers::get_guild,
     },
     task_runner::tasks::{assert_not_error, channel::tests::tests::test_create_channel},
 };

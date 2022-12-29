@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 use entity::entities::player;
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use serenity::{all::ComponentInteraction, utils::MessageBuilder};
 
@@ -23,6 +24,7 @@ pub struct MenuMechanicsHandler {
 pub enum MenuJobs {
     StartTradeMenu { channel_id: DiscordId },
     OpenComms { channel_id: DiscordId },
+    JoinTeam { channel_id: DiscordId },
 }
 
 #[async_trait]
@@ -33,6 +35,7 @@ impl MechanicHandler for MenuMechanicsHandler {
                 self.start_trade_menu(handler, *channel_id).await
             }
             MenuJobs::OpenComms { channel_id } => self.open_comms(handler, *channel_id).await,
+            MenuJobs::JoinTeam { channel_id } => self.join_team(handler, *channel_id).await,
         }
     }
 }
@@ -62,8 +65,37 @@ impl MenuMechanicsHandler {
         // Get the player from the database
         let player = player::Entity::find()
             .filter(player::Column::DiscordId.eq(discord_user_id.0))
-            .one(&handler.db.pool)
+            .one(&*handler.db)
             .await
+            .unwrap()
+            .unwrap();
+
+        // Send a message to the channel
+        let _message_create_status = handler
+            .db
+            .add_await_task(TaskType::MessageHandler(MessageHandler {
+                guild_id: DiscordId(self.guild_id),
+                task: MessageTasks::SendChannelMessage(SendChannelMessage {
+                    channel_id,
+                    message: MessageBuilder::new().push("Comms opened!").build(),
+                    select_menu: None,
+                    buttons: Vec::new(),
+                }),
+            }))
+            .await;
+    }
+
+    async fn join_team(&self, handler: MechanicHandlerWrapper, channel_id: DiscordId) {
+        // Get the team of the interacting player
+        let discord_user_id: DiscordId =
+            handler.interaction.unwrap().member.unwrap().user.id.into();
+
+        // Get the player from the database
+        let player = player::Entity::find()
+            .filter(player::Column::DiscordId.eq(discord_user_id.0))
+            .one(&*handler.db)
+            .await
+            .unwrap()
             .unwrap();
 
         // Send a message to the channel

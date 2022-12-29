@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use serenity::all::ComponentInteraction;
+use serenity::{all::ComponentInteraction, prelude::Context};
 
 use crate::db_wrapper::DBWrapper;
 
@@ -23,6 +23,7 @@ pub enum MechanicFunction {
 pub struct MechanicHandlerWrapper {
     pub db: DBWrapper,
     pub interaction: Option<ComponentInteraction>,
+    pub ctx: Context,
 }
 
 impl MechanicFunction {

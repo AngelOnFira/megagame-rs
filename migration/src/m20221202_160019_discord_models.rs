@@ -6,14 +6,12 @@ pub struct Migration;
 #[derive(Iden)]
 enum Guild {
     Table,
-    Id,
     DiscordId,
 }
 
 #[derive(Iden)]
 enum Channel {
     Table,
-    Id,
     DiscordId,
     GuildFKId,
     Name,
@@ -22,7 +20,6 @@ enum Channel {
 #[derive(Iden)]
 enum Role {
     Table,
-    Id,
     DiscordId,
     GuildFKId,
     Name,
@@ -31,7 +28,6 @@ enum Role {
 #[derive(Iden)]
 enum Category {
     Table,
-    Id,
     DiscordId,
     GuildFKId,
     Name,
@@ -40,93 +36,69 @@ enum Category {
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        // Create Guild table
         manager
             .create_table(
                 Table::create()
                     .table(Guild::Table)
                     .if_not_exists()
-                    .col(
-                        ColumnDef::new(Guild::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
-                    )
-                    .col(ColumnDef::new(Guild::DiscordId).text().not_null())
+                    .col(ColumnDef::new(Guild::DiscordId).text().primary_key())
                     .to_owned(),
             )
             .await?;
 
+        // Create Channel table
         manager
             .create_table(
                 Table::create()
                     .table(Channel::Table)
                     .if_not_exists()
-                    .col(
-                        ColumnDef::new(Channel::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
-                    )
-                    .col(ColumnDef::new(Channel::DiscordId).text().not_null())
+                    .col(ColumnDef::new(Guild::DiscordId).text().primary_key())
                     .col(ColumnDef::new(Channel::GuildFKId).integer().null())
                     .col(ColumnDef::new(Channel::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("channel_guild_fk")
                             .from(Channel::Table, Channel::GuildFKId)
-                            .to(Guild::Table, Guild::Id),
+                            .to(Guild::Table, Guild::DiscordId),
                     )
                     .to_owned(),
             )
             .await?;
 
+        // Create Role table
         manager
             .create_table(
                 Table::create()
                     .table(Role::Table)
                     .if_not_exists()
-                    .col(
-                        ColumnDef::new(Role::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
-                    )
-                    .col(ColumnDef::new(Role::DiscordId).text().not_null())
+                    .col(ColumnDef::new(Guild::DiscordId).text().primary_key())
                     .col(ColumnDef::new(Role::GuildFKId).integer().null())
                     .col(ColumnDef::new(Role::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("role_guild_fk")
                             .from(Role::Table, Role::GuildFKId)
-                            .to(Guild::Table, Guild::Id),
+                            .to(Guild::Table, Guild::DiscordId),
                     )
                     .to_owned(),
             )
             .await?;
 
+        // Create Category table
         manager
             .create_table(
                 Table::create()
                     .table(Category::Table)
                     .if_not_exists()
-                    .col(
-                        ColumnDef::new(Category::Id)
-                            .integer()
-                            .not_null()
-                            .auto_increment()
-                            .primary_key(),
-                    )
-                    .col(ColumnDef::new(Category::DiscordId).text().not_null())
+                    .col(ColumnDef::new(Guild::DiscordId).text().primary_key())
                     .col(ColumnDef::new(Category::GuildFKId).integer().null())
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("category_guild_fk")
                             .from(Category::Table, Category::GuildFKId)
-                            .to(Guild::Table, Guild::Id)
+                            .to(Guild::Table, Guild::DiscordId)
                             .on_update(ForeignKeyAction::Cascade)
                             .on_delete(ForeignKeyAction::SetNull),
                     )

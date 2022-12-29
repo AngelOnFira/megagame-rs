@@ -5,6 +5,9 @@ use sea_orm::{prelude::*, Database, Set};
 use serde::{Deserialize, Serialize};
 
 use crate::task_runner::tasks::{DatabaseId, DiscordId, TaskType};
+
+pub mod helpers;
+
 #[derive(Debug, Clone)]
 pub struct DBWrapper {
     pub db: DatabaseConnection,

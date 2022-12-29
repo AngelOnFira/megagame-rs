@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use entity::entities::team;
 use serde::{Deserialize, Serialize};
 use serenity::{
     all::{ButtonStyle, ComponentInteraction, ReactionType},
@@ -8,7 +9,7 @@ use serenity::{
 };
 
 use crate::{
-    db_wrapper::{DBWrapper, TaskResult, TaskReturnData},
+    db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild},
     game_mechanics::{
         menu::{MenuJobs, MenuMechanicsHandler},
         MechanicFunction,
@@ -55,7 +56,30 @@ impl MechanicHandler for TeamMechanicsHandler {
 
 impl TeamMechanicsHandler {
     async fn create_team(&self, handler: MechanicHandlerWrapper, name: &String) {
+        // Get the guild
+        get_guild(handler.ctx, handler.db, self.guild_id).await;
+        
+
         // Add the team to the database
+        let team_model = team::ActiveModel {
+            // id: todo!(),
+            // name: todo!(),
+            // abreviation: todo!(),
+            // guild: todo!(),
+            // created_at: todo!(),
+            // updated_at: todo!(),
+            // emoji: todo!(),
+            // wallet: todo!(),
+            // role: todo!(),
+            // category_id: todo!(),
+            // general_channel_id: todo!(),
+            // trade_channel_id: todo!(),
+            // menu_channel_id: todo!(),
+            // bank_embed_id: todo!(),
+            name: name.clone(),
+            abreviation: name.clone(),
+
+        }
 
         // Create the role
         let role_create_status = handler
@@ -197,6 +221,21 @@ impl TeamMechanicsHandler {
                                 .label("Update Bank")
                                 .emoji("💰".parse::<ReactionType>().unwrap()),
                             None,
+                        ),
+                        MessageComponent::new(
+                            CreateButton::new("")
+                                .style(ButtonStyle::Primary)
+                                .disabled(false)
+                                .label("Join Team")
+                                .emoji("👋".parse::<ReactionType>().unwrap()),
+                            Some(MessageData::Function(MechanicFunction::Menu(
+                                MenuMechanicsHandler {
+                                    guild_id: self.guild_id,
+                                    task: MenuJobs::JoinTeam {
+                                        channel_id: DiscordId::from(&channel_model.discord_id),
+                                    },
+                                },
+                            ))),
                         ),
                     ],
                 }),

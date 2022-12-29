@@ -61,6 +61,7 @@ impl EventHandler for Handler {
                     &command.data.options(),
                     command.guild_id.unwrap(),
                     self.db.clone(),
+                    ctx.clone(),
                 )
                 .await;
             }
@@ -140,14 +141,11 @@ impl EventHandler for Handler {
     async fn cache_ready(&self, ctx: Context, _guilds: Vec<GuildId>) {
         info!("Cache built successfully!");
 
-        let ctx = Arc::new(ctx);
-
         if !self.is_loop_running.load(Ordering::Relaxed) {
-            let ctx2 = Arc::clone(&ctx);
             let db_clone = self.db.clone();
             tokio::spawn(async move {
                 let runner = TaskRunner {
-                    ctx: ctx2,
+                    ctx: ctx.clone(),
                     db: db_clone,
                 };
 
@@ -164,7 +162,7 @@ impl EventHandler for Handler {
             let db_clone = self.db.clone();
             if self.run_tests {
                 tokio::spawn(async move {
-                    run_tests(ctx, db_clone).await;
+                    run_tests(ctx.clone(), db_clone).await;
                     // Log test complete
                     log::info!("Tests complete");
                 });
