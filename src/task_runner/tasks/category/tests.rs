@@ -62,7 +62,7 @@ pub mod tests {
         db.add_await_task(TaskType::CategoryHandler(CategoryHandler {
             guild_id: DiscordId(345993194322001923),
             task: CategoryTasks::Delete {
-                discord_id: (&category_model.discord_id).into(),
+                discord_id: DiscordId::from(category_model.discord_id),
             },
         }))
         .await;

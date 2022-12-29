@@ -69,7 +69,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Team::Wallet).integer())
                     .col(ColumnDef::new(Team::FKBankEmbedId).integer())
                     // Team guild
-                    .col(ColumnDef::new(Team::FKGuildId).big_integer())
+                    .col(ColumnDef::new(Team::FKGuildId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("team_guild_fk")

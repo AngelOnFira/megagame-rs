@@ -1,5 +1,5 @@
 use entity::entities::message_component_data;
-use sea_orm::{ActiveModelTrait, Set};
+use sea_orm::{ActiveModelTrait, Set, JsonValue, Value};
 use serde::{Deserialize, Serialize};
 use serenity::builder::{CreateButton, CreateSelectMenu};
 
@@ -32,11 +32,11 @@ impl<C: SerenityComponent> MessageComponent<C> {
     /// internal component
     pub async fn build(self, db: DBWrapper) -> C {
         // Serialize the data
-        let data = serde_json::to_string(&self.data).unwrap();
+        let data = serde_json::to_value(&self.data).unwrap();
 
         // Add it to the database
         let database_data = message_component_data::ActiveModel {
-            id_uuid: Set(Uuid::new_v4().to_string()),
+            id_uuid: Set(Uuid::new_v4()),
             payload: Set(data),
             ..Default::default()
         }
@@ -74,17 +74,17 @@ pub enum MessageData {
 }
 
 pub trait SerenityComponent {
-    fn update_id(self, id: String) -> Self;
+    fn update_id(self, id: Uuid) -> Self;
 }
 
 impl SerenityComponent for CreateButton {
-    fn update_id(self, id: String) -> Self {
-        self.custom_id(id)
+    fn update_id(self, id: Uuid) -> Self {
+        self.custom_id(id.to_string())
     }
 }
 
 impl SerenityComponent for CreateSelectMenu {
-    fn update_id(self, id: String) -> Self {
-        self.custom_id(id)
+    fn update_id(self, id: Uuid) -> Self {
+        self.custom_id(id.to_string())
     }
 }

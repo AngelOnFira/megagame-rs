@@ -67,16 +67,17 @@ impl EventHandler for Handler {
             }
             Interaction::Component(component) => {
                 // Get the payload of the custom_id
-                let payload =
-                    message_component_data::Entity::find_by_id(component.data.custom_id.clone())
-                        .one(&*self.db)
-                        .await
-                        .unwrap()
-                        .unwrap()
-                        .payload;
+                let payload = message_component_data::Entity::find_by_id(
+                    uuid::Uuid::parse_str(&component.data.custom_id).unwrap(),
+                )
+                .one(&*self.db)
+                .await
+                .unwrap()
+                .unwrap()
+                .payload;
 
                 // Deserialize the payload
-                let task = *serde_json::from_str::<Box<Option<MessageData>>>(&payload).unwrap();
+                let task = *serde_json::from_value::<Box<Option<MessageData>>>(payload).unwrap();
 
                 // The task might be none, in which case return
                 if task.is_none() {

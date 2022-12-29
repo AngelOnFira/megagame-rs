@@ -72,8 +72,8 @@ impl CategoryHandler {
         // Save the category to the database
         let database_category = category::ActiveModel {
             name: Set(discord_category.name),
-            discord_id: Set(DiscordId(discord_category.id.0.get()).into()),
-            guild_fk_id: Set(Some(database_guild.id)),
+            discord_id: Set(*DiscordId(discord_category.id.0.get()) as i64),
+            guild_fk_id: Set(Some(database_guild.discord_id)),
             ..Default::default()
         }
         .insert(&*db)

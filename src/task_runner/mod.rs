@@ -36,7 +36,7 @@ impl TaskRunner {
 
         // Iterate through open tasks in the DB
         for db_task in incomplete_tasks {
-            let task_payload: TaskType = match serde_json::from_str(&db_task.payload) {
+            let task_payload: TaskType = match serde_json::from_value(db_task.payload.clone()) {
                 Ok(task) => task,
                 Err(why) => {
                     panic!(
@@ -56,7 +56,7 @@ impl TaskRunner {
 
             // Set the task as completed
             let mut db_task_active_model: task::ActiveModel = db_task.into();
-            db_task_active_model.status = Set(serde_json::to_string(&task_status).unwrap());
+            db_task_active_model.status = Set(serde_json::to_value(&task_status).unwrap());
             db_task_active_model.update(&*self.db).await.unwrap();
         }
     }

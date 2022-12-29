@@ -59,7 +59,7 @@ impl TeamMechanicsHandler {
     async fn create_team(&self, handler: MechanicHandlerWrapper, name: &String) {
         // Get the guild
         let (discord_guild, database_guild) =
-            get_guild(handler.ctx, handler.db, self.guild_id).await;
+            get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
 
         // Add the team to the database
         let team_model = team::ActiveModel {
@@ -79,7 +79,7 @@ impl TeamMechanicsHandler {
             // bank_embed_id: todo!(),
             name: Set(name.clone()),
             abreviation: Set(None),
-            fk_guild_id: Set(database_guild.id),
+            fk_guild_id: Set(database_guild.discord_id),
             created_at: Set(None),
             ..Default::default()
         };
@@ -88,7 +88,7 @@ impl TeamMechanicsHandler {
         let role_create_status = handler
             .db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: DiscordId(*self.guild_id),
                 task: RoleTasks::Create(CreateRoleTasks::Role {
                     name: name.clone(),
                     color: 0x00ff00,
@@ -105,7 +105,7 @@ impl TeamMechanicsHandler {
         let category_create_status = handler
             .db
             .add_await_task(TaskType::CategoryHandler(CategoryHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: DiscordId(*self.guild_id),
                 task: CategoryTasks::Create { name: name.clone() },
             }))
             .await;
@@ -119,10 +119,10 @@ impl TeamMechanicsHandler {
         let channel_create_status = handler
             .db
             .add_await_task(TaskType::ChannelHandler(ChannelHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: DiscordId(*self.guild_id),
                 task: ChannelTasks::Create(ChannelCreateData {
                     name: name.clone(),
-                    category_id: Some(DiscordId(category_model.discord_id.parse().unwrap())),
+                    category_id: Some(DiscordId::from(category_model.discord_id)),
                     kind: ChannelType::Text,
                 }),
             }))
@@ -138,12 +138,12 @@ impl TeamMechanicsHandler {
         let _message_create_status = handler
             .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: DiscordId(*self.guild_id),
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
-                    channel_id: DiscordId(channel_model.discord_id.parse().unwrap()),
+                    channel_id: DiscordId::from(channel_model.discord_id),
                     message: MessageBuilder::new()
                         .push("Welcome to the team ")
-                        .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
+                        .mention(&RoleId(DiscordId::from(role_model.discord_id).into()))
                         .push("!")
                         .build(),
                     ..Default::default()
@@ -162,12 +162,12 @@ impl TeamMechanicsHandler {
         let _message_create_status = handler
             .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: DiscordId::from(self.guild_id),
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
-                    channel_id: DiscordId(channel_model.discord_id.parse().unwrap()),
+                    channel_id: DiscordId::from(channel_model.discord_id),
                     message: MessageBuilder::new()
                         .push("Welcome to the team ")
-                        .mention(&RoleId(DiscordId::from(&role_model.discord_id).into()))
+                        .mention(&RoleId(DiscordId::from(role_model.discord_id).into()))
                         .push("!")
                         .build(),
                     select_menu: Some(MessageComponent::new(
@@ -195,9 +195,9 @@ impl TeamMechanicsHandler {
                                 .emoji("💱".parse::<ReactionType>().unwrap()),
                             Some(MessageData::Function(MechanicFunction::Menu(
                                 MenuMechanicsHandler {
-                                    guild_id: self.guild_id,
+                                    guild_id: *self.guild_id,
                                     task: MenuJobs::StartTradeMenu {
-                                        channel_id: DiscordId::from(&channel_model.discord_id),
+                                        channel_id: DiscordId::from(channel_model.discord_id),
                                     },
                                 },
                             ))),
@@ -210,9 +210,9 @@ impl TeamMechanicsHandler {
                                 .emoji("💬".parse::<ReactionType>().unwrap()),
                             Some(MessageData::Function(MechanicFunction::Menu(
                                 MenuMechanicsHandler {
-                                    guild_id: self.guild_id,
+                                    guild_id: *self.guild_id,
                                     task: MenuJobs::OpenComms {
-                                        channel_id: DiscordId::from(&channel_model.discord_id),
+                                        channel_id: DiscordId::from(channel_model.discord_id),
                                     },
                                 },
                             ))),
@@ -233,9 +233,9 @@ impl TeamMechanicsHandler {
                                 .emoji("👋".parse::<ReactionType>().unwrap()),
                             Some(MessageData::Function(MechanicFunction::Menu(
                                 MenuMechanicsHandler {
-                                    guild_id: self.guild_id,
+                                    guild_id: *self.guild_id,
                                     task: MenuJobs::JoinTeam {
-                                        channel_id: DiscordId::from(&channel_model.discord_id),
+                                        channel_id: DiscordId::from(channel_model.discord_id),
                                     },
                                 },
                             ))),

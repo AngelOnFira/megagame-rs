@@ -73,7 +73,7 @@ impl RoleHandler {
 
                 // Add the role to the database
                 let role_database = role::ActiveModel {
-                    discord_id: Set(DiscordId::from(role_discord.id.0).into()),
+                    discord_id: Set(*DiscordId::from(role_discord.id.0) as i64),
                     // guild_id: Set(Some(self.guild_id)),
                     name: Set(role_discord.name),
                     ..Default::default()

@@ -114,15 +114,15 @@ impl Into<NonZeroU64> for DiscordId {
     }
 }
 
-impl Into<u64> for DiscordId {
-    fn into(self) -> u64 {
-        self.0
-    }
-}
-
 impl Into<ChannelId> for DiscordId {
     fn into(self) -> ChannelId {
         ChannelId(NonZeroU64::new(self.0).unwrap())
+    }
+}
+
+impl From<ChannelId> for DiscordId {
+    fn from(id: ChannelId) -> Self {
+        DiscordId(id.0.get())
     }
 }
 
@@ -141,6 +141,12 @@ impl From<GuildId> for DiscordId {
 impl From<UserId> for DiscordId {
     fn from(id: UserId) -> Self {
         DiscordId(id.0.get())
+    }
+}
+
+impl From<i64> for DiscordId {
+    fn from(id: i64) -> Self {
+        DiscordId(id as u64)
     }
 }
 

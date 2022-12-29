@@ -75,8 +75,8 @@ impl ChannelHandler {
 
         // Add it to the database
         let database_category = channel::ActiveModel {
-            discord_id: Set(DiscordId(discord_channel.id.into()).into()),
-            guild_fk_id: Set(Some(database_guild.id)),
+            discord_id: Set(*DiscordId::from(discord_channel.id) as i64),
+            guild_fk_id: Set(Some(database_guild.discord_id)),
             name: Set(data.name.clone()),
             ..Default::default()
         }
