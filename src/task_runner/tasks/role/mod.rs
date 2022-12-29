@@ -19,29 +19,53 @@ pub struct RoleHandler {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum RoleTasks {
-    Create(CreateRoleTasks),
-    Delete(DeleteRoleTasks),
-    RemoveRoleFromUser { user_id: u64, role_id: u64 },
+    CreateRole(CreateRole),
+    DeleteRole(DeleteRole),
+    AddRoleToUser(AddRoleToUser),
+    RemoveRoleFromUser(RemoveRoleFromUser),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum CreateRoleTasks {
-    TeamRole { team_id: u64, channel_db_id: u64 },
-    Role { name: String, color: u32 },
+pub struct CreateRole {
+    pub name: String,
+    pub color: u32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum DeleteRoleTasks {
-    TeamChannel { team_id: u64 },
-    PublicChannel { id: u64 },
+pub struct DeleteRole {
+    pub role_id: DiscordId,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AddRoleToUser {
+    pub user_id: DiscordId,
+    pub role_id: DiscordId,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RemoveRoleFromUser {
+    pub user_id: DiscordId,
+    pub role_id: DiscordId,
 }
 
 #[async_trait]
 impl Task for RoleHandler {
     async fn handle(&self, ctx: Context, db: DBWrapper) -> TaskResult {
         match &self.task {
-            RoleTasks::Create(task) => self.handle_role_create(task, ctx, db).await,
-            RoleTasks::Delete(task) => self.handle_role_delete(task, ctx, db).await,
+            RoleTasks::CreateRole(create_role_task) => {
+                self.handle_role_create(create_role_task, ctx, db).await
+            }
+            RoleTasks::DeleteRole(delete_role_task) => {
+                self.handle_role_delete(delete_role_task, ctx, db).await
+            }
+            RoleTasks::AddRoleToUser(add_role_to_user_task) => {
+                self.handle_add_role_to_user(add_role_to_user_task, ctx, db)
+                    .await
+            }
+            RoleTasks::RemoveRoleFromUser(remove_role_from_user_task) => {
+                self.handle_remove_role_from_user(remove_role_from_user_task, ctx, db)
+                    .await
+            }
         }
     }
 }
@@ -49,49 +73,105 @@ impl Task for RoleHandler {
 impl RoleHandler {
     async fn handle_role_create(
         &self,
-        task: &CreateRoleTasks,
+        task: &CreateRole,
         ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
         let (discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        match task {
-            CreateRoleTasks::TeamRole {
-                team_id: _,
-                channel_db_id: _,
-            } => todo!(),
-            CreateRoleTasks::Role { name, color: _ } => {
-                // Create the role
-                let role_discord = discord_guild
-                    .create_role(&ctx.http, EditRole::new().name(name))
-                    .await
-                    .unwrap();
+        // Create the role
+        let role_discord = discord_guild
+            .create_role(&ctx.http, EditRole::new().name(&task.name))
+            .await
+            .unwrap();
 
-                // TODO: Set the guild
+        // TODO: Set the guild
 
-                // Add the role to the database
-                let role_database = role::ActiveModel {
-                    discord_id: Set(*DiscordId::from(role_discord.id.0) as i64),
-                    // guild_id: Set(Some(self.guild_id)),
-                    name: Set(role_discord.name),
-                    ..Default::default()
-                };
+        // Add the role to the database
+        let role_database = role::ActiveModel {
+            discord_id: Set(*DiscordId::from(role_discord.id.0) as i64),
+            fk_guild_id: Set(Some(*self.guild_id as i64)),
+            name: Set(role_discord.name),
+            ..Default::default()
+        };
 
-                let role_database = role_database.insert(&*db).await.unwrap();
+        let role_database = role_database.insert(&*db).await.unwrap();
 
-                TaskResult::Completed(TaskReturnData::RoleModel(role_database))
-            }
-        }
+        TaskResult::Completed(TaskReturnData::RoleModel(role_database))
     }
 
     async fn handle_role_delete(
         &self,
-        _task: &DeleteRoleTasks,
-        _ctx: Context,
-        _db: DBWrapper,
+        task: &DeleteRole,
+        ctx: Context,
+        db: DBWrapper,
     ) -> TaskResult {
-        todo!()
+        let (discord_guild, _database_guild) =
+            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
+
+        let role_discord = discord_guild
+            .delete_role(&ctx.http, task.role_id)
+            .await
+            .unwrap();
+
+        // role_discord.delete(&ctx.http).await.unwrap();
+
+        TaskResult::Completed(TaskReturnData::None)
+    }
+
+    async fn handle_add_role_to_user(
+        &self,
+        task: &AddRoleToUser,
+        ctx: Context,
+        db: DBWrapper,
+    ) -> TaskResult {
+        let (discord_guild, _database_guild) =
+            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
+
+        // let role_discord = discord_guild
+        //     .role(&ctx.http, task.role_id.into())
+        //     .await
+        //     .unwrap();
+
+        // let user_discord = discord_guild
+        //     .member(&ctx.http, task.user_id.into())
+        //     .await
+        //     .unwrap();
+
+        // user_discord
+        //     .add_role(&ctx.http, role_discord)
+        //     .await
+        //     .unwrap();
+
+        TaskResult::Completed(TaskReturnData::None)
+    }
+
+    async fn handle_remove_role_from_user(
+        &self,
+        task: &RemoveRoleFromUser,
+        ctx: Context,
+        db: DBWrapper,
+    ) -> TaskResult {
+        let (discord_guild, _database_guild) =
+            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
+
+        // let role_discord = discord_guild
+        //     .role(&ctx.http, task.role_id.into())
+        //     .await
+        //     .unwrap();
+
+        // let user_discord = discord_guild
+        //     .member(&ctx.http, task.user_id.into())
+        //     .await
+        //     .unwrap();
+
+        // user_discord
+        //     .remove_role(&ctx.http, role_discord)
+        //     .await
+        //     .unwrap();
+
+        TaskResult::Completed(TaskReturnData::None)
     }
 }
 

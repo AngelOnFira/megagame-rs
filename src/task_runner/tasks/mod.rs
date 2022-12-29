@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use sea_orm::ActiveModelTrait;
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::UserId,
+    all::{UserId, RoleId},
     client::Context,
     model::prelude::{ChannelId, GuildId},
 };
@@ -90,6 +90,7 @@ impl Deref for DiscordId {
     }
 }
 
+// String
 impl Into<String> for DiscordId {
     fn into(self) -> String {
         self.0.to_string()
@@ -102,6 +103,7 @@ impl From<&String> for DiscordId {
     }
 }
 
+// NonZeroU64
 impl From<NonZeroU64> for DiscordId {
     fn from(id: NonZeroU64) -> Self {
         DiscordId(id.get())
@@ -114,6 +116,7 @@ impl Into<NonZeroU64> for DiscordId {
     }
 }
 
+// ChannelId
 impl Into<ChannelId> for DiscordId {
     fn into(self) -> ChannelId {
         ChannelId(NonZeroU64::new(self.0).unwrap())
@@ -126,6 +129,7 @@ impl From<ChannelId> for DiscordId {
     }
 }
 
+// GuildId
 impl Into<GuildId> for DiscordId {
     fn into(self) -> GuildId {
         GuildId(NonZeroU64::new(self.0).unwrap())
@@ -138,9 +142,36 @@ impl From<GuildId> for DiscordId {
     }
 }
 
+// UserId
+impl Into<UserId> for DiscordId {
+    fn into(self) -> UserId {
+        UserId(NonZeroU64::new(self.0).unwrap())
+    }
+}
+
 impl From<UserId> for DiscordId {
     fn from(id: UserId) -> Self {
         DiscordId(id.0.get())
+    }
+}
+
+// RoleId
+impl Into<RoleId> for DiscordId {
+    fn into(self) -> RoleId {
+        RoleId(NonZeroU64::new(self.0).unwrap())
+    }
+}
+
+impl From<RoleId> for DiscordId {
+    fn from(id: RoleId) -> Self {
+        DiscordId(id.0.get())
+    }
+}
+
+// i64
+impl Into<i64> for DiscordId {
+    fn into(self) -> i64 {
+        self.0 as i64
     }
 }
 

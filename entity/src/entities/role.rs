@@ -15,14 +15,14 @@ impl EntityName for Entity {
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
     pub discord_id: i64,
-    pub guild_fk_id: Option<i64>,
+    pub fk_guild_id: Option<i64>,
     pub name: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
 pub enum Column {
     DiscordId,
-    GuildFkId,
+    FkGuildId,
     Name,
 }
 
@@ -49,7 +49,7 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::DiscordId => ColumnType::BigInteger.def(),
-            Self::GuildFkId => ColumnType::BigInteger.def().null(),
+            Self::FkGuildId => ColumnType::BigInteger.def().null(),
             Self::Name => ColumnType::String(None).def(),
         }
     }
@@ -59,7 +59,7 @@ impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {
         match self {
             Self::Guild => Entity::belongs_to(super::guild::Entity)
-                .from(Column::GuildFkId)
+                .from(Column::FkGuildId)
                 .to(super::guild::Column::DiscordId)
                 .into(),
             Self::Team => Entity::has_many(super::team::Entity).into(),
