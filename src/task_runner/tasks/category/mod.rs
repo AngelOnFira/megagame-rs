@@ -71,7 +71,7 @@ impl CategoryHandler {
         let database_category = category::ActiveModel {
             name: Set(discord_category.name),
             discord_id: Set(*DiscordId(discord_category.id.0.get()) as i64),
-            guild_fk_id: Set(Some(database_guild.discord_id)),
+            fk_guild_id: Set(Some(database_guild.discord_id)),
             ..Default::default()
         }
         .insert(&*db)

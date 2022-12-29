@@ -8,7 +8,7 @@ use crate::{
     db_wrapper::helpers::get_guild,
     task_runner::tasks::{
         message::{MessageHandler, MessageTasks, SendChannelMessage},
-        role::{RoleHandler, RoleTasks},
+        role::{RemoveRoleFromUser, RoleHandler, RoleTasks},
         DiscordId, TaskType,
     },
 };
@@ -114,7 +114,6 @@ impl MenuMechanicsHandler {
         };
 
         // If the player had a team, remove the role from them
-        // if player.
         if let Some(team_id) = database_player.fk_team_id {
             // Get the team from the database
             let team = team::Entity::find_by_id(team_id)
@@ -127,18 +126,20 @@ impl MenuMechanicsHandler {
             let team_role = role::Entity::find_by_id(team.fk_team_role_id.unwrap())
                 .one(&*handler.db)
                 .await
+                .unwrap()
                 .unwrap();
 
             // Remove the role from the player
-            handler
+            let role_remove_status = handler
                 .db
                 .add_await_task(TaskType::RoleHandler(RoleHandler {
-                    guild_id: todo!(),
-                    task: RoleTasks::RemoveRoleFromUser {
+                    guild_id: self.guild_id,
+                    task: RoleTasks::RemoveRoleFromUser(RemoveRoleFromUser {
                         user_id: discord_user_id,
-                        role_id: team_role.discord_id,
-                    },
-                }));
+                        role_id: DiscordId::from(team_role.discord_id),
+                    }),
+                }))
+                .await;
         }
 
         // Get the team from the database

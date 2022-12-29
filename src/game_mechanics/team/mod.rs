@@ -22,7 +22,7 @@ use crate::{
             message_component::{MessageComponent, MessageData},
             MessageHandler, MessageTasks, SendChannelMessage,
         },
-        role::{CreateRoleTasks, RoleHandler, RoleTasks},
+        role::{CreateRole, RoleHandler, RoleTasks},
         DiscordId, TaskType,
     },
 };
@@ -89,7 +89,7 @@ impl TeamMechanicsHandler {
             .db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: DiscordId(*self.guild_id),
-                task: RoleTasks::Create(CreateRoleTasks::Role {
+                task: RoleTasks::CreateRole(CreateRole {
                     name: name.clone(),
                     color: 0x00ff00,
                 }),
@@ -195,7 +195,7 @@ impl TeamMechanicsHandler {
                                 .emoji("💱".parse::<ReactionType>().unwrap()),
                             Some(MessageData::Function(MechanicFunction::Menu(
                                 MenuMechanicsHandler {
-                                    guild_id: *self.guild_id,
+                                    guild_id: self.guild_id,
                                     task: MenuJobs::StartTradeMenu {
                                         channel_id: DiscordId::from(channel_model.discord_id),
                                     },
@@ -210,7 +210,7 @@ impl TeamMechanicsHandler {
                                 .emoji("💬".parse::<ReactionType>().unwrap()),
                             Some(MessageData::Function(MechanicFunction::Menu(
                                 MenuMechanicsHandler {
-                                    guild_id: *self.guild_id,
+                                    guild_id: self.guild_id,
                                     task: MenuJobs::OpenComms {
                                         channel_id: DiscordId::from(channel_model.discord_id),
                                     },
@@ -233,7 +233,7 @@ impl TeamMechanicsHandler {
                                 .emoji("👋".parse::<ReactionType>().unwrap()),
                             Some(MessageData::Function(MechanicFunction::Menu(
                                 MenuMechanicsHandler {
-                                    guild_id: *self.guild_id,
+                                    guild_id: self.guild_id,
                                     task: MenuJobs::JoinTeam {
                                         channel_id: DiscordId::from(channel_model.discord_id),
                                     },
