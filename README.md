@@ -18,7 +18,17 @@ sea-orm-cli generate entity \
 ## Rebuiding the database
 
 ```bash
-sea-orm-cli migrate
+dropdb \
+    -U postgres \
+    -h localhost \
+    -p 5432 \
+    -w postgres; \
+createdb \
+    -U postgres \
+    -h localhost \
+    -p 5432 \
+    -w postgres; \
+sea-orm-cli migrate && \
 sea-orm-cli generate entity \
     -o entity/src/entities \
     --expanded-format \

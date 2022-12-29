@@ -9,7 +9,7 @@ use serenity::{builder::EditRole, client::Context};
 use tracing::log;
 
 use super::{DiscordId, Task, TaskTest};
-use crate::db_wrapper::{DBWrapper, TaskResult, TaskReturnData, helpers::get_guild};
+use crate::db_wrapper::{helpers::get_guild, DBWrapper, TaskResult, TaskReturnData};
 
 // pub mod tests;
 
