@@ -1,5 +1,5 @@
 use entity::entities::task;
-use sea_orm::{prelude::*, Set};
+use sea_orm::{prelude::*, DbBackend, QueryTrait, Set};
 use serenity::client::Context;
 use tracing::log;
 
@@ -17,7 +17,14 @@ pub struct TaskRunner {
 
 impl TaskRunner {
     pub async fn run_tasks(&self) {
-        let pending_string = serde_json::to_string(&TaskResult::Pending).unwrap();
+        let pending_string = serde_json::to_value(TaskResult::Pending).unwrap();
+
+        dbg!(&pending_string);
+
+        dbg!(task::Entity::find()
+            .filter(task::Column::Status.eq(pending_string.clone()))
+            .build(DbBackend::Postgres)
+            .to_string());
 
         // Get all the incomplete tasks from the database
         let incomplete_tasks: Vec<task::Model> = match task::Entity::find()

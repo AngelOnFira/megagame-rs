@@ -101,10 +101,11 @@ async fn main() -> Result<()> {
 
     let gateway_intents = GatewayIntents::all();
 
-    let db: DatabaseConnection = match Database::connect("sqlite://./db.sqlite3").await {
-        Ok(db) => db,
-        Err(err) => panic!("Error connecting to database: {:?}", err),
-    };
+    let db: DatabaseConnection =
+        match Database::connect("postgres://postgres:postgres@db/postgres").await {
+            Ok(db) => db,
+            Err(err) => panic!("Error connecting to database: {:?}", err),
+        };
 
     let db_wrapper = DBWrapper::new(db.clone());
 

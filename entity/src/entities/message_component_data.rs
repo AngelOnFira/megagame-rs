@@ -44,7 +44,7 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::IdUuid => ColumnType::Uuid.def(),
-            Self::Payload => ColumnType::Json.def(),
+            Self::Payload => ColumnType::JsonBinary.def(),
         }
     }
 }

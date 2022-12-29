@@ -129,20 +129,11 @@ impl RoleHandler {
         let (discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        // let role_discord = discord_guild
-        //     .role(&ctx.http, task.role_id.into())
-        //     .await
-        //     .unwrap();
+        // Get the member
+        let mut member = ctx.cache.member(self.guild_id, task.user_id).unwrap();
 
-        // let user_discord = discord_guild
-        //     .member(&ctx.http, task.user_id.into())
-        //     .await
-        //     .unwrap();
-
-        // user_discord
-        //     .add_role(&ctx.http, role_discord)
-        //     .await
-        //     .unwrap();
+        // Add the role
+        member.add_role(&ctx.http, task.role_id).await.unwrap();
 
         TaskResult::Completed(TaskReturnData::None)
     }
@@ -156,20 +147,11 @@ impl RoleHandler {
         let (discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        // let role_discord = discord_guild
-        //     .role(&ctx.http, task.role_id.into())
-        //     .await
-        //     .unwrap();
+        // Get the member
+        let mut member = ctx.cache.member(self.guild_id, task.user_id).unwrap();
 
-        // let user_discord = discord_guild
-        //     .member(&ctx.http, task.user_id.into())
-        //     .await
-        //     .unwrap();
-
-        // user_discord
-        //     .remove_role(&ctx.http, role_discord)
-        //     .await
-        //     .unwrap();
+        // Remove the role
+        member.remove_role(&ctx.http, task.role_id).await.unwrap();
 
         TaskResult::Completed(TaskReturnData::None)
     }

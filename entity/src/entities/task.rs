@@ -15,7 +15,9 @@ impl EntityName for Entity {
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
     pub id: i32,
+    #[sea_orm(column_type = "JsonBinary")]
     pub status: Json,
+    #[sea_orm(column_type = "JsonBinary")]
     pub payload: Json,
 }
 
@@ -46,8 +48,8 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::Id => ColumnType::Integer.def(),
-            Self::Status => ColumnType::Json.def(),
-            Self::Payload => ColumnType::Json.def(),
+            Self::Status => ColumnType::JsonBinary.def(),
+            Self::Payload => ColumnType::JsonBinary.def(),
         }
     }
 }

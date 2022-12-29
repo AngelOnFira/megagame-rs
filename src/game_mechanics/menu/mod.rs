@@ -8,7 +8,7 @@ use crate::{
     db_wrapper::helpers::get_guild,
     task_runner::tasks::{
         message::{MessageHandler, MessageTasks, SendChannelMessage},
-        role::{RemoveRoleFromUser, RoleHandler, RoleTasks},
+        role::{AddRoleToUser, RemoveRoleFromUser, RoleHandler, RoleTasks},
         DiscordId, TaskType,
     },
 };
@@ -143,10 +143,31 @@ impl MenuMechanicsHandler {
         }
 
         // Get the team from the database
+        let team_database = team::Entity::find()
+            .filter(team::Column::FkMenuChannelId.eq(Some(*channel_id as i64)))
+            .one(&*handler.db)
+            .await
+            .unwrap()
+            .unwrap();
 
         // Get the team's role from the database
+        let team_role_database = role::Entity::find_by_id(team_database.fk_team_role_id.unwrap())
+            .one(&*handler.db)
+            .await
+            .unwrap()
+            .unwrap();
 
         // Add the role to the player
+        let role_add_status = handler
+            .db
+            .add_await_task(TaskType::RoleHandler(RoleHandler {
+                guild_id: self.guild_id,
+                task: RoleTasks::AddRoleToUser(AddRoleToUser {
+                    user_id: discord_user_id,
+                    role_id: DiscordId::from(team_role_database.discord_id),
+                }),
+            }))
+            .await;
 
         // Send a message to the channel
         // @<role> you have a new member, <player>!

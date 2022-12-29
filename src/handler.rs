@@ -170,28 +170,3 @@ impl EventHandler for Handler {
         }
     }
 }
-
-// async fn run_tests(ctx: Context) {
-//     let db: DatabaseConnection = match Database::connect("sqlite://./django/db.sqlite3").await {
-//         Ok(db) => db,
-//         Err(err) => panic!("Error connecting to database: {:?}", err),
-//     };
-
-//     dbg!(ctx.cache.current_user_id().0);
-
-//     let task = TaskType::MessageUser(MessageUser {
-//         player_id: 133358326439346176,
-//         message: String::from("Good dayyy"),
-//     });
-
-//     task::ActiveModel {
-//         payload: Set(serde_json::to_string(&task).unwrap()),
-//         completed: Set(false),
-//         ..Default::default()
-//     }
-//     .insert(&db)
-//     .await
-//     .unwrap();
-
-//     log::info!("Task inserted");
-// }

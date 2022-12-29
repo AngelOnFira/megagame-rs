@@ -16,5 +16,4 @@ version = "^0.10.0"
 features = [
   "runtime-tokio-rustls",
   "sqlx-postgres",
-  "sqlx-sqlite",
 ]

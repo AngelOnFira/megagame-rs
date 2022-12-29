@@ -31,5 +31,14 @@ services:
     env_file:
         - .env
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    volumes:
+      - ./pgadmin-server.json:/pgadmin4/servers.json
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)

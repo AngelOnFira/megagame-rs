@@ -27,7 +27,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(
                         ColumnDef::new(MessageComponentData::Payload)
-                            .json()
+                            .json_binary()
                             .not_null(),
                     )
                     .to_owned(),

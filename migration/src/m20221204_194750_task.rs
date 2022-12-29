@@ -14,6 +14,21 @@ enum Task {
 #[async_trait::async_trait]
 impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
+        dbg!(Table::create()
+            .table(Task::Table)
+            .if_not_exists()
+            .col(
+                ColumnDef::new(Task::Id)
+                    .integer()
+                    .not_null()
+                    .auto_increment()
+                    .primary_key(),
+            )
+            .col(ColumnDef::new(Task::Status).json_binary().not_null())
+            .col(ColumnDef::new(Task::Payload).json_binary().not_null())
+            .to_owned()
+            .build(PostgresQueryBuilder));
+
         manager
             .create_table(
                 Table::create()
@@ -26,8 +41,8 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Task::Status).json().not_null())
-                    .col(ColumnDef::new(Task::Payload).json().not_null())
+                    .col(ColumnDef::new(Task::Status).json_binary().not_null())
+                    .col(ColumnDef::new(Task::Payload).json_binary().not_null())
                     .to_owned(),
             )
             .await
