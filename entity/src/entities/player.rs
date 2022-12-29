@@ -15,10 +15,10 @@ impl EntityName for Entity {
 #[derive(Clone, Debug, PartialEq, DeriveModel, DeriveActiveModel, Eq, Serialize, Deserialize)]
 pub struct Model {
     pub id: i32,
-    pub discord_id: String,
+    pub discord_id: i64,
     pub name: String,
-    pub team_id: i32,
-    pub guild: Option<i32>,
+    pub fk_team_id: Option<i32>,
+    pub fk_guild_id: i64,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveColumn)]
@@ -26,8 +26,8 @@ pub enum Column {
     Id,
     DiscordId,
     Name,
-    TeamId,
-    Guild,
+    FkTeamId,
+    FkGuildId,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DerivePrimaryKey)]
@@ -52,10 +52,10 @@ impl ColumnTrait for Column {
     fn def(&self) -> ColumnDef {
         match self {
             Self::Id => ColumnType::Integer.def(),
-            Self::DiscordId => ColumnType::String(None).def(),
+            Self::DiscordId => ColumnType::BigInteger.def(),
             Self::Name => ColumnType::String(None).def(),
-            Self::TeamId => ColumnType::Integer.def(),
-            Self::Guild => ColumnType::Integer.def().null(),
+            Self::FkTeamId => ColumnType::Integer.def().null(),
+            Self::FkGuildId => ColumnType::BigInteger.def(),
         }
     }
 }
@@ -64,7 +64,7 @@ impl RelationTrait for Relation {
     fn def(&self) -> RelationDef {
         match self {
             Self::Team => Entity::belongs_to(super::team::Entity)
-                .from(Column::TeamId)
+                .from(Column::FkTeamId)
                 .to(super::team::Column::Id)
                 .into(),
         }

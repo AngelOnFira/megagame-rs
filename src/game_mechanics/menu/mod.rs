@@ -1,19 +1,23 @@
 use async_trait::async_trait;
-use entity::entities::player;
-use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
+use entity::entities::{player, role, team};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
 use serde::{Deserialize, Serialize};
 use serenity::utils::MessageBuilder;
 
-use crate::task_runner::tasks::{
-    message::{MessageHandler, MessageTasks, SendChannelMessage},
-    DiscordId, TaskType,
+use crate::{
+    db_wrapper::helpers::get_guild,
+    task_runner::tasks::{
+        message::{MessageHandler, MessageTasks, SendChannelMessage},
+        role::{RoleHandler, RoleTasks},
+        DiscordId, TaskType,
+    },
 };
 
 use super::{MechanicHandler, MechanicHandlerWrapper};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MenuMechanicsHandler {
-    pub guild_id: u64,
+    pub guild_id: DiscordId,
     pub task: MenuJobs,
 }
 
@@ -43,7 +47,7 @@ impl MenuMechanicsHandler {
         let _message_create_status = handler
             .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: self.guild_id,
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
                     channel_id,
                     message: MessageBuilder::new().push("Trade started!").build(),
@@ -71,7 +75,7 @@ impl MenuMechanicsHandler {
         let _message_create_status = handler
             .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: self.guild_id,
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
                     channel_id,
                     message: MessageBuilder::new().push("Comms opened!").build(),
@@ -83,23 +87,72 @@ impl MenuMechanicsHandler {
     }
 
     async fn join_team(&self, handler: MechanicHandlerWrapper, channel_id: DiscordId) {
-        // Get the team of the interacting player
+        // Get the guild from the database
+        get_guild(handler.ctx.clone(), handler.db.clone(), self.guild_id).await;
+
+        // Get the interacting user
         let discord_user_id: DiscordId =
             handler.interaction.unwrap().member.unwrap().user.id.into();
 
-        // Get the player from the database
-        let _player = player::Entity::find()
+        // Get the player from the database or create it if it doesn't exist
+        let player_option = player::Entity::find()
             .filter(player::Column::DiscordId.eq(discord_user_id.0))
             .one(&*handler.db)
             .await
-            .unwrap()
             .unwrap();
 
+        let database_player = match player_option {
+            Some(player) => player,
+            None => player::ActiveModel {
+                discord_id: Set(*discord_user_id as i64),
+                fk_guild_id: Set(*self.guild_id as i64),
+                ..Default::default()
+            }
+            .insert(&*handler.db)
+            .await
+            .unwrap(),
+        };
+
+        // If the player had a team, remove the role from them
+        // if player.
+        if let Some(team_id) = database_player.fk_team_id {
+            // Get the team from the database
+            let team = team::Entity::find_by_id(team_id)
+                .one(&*handler.db)
+                .await
+                .unwrap()
+                .unwrap();
+
+            // Get the team's role from the database
+            let team_role = role::Entity::find_by_id(team.fk_team_role_id.unwrap())
+                .one(&*handler.db)
+                .await
+                .unwrap();
+
+            // Remove the role from the player
+            handler
+                .db
+                .add_await_task(TaskType::RoleHandler(RoleHandler {
+                    guild_id: todo!(),
+                    task: RoleTasks::RemoveRoleFromUser {
+                        user_id: discord_user_id,
+                        role_id: team_role.discord_id,
+                    },
+                }));
+        }
+
+        // Get the team from the database
+
+        // Get the team's role from the database
+
+        // Add the role to the player
+
         // Send a message to the channel
+        // @<role> you have a new member, <player>!
         let _message_create_status = handler
             .db
             .add_await_task(TaskType::MessageHandler(MessageHandler {
-                guild_id: DiscordId(self.guild_id),
+                guild_id: self.guild_id,
                 task: MessageTasks::SendChannelMessage(SendChannelMessage {
                     channel_id,
                     message: MessageBuilder::new().push("Comms opened!").build(),

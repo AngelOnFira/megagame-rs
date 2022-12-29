@@ -9,8 +9,8 @@ enum Player {
     Id,
     DiscordId,
     Name,
-    TeamId,
-    Guild,
+    FKTeamId,
+    FKGuildId,
 }
 
 #[derive(Iden)]
@@ -34,14 +34,14 @@ impl MigrationTrait for Migration {
                             .auto_increment()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Player::DiscordId).string().not_null())
+                    .col(ColumnDef::new(Player::DiscordId).big_integer().not_null())
                     .col(ColumnDef::new(Player::Name).string().not_null())
-                    .col(ColumnDef::new(Player::TeamId).integer().not_null())
-                    .col(ColumnDef::new(Player::Guild).integer().null())
+                    .col(ColumnDef::new(Player::FKTeamId).integer().null())
+                    .col(ColumnDef::new(Player::FKGuildId).big_integer().not_null())
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_player_team_id")
-                            .from(Player::Table, Player::TeamId)
+                            .from(Player::Table, Player::FKTeamId)
                             .to(Team::Table, Team::Id),
                     )
                     .to_owned(),

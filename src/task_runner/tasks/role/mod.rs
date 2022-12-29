@@ -21,6 +21,7 @@ pub struct RoleHandler {
 pub enum RoleTasks {
     Create(CreateRoleTasks),
     Delete(DeleteRoleTasks),
+    RemoveRoleFromUser { user_id: u64, role_id: u64 },
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
