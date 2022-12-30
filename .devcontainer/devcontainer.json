@@ -13,7 +13,8 @@
         "ckolkman.vscode-postgres",
         "rust-lang.rust-analyzer",
         "Swellaby.rust-pack",
-        "JScearcy.rust-doc-viewer"
+        "JScearcy.rust-doc-viewer",
+        "eamodio.gitlens"
       ]
     }
   },
