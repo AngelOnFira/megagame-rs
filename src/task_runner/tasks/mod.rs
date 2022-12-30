@@ -5,7 +5,7 @@ use async_trait::async_trait;
 use sea_orm::ActiveModelTrait;
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{UserId, RoleId},
+    all::{RoleId, UserId},
     client::Context,
     model::prelude::{ChannelId, GuildId},
 };

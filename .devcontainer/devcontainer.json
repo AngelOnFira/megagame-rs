@@ -8,14 +8,18 @@
   "customizations": {
     "vscode": {
       "extensions": [
-		"GitHub.copilot-nightly",
-		"RobbOwen.synthwave-vscode",
-		"ckolkman.vscode-postgres",
-		"rust-lang.rust-analyzer",
-		"Swellaby.rust-pack",
-		"JScearcy.rust-doc-viewer"
-	]
+        "GitHub.copilot-nightly",
+        "RobbOwen.synthwave-vscode",
+        "ckolkman.vscode-postgres",
+        "rust-lang.rust-analyzer",
+        "Swellaby.rust-pack",
+        "JScearcy.rust-doc-viewer"
+      ]
     }
   },
+  "forwardPorts": [
+    5050, // PGAdmin
+    5432 // Postgres
+  ],
   "postCreateCommand": "./.devcontainer/post.sh"
 }
