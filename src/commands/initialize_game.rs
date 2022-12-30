@@ -31,7 +31,10 @@ impl GameCommand for InitializeGame {
         ctx: Context,
     ) -> String {
         // Make 3 teams, the Airship, the Galleon, and the Submarine
-        for name in ["Airship"] { // , "Galleon", "Submarine"
+        for name in ["Airship", "Galleon"] {
+            // Add a random string to the name
+            let name = format!("{}-{}", name, rand::random::<u16>());
+
             let _role_result = TeamMechanicsHandler {
                 task: TeamJobs::CreateTeam {
                     name: name.to_string(),

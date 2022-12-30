@@ -1,5 +1,5 @@
 use crate::{
-    commands::{fake_trade::FakeTrade, initialize_game::InitializeGame},
+    commands::{fake_trade::FakeTrade, initialize_game::InitializeGame, nuke::Nuke},
     db_wrapper::DBWrapper,
     game_mechanics::MechanicHandlerWrapper,
     task_runner::{
@@ -39,6 +39,7 @@ impl EventHandler for Handler {
                 let command_handler = match command.data.name.as_str() {
                     "trade" => FakeTrade::run,
                     "initialize" => InitializeGame::run,
+                    "nuke" => Nuke::run,
                     _ => unreachable!(),
                 };
 
@@ -127,7 +128,7 @@ impl EventHandler for Handler {
             GuildId(guild.0)
                 .set_application_commands(
                     &ctx.http,
-                    vec![FakeTrade::register(), InitializeGame::register()],
+                    vec![FakeTrade::register(), InitializeGame::register(), Nuke::register()],
                 )
                 .await
                 .unwrap();
@@ -151,7 +152,7 @@ impl EventHandler for Handler {
 
                 loop {
                     runner.run_tasks().await;
-                    tokio::time::sleep(Duration::from_secs(1)).await;
+                    tokio::time::sleep(Duration::from_millis(100)).await;
                 }
             });
 

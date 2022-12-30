@@ -29,8 +29,10 @@ impl TaskRunner {
             Err(why) => panic!("Error getting tasks: {:?}", why),
         };
 
-        // Print the tasks
-        log::info!("Found {} tasks", incomplete_tasks.len());
+        // Print the tasks if there are any
+        if !incomplete_tasks.is_empty() {
+            log::info!("Found {} tasks", incomplete_tasks.len());
+        }
 
         // Iterate through open tasks in the DB
         for db_task in incomplete_tasks {

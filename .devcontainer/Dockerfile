@@ -10,8 +10,8 @@ USER vscode
 
 # Install Rust CLI tools
 RUN cargo install cargo-quickinstall \
-   # && cargo quickinstall sea-orm-cli
-   && cargo install \
-      --git https://github.com/angelonfira/sea-orm \
-      --branch add-json-binary-attribute \
-      sea-orm-cli
+   && cargo quickinstall sea-orm-cli
+   # && cargo install \
+   #    --git https://github.com/angelonfira/sea-orm \
+   #    --branch add-json-binary-attribute \
+   #    sea-orm-cli
