@@ -102,7 +102,7 @@ impl ChannelHandler {
 
         // Delete the channel from the database
         let channel = channel::Entity::find()
-            .filter(channel::Column::DiscordId.eq(*id))
+            .filter(channel::Column::DiscordId.eq(*id as i64))
             .one(&*db)
             .await
             .unwrap()

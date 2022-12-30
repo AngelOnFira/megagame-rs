@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use entity::entities::team;
-use sea_orm::Set;
+use sea_orm::{ActiveModelTrait, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
     all::{ButtonStyle, ReactionType},
@@ -60,29 +60,6 @@ impl TeamMechanicsHandler {
         // Get the guild
         let (_discord_guild, database_guild) =
             get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
-
-        // Add the team to the database
-        let _team_model = team::ActiveModel {
-            // id: todo!(),
-            // name: todo!(),
-            // abreviation: todo!(),
-            // guild: todo!(),
-            // created_at: todo!(),
-            // updated_at: todo!(),
-            // emoji: todo!(),
-            // wallet: todo!(),
-            // role: todo!(),
-            // category_id: todo!(),
-            // general_channel_id: todo!(),
-            // trade_channel_id: todo!(),
-            // menu_channel_id: todo!(),
-            // bank_embed_id: todo!(),
-            name: Set(name.clone()),
-            abreviation: Set(None),
-            fk_guild_id: Set(database_guild.discord_id),
-            created_at: Set(None),
-            ..Default::default()
-        };
 
         // Create the role
         let role_create_status = handler
@@ -244,6 +221,33 @@ impl TeamMechanicsHandler {
                 }),
             }))
             .await;
+
+        // Add the team to the database
+        let _team_model = team::ActiveModel {
+            // id: todo!(),
+            // name: todo!(),
+            // abreviation: todo!(),
+            // guild: todo!(),
+            // created_at: todo!(),
+            // updated_at: todo!(),
+            // emoji: todo!(),
+            // wallet: todo!(),
+            // role: todo!(),
+            // category_id: todo!(),
+            // general_channel_id: todo!(),
+            // trade_channel_id: todo!(),
+            // bank_embed_id: todo!(),
+            name: Set(name.clone()),
+            abreviation: Set(None),
+            created_at: Set(None),
+            fk_guild_id: Set(database_guild.discord_id),
+            fk_team_role_id: Set(Some(role_model.discord_id)),
+            fk_menu_channel_id: Set(Some(channel_model.discord_id)),
+            ..Default::default()
+        }
+        .insert(&*handler.db)
+        .await
+        .unwrap();
     }
 
     async fn add_player_to_team(&self, _handler: MechanicHandlerWrapper) {

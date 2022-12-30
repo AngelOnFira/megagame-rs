@@ -65,7 +65,7 @@ impl MenuMechanicsHandler {
 
         // Get the player from the database
         let _player = player::Entity::find()
-            .filter(player::Column::DiscordId.eq(discord_user_id.0))
+            .filter(player::Column::DiscordId.eq(*discord_user_id as i64))
             .one(&*handler.db)
             .await
             .unwrap()
@@ -91,12 +91,12 @@ impl MenuMechanicsHandler {
         get_guild(handler.ctx.clone(), handler.db.clone(), self.guild_id).await;
 
         // Get the interacting user
-        let discord_user_id: DiscordId =
-            handler.interaction.unwrap().member.unwrap().user.id.into();
+        let user = handler.interaction.unwrap().member.unwrap().user;
+        let user_id = DiscordId::from(user.id);
 
         // Get the player from the database or create it if it doesn't exist
         let player_option = player::Entity::find()
-            .filter(player::Column::DiscordId.eq(discord_user_id.0))
+            .filter(player::Column::DiscordId.eq(*user_id as i64))
             .one(&*handler.db)
             .await
             .unwrap();
@@ -104,8 +104,9 @@ impl MenuMechanicsHandler {
         let database_player = match player_option {
             Some(player) => player,
             None => player::ActiveModel {
-                discord_id: Set(*discord_user_id as i64),
+                discord_id: Set(*user_id as i64),
                 fk_guild_id: Set(*self.guild_id as i64),
+                name: Set(user.name),
                 ..Default::default()
             }
             .insert(&*handler.db)
@@ -135,7 +136,7 @@ impl MenuMechanicsHandler {
                 .add_await_task(TaskType::RoleHandler(RoleHandler {
                     guild_id: self.guild_id,
                     task: RoleTasks::RemoveRoleFromUser(RemoveRoleFromUser {
-                        user_id: discord_user_id,
+                        user_id,
                         role_id: DiscordId::from(team_role.discord_id),
                     }),
                 }))
@@ -163,7 +164,7 @@ impl MenuMechanicsHandler {
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: self.guild_id,
                 task: RoleTasks::AddRoleToUser(AddRoleToUser {
-                    user_id: discord_user_id,
+                    user_id,
                     role_id: DiscordId::from(team_role_database.discord_id),
                 }),
             }))

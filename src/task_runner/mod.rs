@@ -17,18 +17,11 @@ pub struct TaskRunner {
 
 impl TaskRunner {
     pub async fn run_tasks(&self) {
-        let pending_string = serde_json::to_value(TaskResult::Pending).unwrap();
-
-        dbg!(&pending_string);
-
-        dbg!(task::Entity::find()
-            .filter(task::Column::Status.eq(pending_string.clone()))
-            .build(DbBackend::Postgres)
-            .to_string());
+        let pending_as_value = serde_json::to_value(TaskResult::Pending).unwrap();
 
         // Get all the incomplete tasks from the database
         let incomplete_tasks: Vec<task::Model> = match task::Entity::find()
-            .filter(task::Column::Status.eq(pending_string))
+            .filter(task::Column::Status.eq(pending_as_value))
             .all(&*self.db)
             .await
         {

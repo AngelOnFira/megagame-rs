@@ -12,7 +12,7 @@ pub async fn get_guild(ctx: Context, db: DBWrapper, guild_id: DiscordId) -> (Gui
 
     // Get or create the guild
     let guild_option = guild::Entity::find()
-        .filter(guild::Column::DiscordId.eq(guild_id.to_string()))
+        .filter(guild::Column::DiscordId.eq(*guild_id as i64))
         .one(&*db)
         .await
         .unwrap();

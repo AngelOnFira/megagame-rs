@@ -97,7 +97,7 @@ impl CategoryHandler {
 
         // Delete the category from the database
         let category = category::Entity::find()
-            .filter(category::Column::DiscordId.eq(category_discord_id.to_string()))
+            .filter(category::Column::DiscordId.eq(**category_discord_id as i64))
             .one(&*db)
             .await
             .unwrap()
