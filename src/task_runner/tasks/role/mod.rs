@@ -110,7 +110,7 @@ impl RoleHandler {
         let (discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
-        let role_discord = discord_guild
+        let _role_discord = discord_guild
             .delete_role(&ctx.http, task.role_id)
             .await
             .unwrap();
@@ -126,7 +126,7 @@ impl RoleHandler {
         ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
-        let (discord_guild, _database_guild) =
+        let (_discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
         // Get the member
@@ -144,7 +144,7 @@ impl RoleHandler {
         ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
-        let (discord_guild, _database_guild) =
+        let (_discord_guild, _database_guild) =
             get_guild(ctx.clone(), db.clone(), self.guild_id).await;
 
         // Get the member

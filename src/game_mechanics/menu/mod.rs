@@ -130,7 +130,7 @@ impl MenuMechanicsHandler {
                 .unwrap();
 
             // Remove the role from the player
-            let role_remove_status = handler
+            let _role_remove_status = handler
                 .db
                 .add_await_task(TaskType::RoleHandler(RoleHandler {
                     guild_id: self.guild_id,
@@ -158,7 +158,7 @@ impl MenuMechanicsHandler {
             .unwrap();
 
         // Add the role to the player
-        let role_add_status = handler
+        let _role_add_status = handler
             .db
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: self.guild_id,
