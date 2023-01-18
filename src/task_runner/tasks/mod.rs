@@ -2,7 +2,7 @@ use std::{fmt::Debug, num::NonZeroU64, ops::Deref};
 
 use async_trait::async_trait;
 
-use sea_orm::ActiveModelTrait;
+use sea_orm::{ActiveModelTrait, ActiveValue};
 use serde::{Deserialize, Serialize};
 use serenity::{
     all::{RoleId, UserId},
@@ -189,6 +189,13 @@ impl Deref for DatabaseId {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+// ActiveValue<i32>
+impl From<&ActiveValue<i32>> for DatabaseId {
+    fn from(id: &ActiveValue<i32>) -> Self {
+        DatabaseId(id.clone().unwrap())
     }
 }
 

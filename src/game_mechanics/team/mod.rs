@@ -3,7 +3,7 @@ use entity::entities::team;
 use sea_orm::{ActiveModelTrait, Set};
 use serde::{Deserialize, Serialize};
 use serenity::{
-    all::{ButtonStyle, ReactionType},
+    all::*,
     builder::{CreateButton, CreateSelectMenu, CreateSelectMenuKind, CreateSelectMenuOption},
     model::prelude::{ChannelType, RoleId},
     utils::MessageBuilder,
@@ -23,7 +23,7 @@ use crate::{
             MessageHandler, MessageTasks, SendChannelMessage,
         },
         role::{CreateRole, RoleHandler, RoleTasks},
-        DiscordId, TaskType,
+        DiscordId, TaskType, DatabaseId,
     },
 };
 
@@ -56,10 +56,21 @@ impl MechanicHandler for TeamMechanicsHandler {
 }
 
 impl TeamMechanicsHandler {
-    async fn create_team(&self, handler: MechanicHandlerWrapper, name: &String) {
+    async fn create_team(&self, handler: MechanicHandlerWrapper, name: &str) {
+        // Add the team to the database
+        let mut team_model: team::ActiveModel = team::ActiveModel {
+            name: Set(name.to_string()),
+            ..Default::default()
+        }
+        .insert(&*handler.db)
+        .await
+        .unwrap().into();
+
         // Get the guild
         let (_discord_guild, database_guild) =
             get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
+
+        team_model.fk_guild_id = Set(database_guild.discord_id);
 
         // Create the role
         let role_create_status = handler
@@ -67,7 +78,7 @@ impl TeamMechanicsHandler {
             .add_await_task(TaskType::RoleHandler(RoleHandler {
                 guild_id: DiscordId(*self.guild_id),
                 task: RoleTasks::CreateRole(CreateRole {
-                    name: name.clone(),
+                    name: name.to_string(),
                     color: 0x00ff00,
                 }),
             }))
@@ -78,12 +89,16 @@ impl TeamMechanicsHandler {
             _ => panic!("Role not created"),
         };
 
+        team_model.fk_team_role_id = Set(Some(role_model.discord_id));
+
         // Create the team category
         let category_create_status = handler
             .db
             .add_await_task(TaskType::CategoryHandler(CategoryHandler {
                 guild_id: DiscordId(*self.guild_id),
-                task: CategoryTasks::Create { name: name.clone() },
+                task: CategoryTasks::Create {
+                    name: name.to_string(),
+                },
             }))
             .await;
 
@@ -98,7 +113,7 @@ impl TeamMechanicsHandler {
             .add_await_task(TaskType::ChannelHandler(ChannelHandler {
                 guild_id: DiscordId(*self.guild_id),
                 task: ChannelTasks::Create(ChannelCreateData {
-                    name: name.clone(),
+                    name: name.to_string(),
                     category_id: Some(DiscordId::from(category_model.discord_id)),
                     kind: ChannelType::Text,
                 }),
@@ -109,6 +124,8 @@ impl TeamMechanicsHandler {
             TaskResult::Completed(TaskReturnData::ChannelModel(channel_model)) => channel_model,
             _ => panic!("Channel not created"),
         };
+
+        team_model.fk_menu_channel_id = Set(Some(channel_model.discord_id));
 
         // Write a message in the team channel that pings the role of the
         // players
@@ -213,6 +230,7 @@ impl TeamMechanicsHandler {
                                     guild_id: self.guild_id,
                                     task: MenuJobs::JoinTeam {
                                         channel_id: DiscordId::from(channel_model.discord_id),
+                                        joining_team_id: DatabaseId::from(&team_model.id),
                                     },
                                 },
                             ))),
@@ -222,32 +240,8 @@ impl TeamMechanicsHandler {
             }))
             .await;
 
-        // Add the team to the database
-        let _team_model = team::ActiveModel {
-            // id: todo!(),
-            // name: todo!(),
-            // abreviation: todo!(),
-            // guild: todo!(),
-            // created_at: todo!(),
-            // updated_at: todo!(),
-            // emoji: todo!(),
-            // wallet: todo!(),
-            // role: todo!(),
-            // category_id: todo!(),
-            // general_channel_id: todo!(),
-            // trade_channel_id: todo!(),
-            // bank_embed_id: todo!(),
-            name: Set(name.clone()),
-            abreviation: Set(None),
-            created_at: Set(None),
-            fk_guild_id: Set(database_guild.discord_id),
-            fk_team_role_id: Set(Some(role_model.discord_id)),
-            fk_menu_channel_id: Set(Some(channel_model.discord_id)),
-            ..Default::default()
-        }
-        .insert(&*handler.db)
-        .await
-        .unwrap();
+        // Update the team in the database
+        team_model.update(&*handler.db).await;
     }
 
     async fn add_player_to_team(&self, _handler: MechanicHandlerWrapper) {

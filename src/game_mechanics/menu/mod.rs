@@ -2,18 +2,25 @@ use async_trait::async_trait;
 use entity::entities::{player, role, team};
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
-use serenity::utils::MessageBuilder;
+use serenity::{all::*, utils::MessageBuilder};
 
 use crate::{
-    db_wrapper::helpers::{get_guild, get_or_create_player, get_player_team},
+    db_wrapper::{
+        helpers::{get_guild, get_or_create_player, get_player_team},
+        TaskResult, TaskReturnData,
+    },
     task_runner::tasks::{
-        message::{MessageHandler, MessageTasks, SendChannelMessage},
+        channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
+        message::{
+            message_component::{MessageComponent, MessageData},
+            MessageHandler, MessageTasks, SendChannelMessage,
+        },
         role::{AddRoleToUser, RemoveRoleFromUser, RoleHandler, RoleTasks},
-        DiscordId, TaskType,
+        DatabaseId, DiscordId, TaskType,
     },
 };
 
-use super::{MechanicHandler, MechanicHandlerWrapper};
+use super::{MechanicFunction, MechanicHandler, MechanicHandlerWrapper};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct MenuMechanicsHandler {
@@ -23,9 +30,23 @@ pub struct MenuMechanicsHandler {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum MenuJobs {
-    StartTradeMenu { channel_id: DiscordId },
-    OpenComms { channel_id: DiscordId },
-    JoinTeam { channel_id: DiscordId },
+    StartTradeMenu {
+        channel_id: DiscordId,
+    },
+    RoleChangeMenu {
+        team_names: Vec<String>,
+    },
+    OpenComms {
+        channel_id: DiscordId,
+    },
+    /// Move a player to a team. `channel_id` is the channel that the request
+    /// originated from, so that a response can be sent to the initiator.
+    JoinTeam {
+        /// Test
+        channel_id: DiscordId,
+        /// test2
+        joining_team_id: DatabaseId,
+    },
 }
 
 #[async_trait]
@@ -36,7 +57,10 @@ impl MechanicHandler for MenuMechanicsHandler {
                 self.start_trade_menu(handler, *channel_id).await
             }
             MenuJobs::OpenComms { channel_id } => self.open_comms(handler, *channel_id).await,
-            MenuJobs::JoinTeam { channel_id } => self.join_team(handler, *channel_id).await,
+            MenuJobs::JoinTeam { channel_id, joining_team_id} => self.join_team(handler, *channel_id, *joining_team_id).await,
+            MenuJobs::RoleChangeMenu { team_names } => {
+                self.team_change_menu(handler, team_names.clone()).await
+            }
         }
     }
 }
@@ -96,7 +120,7 @@ impl MenuMechanicsHandler {
             .await;
     }
 
-    async fn join_team(&self, handler: MechanicHandlerWrapper, channel_id: DiscordId) {
+    async fn join_team(&self, handler: MechanicHandlerWrapper, channel_id: DiscordId, joining_team_id: DatabaseId) {
         // Get the guild from the database
         get_guild(handler.ctx.clone(), handler.db.clone(), self.guild_id).await;
 
@@ -146,7 +170,7 @@ impl MenuMechanicsHandler {
 
         // Get the team from the database
         let team_database = team::Entity::find()
-            .filter(team::Column::FkMenuChannelId.eq(Some(*channel_id as i64)))
+        .filter(team::Column::Id.eq(*joining_team_id as i64))
             .one(&*handler.db)
             .await
             .unwrap()
@@ -182,6 +206,79 @@ impl MenuMechanicsHandler {
                     message: MessageBuilder::new().push("Comms opened!").build(),
                     select_menu: None,
                     buttons: Vec::new(),
+                }),
+            }))
+            .await;
+    }
+
+    async fn team_change_menu(&self, handler: MechanicHandlerWrapper, team_names: Vec<String>) {
+        // Get each team from the database from the name
+        let mut teams = Vec::new();
+
+        for team_name in team_names {
+            let team = team::Entity::find()
+                .filter(team::Column::Name.eq(team_name))
+                .one(&*handler.db)
+                .await
+                .unwrap()
+                .unwrap();
+
+            teams.push(team);
+        }
+
+        // Make a team change channel
+        let team_change_channel_status = handler
+            .db
+            .add_await_task(TaskType::ChannelHandler(ChannelHandler {
+                task: ChannelTasks::Create(ChannelCreateData {
+                    name: "team-change".to_string(),
+                    category_id: None,
+                    kind: ChannelType::Text,
+                }),
+                guild_id: self.guild_id,
+            }))
+            .await;
+
+        let team_change_channel_model = match team_change_channel_status {
+            TaskResult::Completed(TaskReturnData::ChannelModel(channel_model)) => channel_model,
+            _ => panic!("Failed to create team change channel"),
+        };
+
+        // Create a message in the channel with buttons for each team
+        // Add a team menu to the team channel
+        let _message_create_status = handler
+            .db
+            .add_await_task(TaskType::MessageHandler(MessageHandler {
+                guild_id: DiscordId::from(self.guild_id),
+                task: MessageTasks::SendChannelMessage(SendChannelMessage {
+                    channel_id: DiscordId::from(team_change_channel_model.discord_id),
+                    message: MessageBuilder::new()
+                        .push("Choose the team you'd like to join")
+                        .build(),
+                    select_menu: None,
+                    buttons: teams
+                        .iter()
+                        .map(|team| {
+                            MessageComponent::new(
+                                CreateButton::new("")
+                                    .style(ButtonStyle::Primary)
+                                    .disabled(false)
+                                    .label(format!("Join {}", team.name))
+                                    .emoji("👋".parse::<ReactionType>().unwrap()),
+                                Some(MessageData::Function(MechanicFunction::Menu(
+                                    MenuMechanicsHandler {
+                                        guild_id: self.guild_id,
+                                        task: MenuJobs::JoinTeam {
+                                            channel_id: DiscordId::from(
+                                                team_change_channel_model.discord_id,
+                                            ),
+                                            joining_team_id: DatabaseId(team.id),
+                                        },
+                                    },
+                                ))),
+                            )
+                        })
+                        .collect(),
                 }),
             }))
             .await;
