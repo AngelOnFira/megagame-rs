@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use entity::entities::{player, role, team};
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, Set};
+use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use serenity::utils::MessageBuilder;
 
@@ -58,7 +58,7 @@ impl MenuMechanicsHandler {
             .await;
 
         // Get the team of the interacting player
-        let database_team = get_player_team(
+        let _database_team = get_player_team(
             handler.ctx.clone(),
             handler.db.clone(),
             self.guild_id,

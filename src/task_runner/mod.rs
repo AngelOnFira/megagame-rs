@@ -1,5 +1,5 @@
 use entity::entities::task;
-use sea_orm::{prelude::*, DbBackend, QueryTrait, Set};
+use sea_orm::{prelude::*, Set};
 use serenity::client::Context;
 use tracing::log;
 

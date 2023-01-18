@@ -1,19 +1,14 @@
 use async_trait::async_trait;
 use serenity::{
-    all::{CommandOptionType, GuildId, ResolvedOption, ResolvedValue},
+    all::{CommandOptionType, GuildId, ResolvedOption},
     builder::{CreateCommand, CreateCommandOption},
     prelude::Context,
 };
 
 use crate::{
     db_wrapper::DBWrapper,
-    game_mechanics::{
-        team::{TeamJobs, TeamMechanicsHandler},
-        MechanicHandler, MechanicHandlerWrapper,
-    },
     task_runner::tasks::{
         channel::{ChannelHandler, ChannelTasks},
-        role::{DeleteRole, RoleHandler, RoleTasks},
         DatabaseId, DiscordId, TaskType,
     },
 };
@@ -35,7 +30,7 @@ impl GameCommand for Nuke {
     }
 
     async fn run(
-        options: &[ResolvedOption],
+        _options: &[ResolvedOption],
         guild_id: GuildId,
         db: DBWrapper,
         ctx: Context,
@@ -59,7 +54,7 @@ impl GameCommand for Nuke {
         // Delete every role possible
 
         // Get all the roles
-        let roles = ctx
+        let _roles = ctx
             .http
             .get_guild_roles(guild_id)
             .await

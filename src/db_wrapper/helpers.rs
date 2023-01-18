@@ -76,7 +76,7 @@ pub async fn get_player_team(
 }
 
 pub async fn get_or_create_player(
-    ctx: Context,
+    _ctx: Context,
     db: DBWrapper,
     guild_id: DiscordId,
     player_id: DiscordId,

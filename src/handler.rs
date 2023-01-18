@@ -128,7 +128,11 @@ impl EventHandler for Handler {
             GuildId(guild.0)
                 .set_application_commands(
                     &ctx.http,
-                    vec![FakeTrade::register(), InitializeGame::register(), Nuke::register()],
+                    vec![
+                        FakeTrade::register(),
+                        InitializeGame::register(),
+                        Nuke::register(),
+                    ],
                 )
                 .await
                 .unwrap();
