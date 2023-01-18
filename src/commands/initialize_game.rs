@@ -58,7 +58,11 @@ impl GameCommand for InitializeGame {
         MenuMechanicsHandler {
             task: MenuJobs::RoleChangeMenu { team_names: names },
             guild_id: DiscordId::from(guild_id),
-        };
+        }.handle(MechanicHandlerWrapper {
+            db,
+            interaction: None,
+            ctx,
+        }).await;
 
         "Made a team!".to_string()
     }

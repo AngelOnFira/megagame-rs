@@ -57,20 +57,21 @@ impl MechanicHandler for TeamMechanicsHandler {
 
 impl TeamMechanicsHandler {
     async fn create_team(&self, handler: MechanicHandlerWrapper, name: &str) {
+        
+        // Get the guild
+        let (_discord_guild, database_guild) =
+        get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
+
         // Add the team to the database
         let mut team_model: team::ActiveModel = team::ActiveModel {
             name: Set(name.to_string()),
+            fk_guild_id: Set(database_guild.discord_id),
             ..Default::default()
         }
         .insert(&*handler.db)
         .await
         .unwrap().into();
 
-        // Get the guild
-        let (_discord_guild, database_guild) =
-            get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
-
-        team_model.fk_guild_id = Set(database_guild.discord_id);
 
         // Create the role
         let role_create_status = handler
