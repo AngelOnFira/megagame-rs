@@ -29,7 +29,7 @@ impl GameCommand for Nuke {
             .description("Nuke the server")
             .add_option(CreateCommandOption::new(
                 CommandOptionType::String,
-                "Password",
+                "password",
                 "Confirm that you want to nuke the server",
             ))
     }
@@ -40,19 +40,19 @@ impl GameCommand for Nuke {
         db: DBWrapper,
         ctx: Context,
     ) -> String {
-        // Check the password
-        if let ResolvedValue::String(s) = options
-            .iter()
-            .find(|option| option.name == "Password")
-            .unwrap()
-            .value
-        {
-            if s != "nuke" {
-                return "Invalid password".to_string();
-            }
-        } else {
-            return "Invalid password".to_string();
-        };
+        // // Check the password
+        // if let ResolvedValue::String(s) = options
+        //     .iter()
+        //     .find(|option| option.name == "password")
+        //     .unwrap()
+        //     .value
+        // {
+        //     if s != "nuke" {
+        //         return "Invalid password".to_string();
+        //     }
+        // } else {
+        //     return "Invalid password".to_string();
+        // };
 
         let mut tasks: Vec<DatabaseId> = vec![];
 
@@ -65,18 +65,18 @@ impl GameCommand for Nuke {
             .await
             .expect("Failed to get roles");
 
-        // Queue up all the deletions
-        for role in roles {
-            tasks.push(
-                db.add_task(TaskType::RoleHandler(RoleHandler {
-                    task: RoleTasks::DeleteRole(DeleteRole {
-                        role_id: DiscordId::from(role.id),
-                    }),
-                    guild_id: DiscordId::from(guild_id),
-                }))
-                .await,
-            );
-        }
+        // // Queue up all the deletions
+        // for role in roles {
+        //     tasks.push(
+        //         db.add_task(TaskType::RoleHandler(RoleHandler {
+        //             task: RoleTasks::DeleteRole(DeleteRole {
+        //                 role_id: DiscordId::from(role.id),
+        //             }),
+        //             guild_id: DiscordId::from(guild_id),
+        //         }))
+        //         .await,
+        //     );
+        // }
 
         // Delete every channel possible
 

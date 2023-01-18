@@ -39,7 +39,7 @@ impl EventHandler for Handler {
                 let command_handler = match command.data.name.as_str() {
                     "trade" => FakeTrade::run,
                     "initialize" => InitializeGame::run,
-                    "nuke" => Nuke::run,
+                    "reset" => Nuke::run,
                     _ => unreachable!(),
                 };
 

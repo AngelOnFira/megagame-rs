@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serenity::utils::MessageBuilder;
 
 use crate::{
-    db_wrapper::helpers::get_guild,
+    db_wrapper::helpers::{get_guild, get_or_create_player, get_player_team},
     task_runner::tasks::{
         message::{MessageHandler, MessageTasks, SendChannelMessage},
         role::{AddRoleToUser, RemoveRoleFromUser, RoleHandler, RoleTasks},
@@ -56,6 +56,16 @@ impl MenuMechanicsHandler {
                 }),
             }))
             .await;
+
+        // Get the team of the interacting player
+        let database_team = get_player_team(
+            handler.ctx.clone(),
+            handler.db.clone(),
+            self.guild_id,
+            handler.interaction.unwrap().member.unwrap().user.id.into(),
+        )
+        .await
+        .unwrap();
     }
 
     async fn open_comms(&self, handler: MechanicHandlerWrapper, channel_id: DiscordId) {
@@ -94,25 +104,16 @@ impl MenuMechanicsHandler {
         let user = handler.interaction.unwrap().member.unwrap().user;
         let user_id = DiscordId::from(user.id);
 
-        // Get the player from the database or create it if it doesn't exist
-        let player_option = player::Entity::find()
-            .filter(player::Column::DiscordId.eq(*user_id as i64))
-            .one(&*handler.db)
-            .await
-            .unwrap();
-
-        let database_player = match player_option {
-            Some(player) => player,
-            None => player::ActiveModel {
-                discord_id: Set(*user_id as i64),
-                fk_guild_id: Set(*self.guild_id as i64),
-                name: Set(user.name),
-                ..Default::default()
-            }
-            .insert(&*handler.db)
-            .await
-            .unwrap(),
-        };
+        // Get the player from the database
+        let database_player = get_or_create_player(
+            handler.ctx.clone(),
+            handler.db.clone(),
+            self.guild_id,
+            user_id,
+            user.name,
+        )
+        .await
+        .unwrap();
 
         // If the player had a team, remove the role from them
         if let Some(team_id) = database_player.fk_team_id {
