@@ -36,6 +36,7 @@ eyre = "0.6"
 
 # Local
 entity = { path = "entity" }
+migration = { path = "migration" }
 uuid = "1.2.2"
 
 # TUI

@@ -6,6 +6,7 @@ use db_wrapper::DBWrapper;
 use handler::Handler;
 
 use eyre::Result;
+use migration::{Migrator, MigratorTrait};
 use sea_orm::{prelude::*, Database};
 use serenity::{all::ApplicationId, prelude::*};
 use std::{env, num::NonZeroU64, sync::atomic::AtomicBool};
@@ -93,6 +94,9 @@ async fn main() -> Result<()> {
         .with_env_filter(filter)
         .try_init()
         .unwrap();
+
+    // Run any migrations
+    Migrator::up(db, None).await?;
 
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");

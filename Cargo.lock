@@ -1360,6 +1360,7 @@ dependencies = [
  "entity",
  "eyre",
  "log",
+ "migration",
  "rand",
  "regex",
  "reqwest",
