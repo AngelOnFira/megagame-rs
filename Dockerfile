@@ -3,6 +3,11 @@ FROM rust:1 as builder
 WORKDIR /app
 
 COPY . /app
+
+# Install libs
+RUN apt-get update && apt-get install -y lld clang
+
+# Build release
 RUN cargo build --release
 
 
