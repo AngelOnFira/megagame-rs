@@ -95,9 +95,6 @@ async fn main() -> Result<()> {
         .try_init()
         .unwrap();
 
-    // Run any migrations
-    Migrator::up(db, None).await?;
-
     // Configure the client with your Discord bot token in the environment.
     let token = env::var("DISCORD_TOKEN").expect("Expected a token in the environment");
 
@@ -112,6 +109,9 @@ async fn main() -> Result<()> {
         };
 
     let db_wrapper = DBWrapper::new(db.clone());
+
+        // Run any migrations
+        Migrator::up(&db, None).await?;
 
     // Start the Serenity client in a new Tokio thread
     let serenity_handle = tokio::spawn(async move {
