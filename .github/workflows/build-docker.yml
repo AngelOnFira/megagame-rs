@@ -25,4 +25,4 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           push: true
-          tags: megagame-serenity-bot:latest
+          tags: ghcr.io/angelonfira/megagame-rs/megagame-serenity-bot:latest
