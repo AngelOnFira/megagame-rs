@@ -91,9 +91,9 @@ impl Deref for DiscordId {
 }
 
 // String
-impl Into<String> for DiscordId {
-    fn into(self) -> String {
-        self.0.to_string()
+impl From<DiscordId> for String {
+    fn from(id: DiscordId) -> Self {
+        id.0.to_string()
     }
 }
 
@@ -110,68 +110,68 @@ impl From<NonZeroU64> for DiscordId {
     }
 }
 
-impl Into<NonZeroU64> for DiscordId {
-    fn into(self) -> NonZeroU64 {
-        NonZeroU64::new(self.0).unwrap()
+impl From<DiscordId> for NonZeroU64 {
+    fn from(id: DiscordId) -> Self {
+        NonZeroU64::new(id.0).unwrap()
     }
 }
 
 // ChannelId
-impl Into<ChannelId> for DiscordId {
-    fn into(self) -> ChannelId {
-        ChannelId(NonZeroU64::new(self.0).unwrap())
+impl From<DiscordId> for ChannelId {
+    fn from(id: DiscordId) -> Self {
+        ChannelId::new(id.0)
     }
 }
 
 impl From<ChannelId> for DiscordId {
     fn from(id: ChannelId) -> Self {
-        DiscordId(id.0.get())
+        DiscordId(id.get())
     }
 }
 
 // GuildId
-impl Into<GuildId> for DiscordId {
-    fn into(self) -> GuildId {
-        GuildId(NonZeroU64::new(self.0).unwrap())
+impl From<DiscordId> for GuildId {
+    fn from(id: DiscordId) -> Self {
+        GuildId::new(id.0)
     }
 }
 
 impl From<GuildId> for DiscordId {
     fn from(id: GuildId) -> Self {
-        DiscordId(id.0.get())
+        DiscordId(id.get())
     }
 }
 
 // UserId
-impl Into<UserId> for DiscordId {
-    fn into(self) -> UserId {
-        UserId(NonZeroU64::new(self.0).unwrap())
+impl From<DiscordId> for UserId {
+    fn from(id: DiscordId) -> Self {
+        UserId::new(id.0)
     }
 }
 
 impl From<UserId> for DiscordId {
     fn from(id: UserId) -> Self {
-        DiscordId(id.0.get())
+        DiscordId(id.get())
     }
 }
 
 // RoleId
-impl Into<RoleId> for DiscordId {
-    fn into(self) -> RoleId {
-        RoleId(NonZeroU64::new(self.0).unwrap())
+impl From<DiscordId> for RoleId {
+    fn from(id: DiscordId) -> Self {
+        RoleId::new(id.0)
     }
 }
 
 impl From<RoleId> for DiscordId {
     fn from(id: RoleId) -> Self {
-        DiscordId(id.0.get())
+        DiscordId(id.get())
     }
 }
 
 // i64
-impl Into<i64> for DiscordId {
-    fn into(self) -> i64 {
-        self.0 as i64
+impl From<DiscordId> for i64 {
+    fn from(id: DiscordId) -> Self {
+        id.0 as i64
     }
 }
 
