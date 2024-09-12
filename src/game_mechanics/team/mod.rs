@@ -23,7 +23,7 @@ use crate::{
             MessageHandler, MessageTasks, SendChannelMessage,
         },
         role::{CreateRole, RoleHandler, RoleTasks},
-        DiscordId, TaskType, DatabaseId,
+        DatabaseId, DiscordId, TaskType,
     },
 };
 
@@ -57,10 +57,9 @@ impl MechanicHandler for TeamMechanicsHandler {
 
 impl TeamMechanicsHandler {
     async fn create_team(&self, handler: MechanicHandlerWrapper, name: &str) {
-        
         // Get the guild
         let (_discord_guild, database_guild) =
-        get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
+            get_guild(handler.ctx, handler.db.clone(), self.guild_id).await;
 
         // Add the team to the database
         let mut team_model: team::ActiveModel = team::ActiveModel {
@@ -70,8 +69,8 @@ impl TeamMechanicsHandler {
         }
         .insert(&*handler.db)
         .await
-        .unwrap().into();
-
+        .unwrap()
+        .into();
 
         // Create the role
         let role_create_status = handler
@@ -138,7 +137,7 @@ impl TeamMechanicsHandler {
                     channel_id: DiscordId::from(channel_model.discord_id),
                     message: MessageBuilder::new()
                         .push("Welcome to the team ")
-                        .mention(&RoleId(DiscordId::from(role_model.discord_id).into()))
+                        .mention(&RoleId::new(*DiscordId::from(role_model.discord_id)))
                         .push("!")
                         .build(),
                     ..Default::default()
@@ -162,7 +161,7 @@ impl TeamMechanicsHandler {
                     channel_id: DiscordId::from(channel_model.discord_id),
                     message: MessageBuilder::new()
                         .push("Welcome to the team ")
-                        .mention(&RoleId(DiscordId::from(role_model.discord_id).into()))
+                        .mention(&RoleId::new(*DiscordId::from(role_model.discord_id)))
                         .push("!")
                         .build(),
                     select_menu: Some(MessageComponent::new(

@@ -90,7 +90,7 @@ impl RoleHandler {
 
         // Add the role to the database
         let role_database = role::ActiveModel {
-            discord_id: Set(*DiscordId::from(role_discord.id.0) as i64),
+            discord_id: Set(*DiscordId::from(role_discord.id) as i64),
             fk_guild_id: Set(Some(*self.guild_id as i64)),
             name: Set(role_discord.name),
             ..Default::default()
@@ -126,11 +126,16 @@ impl RoleHandler {
         ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
-        let (_discord_guild, _database_guild) =
-            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
+        let member = {
+            let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        // Get the member
-        let mut member = ctx.cache.member(self.guild_id, task.user_id).unwrap();
+            guild
+                .members
+                .clone()
+                .get(&(*task.user_id).into())
+                .unwrap()
+                .to_owned()
+        };
 
         // Add the role
         member.add_role(&ctx.http, task.role_id).await.unwrap();
@@ -144,11 +149,16 @@ impl RoleHandler {
         ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
-        let (_discord_guild, _database_guild) =
-            get_guild(ctx.clone(), db.clone(), self.guild_id).await;
+        let member = {
+            let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-        // Get the member
-        let mut member = ctx.cache.member(self.guild_id, task.user_id).unwrap();
+            guild
+                .members
+                .clone()
+                .get(&(*task.user_id).into())
+                .unwrap()
+                .to_owned()
+        };
 
         // Remove the role
         member.remove_role(&ctx.http, task.role_id).await.unwrap();

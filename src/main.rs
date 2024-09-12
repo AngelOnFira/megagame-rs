@@ -1,4 +1,4 @@
-#![feature(async_closure)]
+// #![feature(async_closure)]
 
 use clap::Parser;
 
@@ -110,13 +110,13 @@ async fn main() -> Result<()> {
 
     let db_wrapper = DBWrapper::new(db.clone());
 
-        // Run any migrations
-        Migrator::up(&db, None).await?;
+    // Run any migrations
+    Migrator::up(&db, None).await?;
 
     // Start the Serenity client in a new Tokio thread
     let serenity_handle = tokio::spawn(async move {
         let mut client = Client::builder(&token, gateway_intents)
-            .application_id(ApplicationId(NonZeroU64::new(451862707746897961).unwrap()))
+            .application_id(ApplicationId::new(451862707746897961))
             .event_handler(Handler {
                 is_loop_running: AtomicBool::new(false),
                 run_tests: args.test,

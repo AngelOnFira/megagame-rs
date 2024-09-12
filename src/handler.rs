@@ -125,8 +125,8 @@ impl EventHandler for Handler {
         info!("{} is connected!", ready.user.name);
 
         for guild in ctx.cache.guilds().iter() {
-            GuildId(guild.0)
-                .set_application_commands(
+            GuildId::new(guild.get())
+                .set_commands(
                     &ctx.http,
                     vec![
                         FakeTrade::register(),

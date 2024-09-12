@@ -92,13 +92,19 @@ impl ChannelHandler {
         ctx: Context,
         db: DBWrapper,
     ) -> TaskResult {
+        let channel = {
+            let guild = ctx.cache.guild(self.guild_id).unwrap();
+
+            guild
+                .channels
+                .clone()
+                .get(&(*id).into())
+                .unwrap()
+                .to_owned()
+        };
+
         // Delete the channel from Discord
-        ctx.cache
-            .channel(*id)
-            .unwrap()
-            .delete(&ctx.http)
-            .await
-            .unwrap();
+        channel.delete(&ctx.http).await.unwrap();
 
         // Delete the channel from the database
         let channel = channel::Entity::find()

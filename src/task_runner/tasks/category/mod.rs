@@ -70,7 +70,7 @@ impl CategoryHandler {
         // Save the category to the database
         let database_category = category::ActiveModel {
             name: Set(discord_category.name),
-            discord_id: Set(*DiscordId(discord_category.id.0.get()) as i64),
+            discord_id: Set(*DiscordId(discord_category.id.into()) as i64),
             fk_guild_id: Set(Some(database_guild.discord_id)),
             ..Default::default()
         }
@@ -88,12 +88,18 @@ impl CategoryHandler {
         db: DBWrapper,
     ) -> TaskResult {
         // Delete the category from Discord
-        ctx.cache
-            .channel(*category_discord_id)
-            .unwrap()
-            .delete(&ctx.http)
-            .await
-            .unwrap();
+        let channel = {
+            let guild = ctx.cache.guild(self.guild_id).unwrap();
+
+            guild
+                .channels
+                .clone()
+                .get(&(*category_discord_id).into())
+                .unwrap()
+                .to_owned()
+        };
+
+        channel.delete(&ctx.http).await.unwrap();
 
         // Delete the category from the database
         let category = category::Entity::find()
