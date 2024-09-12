@@ -1,0 +1,13 @@
+[package]
+name = "local-postgres"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+pg-embed = { git = "https://github.com/faokunega/pg-embed", tag = "v0.8.0" }
+tokio = { version = "1", features = ["full"] }
+clap = { version = "4.4", features = ["derive"] }
+tempdir = "0.3.7"
+uuid = { version = "1.10.0", features = ["v4"] }
