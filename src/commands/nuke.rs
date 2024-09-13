@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use serenity::{
-    all::{CommandOptionType, GuildId, ResolvedOption},
+    all::{ChannelType, CommandOptionType, GuildId, ResolvedOption},
     builder::{CreateCommand, CreateCommandOption},
     prelude::Context,
 };
@@ -8,7 +8,8 @@ use serenity::{
 use crate::{
     db_wrapper::DBWrapper,
     task_runner::tasks::{
-        channel::{ChannelHandler, ChannelTasks},
+        channel::{ChannelCreateData, ChannelHandler, ChannelTasks},
+        role::{DeleteRole, RoleHandler, RoleTasks},
         DatabaseId, DiscordId, TaskType,
     },
 };
@@ -54,24 +55,34 @@ impl GameCommand for Nuke {
         // Delete every role possible
 
         // Get all the roles
-        let _roles = ctx
+        let roles = ctx
             .http
             .get_guild_roles(guild_id)
             .await
             .expect("Failed to get roles");
 
-        // // Queue up all the deletions
-        // for role in roles {
-        //     tasks.push(
-        //         db.add_task(TaskType::RoleHandler(RoleHandler {
-        //             task: RoleTasks::DeleteRole(DeleteRole {
-        //                 role_id: DiscordId::from(role.id),
-        //             }),
-        //             guild_id: DiscordId::from(guild_id),
-        //         }))
-        //         .await,
-        //     );
-        // }
+        // Debug print all the roles
+        for role in &roles {
+            println!("Role: {:?}", &role.name);
+        }
+
+        // Queue up all the deletions
+        for role in roles {
+            // Skip the @everyone role
+            if role.name == "@everyone" || role.managed || role.permissions.administrator() {
+                continue;
+            }
+
+            tasks.push(
+                db.add_task(TaskType::RoleHandler(RoleHandler {
+                    task: RoleTasks::DeleteRole(DeleteRole {
+                        role_id: DiscordId::from(role.id),
+                    }),
+                    guild_id: DiscordId::from(guild_id),
+                }))
+                .await,
+            );
+        }
 
         // Delete every channel possible
 
@@ -94,6 +105,19 @@ impl GameCommand for Nuke {
                 .await,
             );
         }
+
+        // Create a new basic channel
+        tasks.push(
+            db.add_task(TaskType::ChannelHandler(ChannelHandler {
+                task: ChannelTasks::Create(ChannelCreateData {
+                    name: "test".to_string(),
+                    category_id: None,
+                    kind: ChannelType::Text,
+                }),
+                guild_id: DiscordId::from(guild_id),
+            }))
+            .await,
+        );
 
         // Wait for all the tasks to finish
         for task in tasks {

@@ -38,7 +38,6 @@ impl<C: SerenityComponent> MessageComponent<C> {
         let database_data = message_component_data::ActiveModel {
             id_uuid: Set(Uuid::new_v4()),
             payload: Set(data),
-            ..Default::default()
         }
         .insert(&*db)
         .await

@@ -20,7 +20,7 @@ pub mod game_mechanics;
 pub mod handler;
 pub mod task_runner;
 
-pub const TEST_GUILD_ID: u64 = 345993194322001923;
+pub const TEST_GUILD_ID: u64 = 855215558994821120;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -103,7 +103,7 @@ async fn main() -> Result<()> {
     let gateway_intents = GatewayIntents::all();
 
     let db: DatabaseConnection =
-        match Database::connect("postgres://postgres:postgres@db/postgres").await {
+        match Database::connect("postgres://postgres:postgres@localhost:5432/postgres").await {
             Ok(db) => db,
             Err(err) => panic!("Error connecting to database: {:?}", err),
         };

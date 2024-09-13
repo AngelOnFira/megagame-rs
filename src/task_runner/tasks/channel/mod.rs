@@ -95,26 +95,24 @@ impl ChannelHandler {
         let channel = {
             let guild = ctx.cache.guild(self.guild_id).unwrap();
 
-            guild
-                .channels
-                .clone()
-                .get(&(*id).into())
-                .unwrap()
-                .to_owned()
+            guild.channels.get(&(*id).into()).cloned()
         };
 
-        // Delete the channel from Discord
-        channel.delete(&ctx.http).await.unwrap();
+        // Delete the channel from Discord if it exists
+        if let Some(channel) = channel {
+            channel.delete(&ctx.http).await.unwrap();
+        }
 
-        // Delete the channel from the database
+        // Delete the channel from the database if it exists
         let channel = channel::Entity::find()
             .filter(channel::Column::DiscordId.eq(*id as i64))
             .one(&*db)
             .await
-            .unwrap()
             .unwrap();
 
-        channel.delete(&*db).await.unwrap();
+        if let Some(channel) = channel {
+            channel.delete(&*db).await.unwrap();
+        }
 
         TaskResult::Completed(TaskReturnData::None)
     }

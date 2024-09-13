@@ -40,7 +40,7 @@ impl TaskRunner {
                 Ok(task) => task,
                 Err(why) => {
                     panic!(
-                        "Error parsing task: {:?}\nThe payload was {:?}",
+                        "Error parsing task: {:#?}\nThe payload was {:#?}",
                         why, &db_task.payload
                     )
                 }

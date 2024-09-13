@@ -38,7 +38,7 @@ eyre = "0.6"
 # Local
 entity = { path = "entity" }
 migration = { path = "migration" }
-uuid = "1.2.2"
+uuid = { version = "1.4.0", features = ["v4"] }
 
 # TUI
 tui = { version = "0.19.0", features = ["crossterm"], default-features = false }
